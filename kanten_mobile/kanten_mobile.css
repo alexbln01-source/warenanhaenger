@@ -1,0 +1,293 @@
+/* =====================================================
+   GLOBAL RESET
+   - einheitliches Box-Modell
+===================================================== */
+* {
+    box-sizing: border-box;
+}
+
+/* =====================================================
+   GRUNDLAYOUT
+   - Vollbild
+   - zentrierter Inhalt (Terminal / Tablet)
+===================================================== */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #eef1f4;
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =====================================================
+   HAUPTCONTAINER (CARD)
+   - begrenzt die maximale Breite
+===================================================== */
+#card {
+    width: 94%;
+    max-width: 900px;
+}
+
+/* =====================================================
+   ÜBERSCHRIFTEN / LABELS
+   - Abschnittskennzeichnung
+===================================================== */
+.grid-label {
+    font-size: 16px;
+    font-weight: 900;
+    text-align: center;
+    margin: 12px 0 10px;
+    color: #003a73;
+    letter-spacing: 0.5px;
+}
+
+/* zusätzlicher Abstand nach oben */
+.spacer-top {
+    margin-top: 22px;
+}
+
+/* =====================================================
+   SEKTIONEN
+   - optische Gruppierung der Inhalte
+===================================================== */
+.section {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 10px 16px;
+    margin-bottom: 16px;
+    border: 1px solid #d0d6de;
+}
+
+/* =====================================================
+   ART-AUSWAHL (Kanten / Schweißen / Bohrwerk)
+===================================================== */
+.art-btn-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+/* Standardzustand der Art-Buttons */
+.artBtn {
+    min-height: 64px;
+    border-radius: 10px;
+    border: 2px solid #c7cdd6;
+    font-size: 20px;
+    font-weight: 900;
+    background: #e6ebf1;
+    color: #003a73;
+}
+
+/* Aktive Auswahl */
+.artBtn.active {
+    background: #007bff;     /* gleiches Blau wie Kunden */
+    color: white;
+    border-color: #0056b3;
+}
+
+/* =====================================================
+   KUNDENAUSWAHL
+===================================================== */
+#kundenArea {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+/* deaktivierter Zustand (Art noch nicht gewählt) */
+#kundenArea.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* Standardzustand Kunden-Button */
+.kundeBtn {
+    min-height: 56px;
+    border-radius: 10px;
+    border: 2px solid #c7cdd6;
+    background: #f9fafb;
+    color: #003a73;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* Aktiver Kunde */
+.kundeBtn.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+/* =====================================================
+   AKTIONSBUTTONS (Zurück / Drucken)
+===================================================== */
+#actionButtons {
+    margin-top: 18px;
+    padding: 0 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+#btnBack,
+#btnDrucken {
+    padding: 20px 0;
+    border-radius: 14px;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+#btnBack     { background: #444; }
+#btnDrucken  { background: #00963d; }
+
+/* =====================================================
+   FOKUS-ANZEIGE
+   - wichtig für Zebra mit Hardware-Tasten
+===================================================== */
+button:focus {
+    outline: 3px solid #ff9800;
+    outline-offset: 2px;
+}
+
+/* =====================================================
+   POPUP-TASTATUR
+   - eigener Layer über allem
+   - blockiert Bedienung im Hintergrund
+===================================================== */
+#keyboardPopup {
+    position: fixed;          /* entkoppelt vom Body-Flex */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    background: rgba(0,0,0,0.55);
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;            /* immer im Vordergrund */
+}
+
+/* Tastatur-Container */
+#keyboardBox {
+    width: 92%;
+    max-width: 520px;
+    background: white;
+    padding: 22px;
+    border-radius: 20px;
+}
+
+/* Titel der Tastatur */
+.keyboard-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: #003a73;
+}
+
+/* Eingabefeld (nur für Popup-Tastatur, nicht Android) */
+#keyboardInput {
+    width: 100%;
+    padding: 14px;
+    font-size: 22px;
+    border-radius: 14px;
+    border: 2px solid #004a90;
+    margin-bottom: 12px;
+}
+
+/* Tastenreihen */
+.kb-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* einzelne Taste */
+.kb {
+    flex: 1;
+    padding: 14px 0;
+    font-size: 18px;
+    border-radius: 12px;
+    border: none;
+    background: #f7f7f7;
+}
+
+/* Sondertasten */
+.kb.space            { flex: 4; }
+.kb.special.green    { background: #00963d; color: white; }
+.kb.special.red      { background: #c80000; color: white; }
+
+/* Abbrechen-Button */
+.cancel {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px;
+    background: #666;
+    border-radius: 12px;
+    border: none;
+    color: white;
+    font-size: 18px;
+}
+
+/* =====================================================
+   GERÄTE- / BUILD-INFORMATION
+===================================================== */
+.device-info {
+    position: fixed;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: bold;
+    color: #003a73;
+    opacity: 0.8;
+}
+
+.build-info {
+    position: fixed;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #333;
+    opacity: 0.7;
+}
+
+/* =====================================================
+   GERÄTESPEZIFISCHE ANPASSUNGEN
+   - Zebra TC21 / TC22
+   - Desktop-PC
+===================================================== */
+body.zebra-tc21 .artBtn   { min-height: 58px; font-size: 18px; }
+body.zebra-tc21 .kundeBtn { min-height: 50px; font-size: 13px; }
+
+body.zebra-tc22 .artBtn   { min-height: 62px; }
+body.zebra-tc22 .kundeBtn { min-height: 54px; }
+
+body.pc-device #card { max-width: 1100px; }
+
+/* =====================================================
+   🦓 ZEBRA TC22 – GRID-FIX
+   - stellt sicher, dass alle 3 Art-Buttons sichtbar bleiben
+===================================================== */
+body.zebra-tc22 .art-btn-row {
+    padding: 0 6px;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body.zebra-tc22 .artBtn {
+    font-size: 15px;
+    padding: 16px 0;
+}

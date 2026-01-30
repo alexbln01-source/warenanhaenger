@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Druck – Kanten / Schweißen / Bohrwerk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #dcdcdc;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* =======================
+   VORSCHAU
+======================= */
+.preview-wrapper {
+    width: 100%;
+    height: calc(100% - 180px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-area {
+    width: 148mm;
+    height: 105mm;
+    background: #fff;
+    border: 1px solid #bbb;
+    box-shadow: 0 0 12px rgba(0,0,0,0.35);
+    transform-origin: center;
+}
+
+/* === Vorschau-Skalierung (A6 angepasst an Beschichtung) === */
+@media (max-width: 900px) {
+    .preview-area {
+        transform: scale(0.52);
+    }
+}
+
+@media (min-width: 901px) {
+    .preview-area {
+        transform: scale(0.65);
+    }
+}
+.etikett {
+    width: 148mm;
+    height: 105mm;
+    padding: 8mm;
+    box-sizing: border-box;
+}
+
+.etikett-center {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.etikett-center div {
+    font-weight: bold;
+    width: 100%;
+}
+
+/* =======================
+   BUTTONS
+======================= */
+.bottom-bar {
+    height: 70px;
+    display: flex;
+    gap: 16px;
+    padding: 10px 18px;
+}
+
+.btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    font-size: 20px;
+    color: white;
+    font-weight: bold;
+}
+
+.back-btn  { background:#444; }
+.print-btn { background:#15803d; }
+
+/* =======================
+   DRUCK (A6 QUER, FIX)
+======================= */
+@media print {
+
+    html, body {
+        width: 148mm !important;
+        height: 105mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        overflow: visible !important;
+    }
+
+    .preview-wrapper,
+    .bottom-bar {
+        display: none !important;
+    }
+
+    #printArea {
+        display: block !important;
+        width: 148mm !important;
+        height: 105mm !important;
+    }
+
+    @page {
+        size: A6 landscape;
+        margin: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== VORSCHAU ===== -->
+<div class="preview-wrapper">
+    <div class="preview-area">
+        <div class="etikett">
+            <div class="etikett-center" id="previewContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== DRUCKBEREICH ===== -->
+<div id="printArea" class="etikett" style="display:none;">
+    <div class="etikett-center" id="printContent"></div>
+</div>
+
+<!-- ===== BUTTONS ===== -->
+<div class="bottom-bar">
+    <button class="btn back-btn" id="backBtn">◀ Zurück</button>
+    <button class="btn print-btn" id="printBtn">Drucken</button>
+</div>
+
+<script>
+const qs    = new URLSearchParams(location.search);
+const kunde = qs.get("kunde") || "Sonstige Kunden";
+const art   = qs.get("art")   || "kanten";
+
+/* ================== BOHRWERK PARAMETER ================== */
+const BW_KUNDE_SIZE = "50pt";
+const BW_KREIS_SIZE = "50mm";
+const BW_TEXT_SIZE  = "25mm";
+const BW_ABSTAND    = "12mm";
+
+/* ================== KANTEN ================== */
+const kantenLayouts = {
+"Backhus": [
+ { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
+ { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
+ { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
+ { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
+],
+"PAUS": [
+ { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
+ { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
+ { text:"K-Termin: _____________________", size:"22pt", marginTop:"20mm", align:"left" }
+],
+"Sonstige Kunden": [
+ { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
+ { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
+ { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
+ { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
+]
+};
+
+/* ================== SCHWEISSEN ================== */
+const schweissenLayouts = {
+"Sonstige Kunden": [
+ { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
+ { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
+ { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
+]
+};
+
+/* ================== BOHRWERK ================== */
+const bohrwerkLayouts = {
+"Sonstige Kunden": [
+ { text:"<kunde>", size:BW_KUNDE_SIZE, marginTop:"0mm", align:"center" },
+ { text:"BW", size:BW_TEXT_SIZE, marginTop:BW_ABSTAND, align:"center", circle:true }
+]
+};
+
+function render(rows) {
+    return rows.map(r => {
+        if (r.circle) {
+            return `
+            <div style="
+                margin:${r.marginTop} auto 0;
+                width:${BW_KREIS_SIZE};
+                height:${BW_KREIS_SIZE};
+                border:4px solid black;
+                border-radius:50%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:${r.size};
+            ">${r.text}</div>`;
+        }
+        return `
+        <div style="font-size:${r.size}; margin-top:${r.marginTop}; text-align:${r.align};">
+            ${r.text.replace("<kunde>", kunde)}
+        </div>`;
+    }).join("");
+}
+
+/* ================== AUSGABE ================== */
+let layouts = kantenLayouts;
+if (art === "schweissen") layouts = schweissenLayouts;
+if (art === "bohrwerk")   layouts = bohrwerkLayouts;
+
+const html = render(layouts[kunde] || layouts["Sonstige Kunden"]);
+previewContent.innerHTML = html;
+printContent.innerHTML   = html;
+
+printBtn.onclick = () => window.print();
+window.onafterprint = () => location.replace("../index.html");
+backBtn.onclick = () => location.replace("../index.html");
+</script>
+
+</body>
+</html>
