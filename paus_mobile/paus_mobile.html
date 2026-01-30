@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>PAUS Lieferung</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="paus_mobile.css">
+<script defer src="paus_mobile.js"></script>
+</head>
+
+<body>
+
+<div id="deviceInfo" class="device-info"></div>
+
+<div class="page">
+
+    <h1 class="title">PAUS Lieferung</h1>
+
+    <!-- EINGABEN -->
+    <input id="kommission" class="input-field" placeholder="Kommissionsnummer" autocomplete="off">
+    <input id="lieferdatum" class="input-field" placeholder="TT.MM" autocomplete="off">
+
+    <!-- FARBAUSWAHL -->
+    <div class="color-row">
+        <button class="color-btn" data-color="red">Rot</button>
+        <button class="color-btn" data-color="blue">Blau</button>
+        <button class="color-btn" data-color="black">Schwarz</button>
+    </div>
+
+    <!-- BUTTON: Auftrag vorgezogen -->
+    <button id="btnVorgezogen" class="vorgezogen-btn">Auftrag vorgezogen</button>
+
+    <!-- Tastatur öffnen -->
+    <button id="openKeyboardBtn" class="keyboard-open-btn">Tastatur öffnen</button>
+
+    <!-- POPUP TASTATUR -->
+    <div id="keyboardPopup" class="keyboard-popup">
+        <div class="keyboard-content">
+            <h3 id="keyboardTitle">Eingabe</h3>
+
+            <input id="keyboardInput"
+                   class="keyboard-input"
+                   inputmode="none"
+                   autocomplete="off"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   spellcheck="false">
+
+            <div id="keyboardKeys" class="keyboard-keys"></div>
+
+            <div class="keyboard-actions">
+                <button id="keyboardDelete" class="key-delete">Löschen</button>
+                <button id="keyboardOK" class="key-ok">OK</button>
+                <button id="keyboardClose" class="key-close">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNTEN -->
+    <div class="bottom-row">
+        <button id="backBtn" class="back-btn">◀ Zurück</button>
+        <button id="druckenBtn" class="primary-btn">🖨️ Drucken</button>
+    </div>
+
+    <div id="buildInfo" class="build-info"></div>
+
+</div>
+</body>
+</html>

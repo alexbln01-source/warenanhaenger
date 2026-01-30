@@ -1,0 +1,222 @@
+/* ===== RESET ===== */
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #eef1f4;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===== DEVICE INFO + BUILD ===== */
+.device-info {
+    position: fixed;
+    top: 6px;
+    left: 10px;
+    font-size: 12px;
+    color: #003a73;
+}
+
+.build-info {
+    position: fixed;
+    bottom: 6px;
+    right: 10px;
+    font-size: 12px;
+    color: #003a73;
+}
+
+/* ===== PAGE FRAME ===== */
+.page {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    text-align: center;
+}
+
+/* ===== TITLE ===== */
+.title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #003a73;
+    margin-bottom: 12px;
+}
+
+/* ===== FARBBUTTONS ===== */
+.color-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 10px 0 16px 0;
+}
+
+.color-btn {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 18px;
+    border-radius: 14px;
+    border: none;
+    font-weight: bold;
+    color: white;
+    background: #555;
+}
+
+.color-btn[data-color="red"] { background: #c62828; }
+.color-btn[data-color="blue"] { background: #1565c0; }
+.color-btn[data-color="black"] { background: #333; }
+
+.color-btn.active {
+    outline: 3px solid #1a73e8;
+}
+
+/* ===== VORGEZOGEN BUTTON ===== */
+.vorgezogen-btn {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0 20px 0;
+    background: #777;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
+}
+
+.vorgezogen-btn.active {
+    outline: 3px solid #1a73e8;
+    background: #00963d;
+}
+
+/* ===== INPUTS ===== */
+.input-field {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    margin-bottom: 12px;
+    border: 1px solid #777;
+    border-radius: 14px;
+    text-align: center;
+    background: white;
+}
+
+/* Cursor sichtbar */
+input[inputmode="none"] {
+    caret-color: black !important;
+}
+
+/* ===== Tastatur öffnen ===== */
+.keyboard-open-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: none;
+    background: #777;
+    color: white;
+}
+
+body.pc-device .keyboard-open-btn {
+    display: none !important;
+}
+
+/* ===== POPUP ===== */
+.keyboard-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.keyboard-content {
+    width: 90%;
+    max-width: 360px;
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.keyboard-input {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    border: 1px solid #777;
+    border-radius: 12px;
+}
+
+.keyboard-keys {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.keyboard-keys button {
+    padding: 12px 0;
+    font-size: 18px;
+    border-radius: 10px;
+    border: 1px solid #aaa;
+    background: #f2f2f2;
+}
+
+.keyboard-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.key-delete { flex: 1; background: #c62828; color: white; padding: 10px; border-radius: 10px; border: none; }
+.key-ok     { flex: 1; background: #00963d; color: white; padding: 10px; border-radius: 10px; border: none; }
+.key-close  { flex: 1; background: #555;    color: white; padding: 10px; border-radius: 10px; border: none; }
+
+/* ===== BUTTONS ===== */
+.bottom-row {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.back-btn, .primary-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
+    color: white;
+}
+
+.back-btn { background: #333; }
+.primary-btn { background: #00963d; }
+
+/* =============================
+   PC – kompakteres Layout
+   (Zebra / Mobile bleiben unverändert)
+============================= */
+body.pc-device .page {
+    width: 80vw;
+    height: auto;
+    max-width: 1100px;
+    padding-top: 20px;
+}
+
+body.pc-device .kunden-grid {
+    grid-template-columns: repeat(3, 220px);
+    gap: 10px;
+}
+
+body.pc-device #eiltBtn {
+    margin-top: 12px;
+}
+
+body.pc-device .bottom-row {
+    margin-top: 40px;
+}
