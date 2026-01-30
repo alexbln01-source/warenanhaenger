@@ -1,0 +1,230 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #eef1f4;
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* =============================
+   Hauptseite Basis
+============================= */
+.page {
+    width: 94vw;
+    height: 92vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 10px;
+}
+
+/* =============================
+   Titel
+============================= */
+.title {
+    font-size: 24px;
+    font-weight: 900;
+    color: #003a73;
+    margin-bottom: 10px;
+}
+
+/* =============================
+   Grid-Label
+============================= */
+.grid-label {
+    font-size: 18px;
+    font-weight: 900;
+    color: #003a73;
+    text-align: center;
+    margin: 10px 0 6px 0;
+}
+
+/* =============================
+   Eingabefelder
+============================= */
+#beistellInput,
+#kundeInput {
+    width: 90%;
+    padding: 12px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    border: 1px solid #777;
+    border-radius: 14px;
+}
+
+#beistellInput::placeholder,
+#kundeInput::placeholder {
+    color: #999;
+}
+
+/* =============================
+   GRID Standard (fallback)
+============================= */
+.kunden-grid {
+    width: 100%;
+    padding: 0 12px;
+    display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    justify-items: stretch;
+    justify-content: center;
+}
+
+/* =============================
+   TC21 Layout
+============================= */
+body.zebra-tc21 .kunden-grid {
+    padding: 0 6px;
+    grid-template-columns: repeat(3, 100px);
+    gap: 8px;
+    justify-content: center;
+}
+
+body.zebra-tc21 .kunde-btn {
+    width: 100px;
+    min-height: px;
+    font-size: 12px;
+    padding: 4px;
+}
+
+body.zebra-tc21 #eiltBtn {
+    margin-top: 14px;
+    margin-bottom: 18px;
+}
+
+/* =============================
+   TC22 Layout
+============================= */
+body.zebra-tc22 .kunden-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+body.zebra-tc22 .kunde-btn {
+    min-height: 42px;
+    padding: 4px;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+/* =============================
+   Kundenbuttons Standard
+============================= */
+.kunde-btn {
+    width: 100%;
+    min-height: 62px;
+    padding: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    border-radius: 14px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    color: #003a73;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.kunde-btn.active {
+    background: #007bff;
+    color: white;
+}
+
+/* =============================
+   EILT Button
+============================= */
+#eiltBtn {
+    margin-top: 14px;
+    width: 90%;
+    padding: 14px;
+    font-size: 20px;
+    border-radius: 14px;
+    border: none;
+    background: #777;
+    color: white;
+    font-weight: bold;
+}
+
+#eiltBtn.on {
+    background: #c80000;
+}
+
+/* =============================
+   Untere Buttons
+============================= */
+.bottom-row {
+    width: 90%;
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
+    padding-bottom: 10px;
+}
+
+.back-btn,
+.primary-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+.back-btn { background: #444; }
+.primary-btn { background: #00963d; }
+
+/* =============================
+   Fokus / Cursor
+============================= */
+button:focus {
+    outline: 4px solid #1a73e8;
+}
+
+/* =============================
+   Mobile Fokus
+============================= */
+.mobile-focus {
+    outline: 4px solid #1a73e8 !important;
+    border-radius: 14px;
+}
+
+/* =============================
+   PC â€“ kompakteres Layout
+   (Zebra / Mobile bleiben unverÃ¤ndert)
+============================= */
+body.pc-device .page {
+    width: 80vw;          /* weniger Breite */
+    height: auto;         /* nicht auf Vollbild stretchen */
+    max-width: 1100px;    /* schÃ¶ner Desktop-Rahmen */
+    padding-top: 20px;
+}
+
+body.pc-device .kunden-grid {
+    grid-template-columns: repeat(3, 317px);  /* statt 315px */
+    gap: 10px;
+}
+
+body.pc-device #eiltBtn {
+    margin-top: 12px;
+}
+
+body.pc-device .bottom-row {
+    margin-top: 40px;  /* statt margin-top: auto */
+}

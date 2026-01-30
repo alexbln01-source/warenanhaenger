@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Etikett Beschichtung</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="beschichtung_mobile.css">
+
+<style>
+/* ===========================
+   MINI-KEYBOARD – CLEAN & MODERN
+=========================== */
+.kb-mini {
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.93);
+    backdrop-filter: blur(10px);
+    padding: 10px 14px;
+    border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.22);
+    z-index: 9999;
+    width: 92%;
+    max-width: 420px;
+}
+
+.kbm-row {
+    display: flex;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+.kbm-key {
+    flex: 1;
+    margin: 4px;
+    padding: 11px 0;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 12px;
+    border: none;
+    color: #003a73;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+    transition: transform 0.07s ease, background 0.1s;
+}
+
+.kbm-key:active {
+    transform: scale(0.92);
+    background: #dfe7f1;
+}
+
+.kbm-del {
+    color: #b00020 !important;
+}
+
+/* OK-Taste: grün wie "Drucken" */
+.kbm-ok {
+    background: #00963d !important;
+    color: white !important;
+    font-weight: 700;
+}
+</style>
+</head>
+<body>
+
+<!-- Debug / Geräteanzeige -->
+<div id="deviceInfo" style="
+    position: fixed;
+    top: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.12);
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #000;
+    border-radius: 6px;
+    z-index: 999999;">
+    Gerät lädt…
+</div>
+
+<div class="page">
+
+    <h1 class="title">Etikett Beschichtung</h1>
+
+    <input id="beistellInput" type="text" placeholder="Beistellnummer" readonly>
+    <input id="kundeInput" type="text" placeholder="Kundenname (optional)" readonly>
+
+    <div class="grid-label">Beschichter wählen:</div>
+
+    <div class="kunden-grid">
+
+        <button class="kunde-btn" data-type="LP">L&P</button>
+        <button class="kunde-btn" data-type="SCHUETTE">Schütte</button>
+        <button class="kunde-btn" data-type="KLEY">Kleymann</button>
+
+        <!-- ✅ NEU: WOB direkt neben Kleymann -->
+        <button class="kunde-btn" data-type="WOB">WOB</button>
+
+        <button class="kunde-btn" data-type="KALEY">Kaley</button>
+
+        <button class="kunde-btn" data-type="COMTEZN8">Comte ZN8</button>
+        <button class="kunde-btn" data-type="COMTEZNI8">Comte ZnI8</button>
+
+        <button class="kunde-btn" data-type="CHEMISCH">Comte Chemisch</button>
+        <button class="kunde-btn" data-type="DICK">Comte Dickschicht</button>
+        <button class="kunde-btn" data-type="BLAU">Comte Blau</button>
+
+        <button class="kunde-btn" data-type="PENTZ">Pentz &amp; Gerdes ZN8</button>
+        <button class="kunde-btn" data-type="RCS">RCS – Schweißen</button>
+        <button class="kunde-btn" data-type="COATINC">Coatinc 24 Verzinken</button>
+
+    </div>
+
+    <button id="eiltBtn">EILT SEHR: AUS</button>
+
+    <div class="bottom-row">
+        <button id="backBtn" class="back-btn">◀ Zurück</button>
+        <button id="druckenBtn" class="primary-btn">🖨️ Drucken</button>
+    </div>
+
+</div>
+
+<!-- ===========================
+     ALPHA-QWERTZ (ohne Sonderzeichen)
+=========================== -->
+<div id="alphaKeyboard" class="kb-mini" style="display:none;">
+
+    <!-- Reihe 1 -->
+    <div class="kbm-row">
+        <button class="kbm-key">Q</button>
+        <button class="kbm-key">W</button>
+        <button class="kbm-key">E</button>
+        <button class="kbm-key">R</button>
+        <button class="kbm-key">T</button>
+        <button class="kbm-key">Z</button>
+        <button class="kbm-key">U</button>
+        <button class="kbm-key">I</button>
+        <button class="kbm-key">O</button>
+        <button class="kbm-key">P</button>
+    </div>
+
+    <!-- Reihe 2 -->
+    <div class="kbm-row">
+        <button class="kbm-key">A</button>
+        <button class="kbm-key">S</button>
+        <button class="kbm-key">D</button>
+        <button class="kbm-key">F</button>
+        <button class="kbm-key">G</button>
+        <button class="kbm-key">H</button>
+        <button class="kbm-key">J</button>
+        <button class="kbm-key">K</button>
+        <button class="kbm-key">L</button>
+    </div>
+
+    <!-- Reihe 3 -->
+    <div class="kbm-row">
+        <button class="kbm-key">Y</button>
+        <button class="kbm-key">X</button>
+        <button class="kbm-key">C</button>
+        <button class="kbm-key">V</button>
+        <button class="kbm-key">B</button>
+        <button class="kbm-key">N</button>
+        <button class="kbm-key">M</button>
+    </div>
+
+    <!-- Reihe 4: Delete – Space – OK -->
+    <div class="kbm-row">
+        <button class="kbm-key kbm-del" id="alphaDel">⌫</button>
+        <button class="kbm-key" id="alphaSpace" style="flex:3;">␣</button>
+        <button class="kbm-key kbm-ok" id="alphaOk">OK</button>
+    </div>
+
+</div>
+
+<!-- ===========================
+     NUMERIC KEYBOARD
+=========================== -->
+<div id="numKeyboard" class="kb-mini" style="display:none;">
+
+    <div class="kbm-row">
+        <button class="kbm-key">1</button>
+        <button class="kbm-key">2</button>
+        <button class="kbm-key">3</button>
+    </div>
+
+    <div class="kbm-row">
+        <button class="kbm-key">4</button>
+        <button class="kbm-key">5</button>
+        <button class="kbm-key">6</button>
+    </div>
+
+    <div class="kbm-row">
+        <button class="kbm-key">7</button>
+        <button class="kbm-key">8</button>
+        <button class="kbm-key">9</button>
+    </div>
+
+    <!-- Reihe 4: Delete – 0 – OK -->
+    <div class="kbm-row">
+        <button class="kbm-key kbm-del" id="numDel">⌫</button>
+        <button class="kbm-key" id="num0">0</button>
+        <button class="kbm-key kbm-ok" id="numOk">OK</button>
+    </div>
+
+</div>
+
+<script src="beschichtung_mobile.js"></script>
+
+<!-- Build-Anzeige -->
+<div id="buildInfo" style="
+    position: fixed;
+    bottom: 6px;
+    right: 8px;
+    font-size: 11px;
+    color: #555;
+    opacity: 0.7;">
+    Build lädt…
+</div>
+
+</body>
+</html>
