@@ -90,16 +90,20 @@
 
     <div class="kunden-grid">
 
-        <button class="kunde-btn" data-type="LP">L&P</button>
+        <button class="kunde-btn" data-type="LP">L&amp;P</button>
         <button class="kunde-btn" data-type="SCHUETTE">Schütte</button>
         <button class="kunde-btn" data-type="KLEY">Kleymann</button>
 
-        <!-- ✅ NEU: WOB direkt neben Kleymann -->
+        <!-- WOB -->
         <button class="kunde-btn" data-type="WOB">WOB</button>
 
         <button class="kunde-btn" data-type="KALEY">Kaley</button>
 
         <button class="kunde-btn" data-type="COMTEZN8">Comte ZN8</button>
+
+        <!-- ✅ NUR DAS IST NEU -->
+        <button class="kunde-btn" data-type="EKODEKOR">EKO-Dekor</button>
+
         <button class="kunde-btn" data-type="COMTEZNI8">Comte ZnI8</button>
 
         <button class="kunde-btn" data-type="CHEMISCH">Comte Chemisch</button>
@@ -125,8 +129,6 @@
      ALPHA-QWERTZ (ohne Sonderzeichen)
 =========================== -->
 <div id="alphaKeyboard" class="kb-mini" style="display:none;">
-
-    <!-- Reihe 1 -->
     <div class="kbm-row">
         <button class="kbm-key">Q</button>
         <button class="kbm-key">W</button>
@@ -139,8 +141,6 @@
         <button class="kbm-key">O</button>
         <button class="kbm-key">P</button>
     </div>
-
-    <!-- Reihe 2 -->
     <div class="kbm-row">
         <button class="kbm-key">A</button>
         <button class="kbm-key">S</button>
@@ -152,8 +152,6 @@
         <button class="kbm-key">K</button>
         <button class="kbm-key">L</button>
     </div>
-
-    <!-- Reihe 3 -->
     <div class="kbm-row">
         <button class="kbm-key">Y</button>
         <button class="kbm-key">X</button>
@@ -163,51 +161,41 @@
         <button class="kbm-key">N</button>
         <button class="kbm-key">M</button>
     </div>
-
-    <!-- Reihe 4: Delete – Space – OK -->
     <div class="kbm-row">
         <button class="kbm-key kbm-del" id="alphaDel">⌫</button>
         <button class="kbm-key" id="alphaSpace" style="flex:3;">␣</button>
         <button class="kbm-key kbm-ok" id="alphaOk">OK</button>
     </div>
-
 </div>
 
 <!-- ===========================
      NUMERIC KEYBOARD
 =========================== -->
 <div id="numKeyboard" class="kb-mini" style="display:none;">
-
     <div class="kbm-row">
         <button class="kbm-key">1</button>
         <button class="kbm-key">2</button>
         <button class="kbm-key">3</button>
     </div>
-
     <div class="kbm-row">
         <button class="kbm-key">4</button>
         <button class="kbm-key">5</button>
         <button class="kbm-key">6</button>
     </div>
-
     <div class="kbm-row">
         <button class="kbm-key">7</button>
         <button class="kbm-key">8</button>
         <button class="kbm-key">9</button>
     </div>
-
-    <!-- Reihe 4: Delete – 0 – OK -->
     <div class="kbm-row">
         <button class="kbm-key kbm-del" id="numDel">⌫</button>
         <button class="kbm-key" id="num0">0</button>
         <button class="kbm-key kbm-ok" id="numOk">OK</button>
     </div>
-
 </div>
 
 <script src="beschichtung_mobile.js"></script>
 
-<!-- Build-Anzeige -->
 <div id="buildInfo" style="
     position: fixed;
     bottom: 6px;

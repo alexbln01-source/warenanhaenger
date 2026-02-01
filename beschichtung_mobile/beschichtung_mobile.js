@@ -26,20 +26,13 @@ const sw  = window.screen.width;
 const sh  = window.screen.height;
 const dpr = window.devicePixelRatio;
 
-// generell mobile?
 const isMobile = /android|iphone|ipad|ipod/i.test(ua);
-
-// TC21 (optional)
 const isZebraTC21 = ua.includes("android") && sw === 360 && sh === 640;
-
-// TC22 (dein Gerät)
 const isZebraTC22 = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
 
-// Klassen setzen
 if (isZebraTC21) document.body.classList.add("zebra-tc21");
 if (isZebraTC22) document.body.classList.add("zebra-tc22");
 
-// PC erkennen (NICHT mobil + kein Zebra)
 if (!isMobile && !isZebraTC21 && !isZebraTC22) {
     document.body.classList.add("pc-device");
 }
@@ -163,12 +156,10 @@ kundenButtons.forEach((btn, index) => {
 
     btn.onclick = () => {
 
-        // Eingaben beenden
         beistell.blur();
         kundenname.blur();
         activeInput = null;
 
-        // Tastaturen schließen
         numKb.style.display = "none";
         alphaKb.style.display = "none";
 
@@ -180,20 +171,20 @@ kundenButtons.forEach((btn, index) => {
 });
 
 /* ============================================================
-   PRINT — mit korrekter EILT-Logik!
+   PRINT — EILT-Logik (MINIMAL ERWEITERT)
 ============================================================ */
 druckenBtn.onclick = () => {
 
-    /* --- EILT-Logik MUSS vor dem Erstellen von data ausgeführt werden --- */
     if (isEilt) {
         switch (selectedType) {
             case "LP":       selectedType = "LPEILT"; break;
             case "SCHUETTE": selectedType = "SCHUETTEEILT"; break;
             case "KLEY":     selectedType = "KLEYEILT"; break;
             case "KALEY":    selectedType = "KALEYEILT"; break;
-
-            // ✅ NEU: WOB eigenständig
             case "WOB":      selectedType = "WOBEILT"; break;
+
+            /* ✅ NUR DAS IST NEU */
+            case "EKODEKOR": selectedType = "EKODEKOREILT"; break;
         }
     }
 
