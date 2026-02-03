@@ -50,7 +50,7 @@ html, body {
     position: relative;
 }
 
-/* Inhalt mittig */
+/* Inhalt mittig (SCREEN) – ohne Logo */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
@@ -111,7 +111,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =========================================================
-   PRINT (MOPRIA)
+   PRINT (MOPRIA · A6 QUER)
 ========================================================= */
 
 /* PrintArea im Screen verstecken */
@@ -130,7 +130,7 @@ html, body {
         display: none !important;
     }
 
-    /* Mopria kann das */
+    /* Mopria versteht das */
     @page {
         size: A6 landscape;
         margin: 0;
@@ -145,17 +145,20 @@ html, body {
         height: 105mm;
     }
 
-    /* Text exakt mittig */
+    /* === TEXT MITTE OHNE LOGO (WICHTIGER FIX) === */
     .etikett-inner {
-        height: 100% !important;
-        margin-bottom: 0 !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
+        width: 100% !important;
+        height: calc(100% - 25mm) !important;
+        margin-bottom: 25mm !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
     }
 
-    /* Logo unten rechts */
+    /* === LOGO UNTEN RECHTS === */
     .logo {
         position: absolute;
         right: 5mm;
@@ -212,7 +215,10 @@ window.onload = () => {
         const now = new Date();
         const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const diff = (today.getFullYear()-target.getFullYear())*12 + (today.getMonth()-target.getMonth());
+        const diff =
+            (today.getFullYear()-target.getFullYear())*12 +
+            (today.getMonth()-target.getMonth());
+
         if (target < today && diff < 2) isPast = true;
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
@@ -230,7 +236,7 @@ window.onload = () => {
     }
 
     previewContent.innerHTML = html;
-    printContent.innerHTML = html;
+    printContent.innerHTML   = html;
 
     const cls = vorgezogen ? "offset-vorgezogen" : "offset-normal";
     previewContent.classList.add(cls);
