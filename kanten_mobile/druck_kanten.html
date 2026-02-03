@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+/* =======================
+   BASIS
+======================= */
 html, body {
     margin: 0;
     padding: 0;
@@ -16,7 +19,7 @@ html, body {
 }
 
 /* =======================
-   VORSCHAU
+   VORSCHAU (A5 QUER)
 ======================= */
 .preview-wrapper {
     width: 100%;
@@ -27,30 +30,29 @@ html, body {
 }
 
 .preview-area {
-    width: 148mm;
-    height: 105mm;
+    width: 210mm;
+    height: 148mm;
     background: #fff;
     border: 1px solid #bbb;
     box-shadow: 0 0 12px rgba(0,0,0,0.35);
     transform-origin: center;
 }
 
-/* === Vorschau-Skalierung (A6 angepasst an Beschichtung) === */
+/* Skalierung Vorschau */
 @media (max-width: 900px) {
-    .preview-area {
-        transform: scale(0.52);
-    }
+    .preview-area { transform: scale(0.45); }
+}
+@media (min-width: 901px) {
+    .preview-area { transform: scale(0.6); }
 }
 
-@media (min-width: 901px) {
-    .preview-area {
-        transform: scale(0.65);
-    }
-}
+/* =======================
+   ETIKETT (A5 QUER)
+======================= */
 .etikett {
-    width: 148mm;
-    height: 105mm;
-    padding: 8mm;
+    width: 210mm;
+    height: 148mm;
+    padding: 10mm;
     box-sizing: border-box;
 }
 
@@ -91,13 +93,13 @@ html, body {
 .print-btn { background:#15803d; }
 
 /* =======================
-   DRUCK (A6 QUER, FIX)
+   DRUCK (A5 QUER – STABIL)
 ======================= */
 @media print {
 
     html, body {
-        width: 148mm !important;
-        height: 105mm !important;
+        width: 210mm !important;
+        height: 148mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
@@ -111,12 +113,12 @@ html, body {
 
     #printArea {
         display: block !important;
-        width: 148mm !important;
-        height: 105mm !important;
+        width: 210mm !important;
+        height: 148mm !important;
     }
 
     @page {
-        size: A6 landscape;
+        size: A5 landscape;
         margin: 0;
     }
 }
@@ -158,63 +160,6 @@ const BW_ABSTAND    = "12mm";
 
 /* ================== KANTEN ================== */
 const kantenLayouts = {
-"Backhus": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"Bergmann M-H": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"Bücker": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"FVG": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"Grimme": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"Janzen": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"Krone Spelle": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"L. Bergmann": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"PAUS": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" }
-],
-"TOS": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" }
-],
 "Sonstige Kunden": [
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
@@ -223,64 +168,8 @@ const kantenLayouts = {
 ]
 };
 
-//* ================== SCHWEISSEN ================== */
+/* ================== SCHWEISSEN ================== */
 const schweissenLayouts = {
-
-"Bergmann M-H": [
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"18pt", marginTop:"8mm", align:"center" },
- { text:"Auftr. Nr: __________________________", size:"18pt", marginTop:"12mm", align:"left" },
-{ text:"Pos. Nr: ___________________________", size:"18pt", marginTop:"12mm", align:"left" },
-{ text:"SW-Termin: ________________________", size:"18pt", marginTop:"12mm", align:"left" },
-],
-"Backhus": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: _____________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"Bücker": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"FVG": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"Grimme": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"Janzen": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"Krone Spelle": [
-{ text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"18pt", marginTop:"0mm", align:"center" },
- { text:"Auftr--Nr: _________________________", size:"18pt", marginTop:"6mm", align:"left" },
- { text:"Bezeichnung: ______________________", size:"18pt", marginTop:"12mm", align:"left" },
- {text: "Stückzahl: ________\u00A0\u00A0\u00A0\u00A0\u00A0KW-SW: _______",size: "18pt", marginTop: "12mm", align:"left"},
-{ text:"Liefertermin: _______________________", size:"18pt", marginTop:"12mm", align:"left" },
-],
-"L. Bergmann": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"PAUS": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
-"TOS": [
- { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
- { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: ____________________", size:"22pt", marginTop:"16mm", align:"left" }
-],
 "Sonstige Kunden": [
  { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
  { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
@@ -329,8 +218,7 @@ previewContent.innerHTML = html;
 printContent.innerHTML   = html;
 
 printBtn.onclick = () => window.print();
-window.onafterprint = () => location.replace("../index.html");
-backBtn.onclick = () => location.replace("../index.html");
+backBtn.onclick  = () => location.replace("../index.html");
 </script>
 
 </body>
