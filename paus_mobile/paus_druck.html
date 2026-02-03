@@ -50,7 +50,7 @@ html, body {
     position: relative;
 }
 
-/* Inhalt mittig */
+/* Inhalt mittig (SCREEN) */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
@@ -65,7 +65,7 @@ html, body {
 .offset-normal { transform: translateY(7mm); }
 .offset-vorgezogen { transform: translateY(4mm); }
 
-/* Logo */
+/* Logo (SCREEN) */
 .logo {
     position: absolute;
     right: 5mm;
@@ -114,7 +114,7 @@ html, body {
    PRINT-LOGIK
 ========================================================= */
 
-/* PrintArea IM SCREEN verstecken */
+/* PrintArea im Screen verstecken */
 .print-only {
     display: none;
 }
@@ -141,14 +141,33 @@ html, body {
         display: block !important;
     }
 
-    /* Inhalt drehen = A6 QUER */
-   #printArea {
-    width: 105mm;
-    height: 148mm;
+    /* === A6 quer durch Rotation === */
+    #printArea {
+        width: 105mm;
+        height: 148mm;
+        transform: translateX(105mm) rotate(90deg);
+        transform-origin: top left;
+    }
 
-    transform: translateX(105mm) rotate(90deg);
-    transform-origin: top left;
-}
+    /* === TEXT WIRKLICH MITTIG === */
+    .etikett-inner {
+        height: 100% !important;
+        margin-bottom: 0 !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* === LOGO UNTEN RECHTS (NACH ROTATION) === */
+    .logo {
+        position: absolute;
+        top: auto !important;
+        left: auto !important;
+        right: 5mm;
+        bottom: 5mm;
+        width: 40mm;
+    }
 }
 </style>
 </head>
