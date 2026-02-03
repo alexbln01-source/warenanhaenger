@@ -12,10 +12,11 @@ html, body {
     background: #dcdcdc;
     font-family: Arial, sans-serif;
     height: 100%;
-    overflow: hidden;
 }
 
-/* Vorschau-Bereich */
+/* =======================
+   VORSCHAU – A6 QUER
+======================= */
 .preview-wrapper {
     width: 100%;
     height: calc(100% - 150px);
@@ -24,22 +25,20 @@ html, body {
     align-items: center;
 }
 
-/* Vorschau-Fenster */
 .preview-area {
     width: 148mm;
     height: 105mm;
     background: white;
     box-shadow: 0 0 15px rgba(0,0,0,0.25);
-    position: relative;
-    transform-origin: center;
 }
 
-/* Skalierung */
 @media (max-width: 900px) { .preview-area { transform: scale(0.51); } }
 @media (min-width: 901px) and (max-width: 1300px) { .preview-area { transform: scale(0.64); } }
 @media (min-width: 1301px) { .preview-area { transform: scale(0.72); } }
 
-/* Etikett */
+/* =======================
+   ETIKETT (LOGISCH QUER)
+======================= */
 .etikett {
     width: 148mm;
     height: 105mm;
@@ -48,31 +47,20 @@ html, body {
     position: relative;
 }
 
-/* ⭐ DYNAMISCHE MITTE (ohne Logo) */
+/* Inhalt */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
-
     display: flex;
     flex-direction: column;
-
     justify-content: center;
     align-items: center;
     text-align: center;
-
     margin-bottom: 25mm;
-    box-sizing: border-box;
 }
 
-/* ⭐ Getrennter Offset ohne vorgezogen */
-.offset-normal {
-    transform: translateY(7mm);
-}
-
-/* ⭐ Getrennter Offset mit vorgezogen */
-.offset-vorgezogen {
-    transform: translateY(4mm);
-}
+.offset-normal { transform: translateY(7mm); }
+.offset-vorgezogen { transform: translateY(4mm); }
 
 /* Logo */
 .logo {
@@ -82,34 +70,13 @@ html, body {
     width: 40mm;
 }
 
-/* Textzeilen */
-.line {
-    width: 100%;
-    text-align: center;
-    font-weight: bold;
-}
+/* Text */
+.line { width: 100%; text-align: center; font-weight: bold; }
+.line-title { font-size: 40pt; }
+.line-kommission { font-size: 48pt; }
+.line-date { font-size: 48pt; }
+.line-vorgezogen { font-size: 40pt; }
 
-.line-title {
-    font-size: 40pt;
-    margin-top: 1mm;
-}
-
-.line-kommission {
-    font-size: 48pt;
-    margin-top: 1mm;
-}
-
-.line-date {
-    font-size: 48pt;
-    margin-top: 1mm;
-}
-
-.line-vorgezogen {
-    font-size: 40pt;
-    margin-top: 1mm;
-}
-
-/* Datumrahmen */
 .date-past {
     border: 3px solid red;
     padding: 1px 8px;
@@ -138,15 +105,13 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* Druckansicht */
+/* =======================
+   DRUCK – ANDROID-SICHER
+======================= */
 @media print {
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 148mm !important;
-        height: 105mm !important;
+
+    body {
         background: white !important;
-        overflow: visible !important;
     }
 
     .preview-wrapper,
@@ -154,20 +119,28 @@ html, body {
         display: none !important;
     }
 
-    #printArea {
-        display: block !important;
-        width: 148mm !important;
-        height: 105mm !important;
+    /* Android MUSS A6 PORTRAIT sehen */
+    @page {
+        size: A6 portrait;
+        margin: 0;
     }
 
-    @page { size: A6 landscape; margin: 0; }
+    /* Inhalt drehen = A6 QUER */
+    #printArea {
+        display: block !important;
+        width: 105mm;
+        height: 148mm;
+
+        transform: rotate(90deg) translateY(-105mm);
+        transform-origin: top left;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<!-- Vorschau -->
+<!-- VORSCHAU -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -177,13 +150,13 @@ html, body {
     </div>
 </div>
 
-<!-- Druck -->
-<div id="printArea" class="etikett" style="display:none;">
+<!-- DRUCK -->
+<div id="printArea" class="etikett">
     <div id="printContent" class="etikett-inner"></div>
     <img src="langen.png" class="logo">
 </div>
 
-<!-- Buttons -->
+<!-- BUTTONS -->
 <div class="bottom-bar">
     <button class="btn back-btn" id="backBtn">◀ Zurück</button>
     <button class="btn print-btn" id="printBtn">Drucken</button>
@@ -200,50 +173,27 @@ window.onload = () => {
     const farbe = data.farbe;
     const vorgezogen = data.vorgezogen;
 
-    /* ⭐ Datum interpretieren und prüfen */
     let isPast = false;
-    let finalFormattedDate = dat;
+    let finalDate = dat;
 
     if (dat) {
-        let clean = dat.replace(/\s/g, "");
-
-        let dayStr, monthStr;
-        if (clean.includes(".")) {
-            const parts = clean.split(".");
-            dayStr = parts[0];
-            monthStr = parts[1];
-        } else {
-            dayStr = clean.slice(0, 2);
-            monthStr = clean.slice(2, 4);
-        }
-
-        const tag = parseInt(dayStr, 10);
-        const monat = parseInt(monthStr, 10) - 1;
-
+        let clean = dat.replace(/\s/g,"");
+        let d = clean.slice(0,2);
+        let m = clean.slice(2,4);
+        if (clean.includes(".")) [d,m] = clean.split(".");
         const now = new Date();
+        const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const dTarget = new Date(now.getFullYear(), monat, tag);
-
-        /* ⭐ MONATS-DIFFERENZ */
-        const monthDiff =
-            (today.getFullYear() - dTarget.getFullYear()) * 12 +
-            (today.getMonth() - dTarget.getMonth());
-
-        /* ⭐ ROT WENN < 2 Monate in der Vergangenheit */
-        if (dTarget < today && monthDiff < 2) {
-            isPast = true;
-        }
-
-        finalFormattedDate =
-            `${String(tag).padStart(2, "0")}.${String(monat + 1).padStart(2, "0")}`;
+        const diff = (today.getFullYear()-target.getFullYear())*12 + (today.getMonth()-target.getMonth());
+        if (target < today && diff < 2) isPast = true;
+        finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
-    /* Inhalt erzeugen */
     let html = `
         <div class="line line-title">PAUS</div>
         <div class="line line-kommission" style="color:${farbe};">${kom}</div>
         <div class="line line-date">
-            <span class="${isPast ? "date-past" : ""}">${finalFormattedDate}</span>
+            <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
         </div>
     `;
 
@@ -251,32 +201,17 @@ window.onload = () => {
         html += `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>`;
     }
 
-    /* HTML einsetzen */
     previewContent.innerHTML = html;
     printContent.innerHTML = html;
 
-    /* Offset anwenden */
-    if (vorgezogen) {
-        previewContent.classList.add("offset-vorgezogen");
-        printContent.classList.add("offset-vorgezogen");
-    } else {
-        previewContent.classList.add("offset-normal");
-        printContent.classList.add("offset-normal");
-    }
+    const cls = vorgezogen ? "offset-vorgezogen" : "offset-normal";
+    previewContent.classList.add(cls);
+    printContent.classList.add(cls);
 
     printBtn.onclick = () => {
-    window.print();
+        setTimeout(() => window.print(), 120);
+    };
 
-    // 1️⃣ Sofort zurück zur paus_mobile.html
-    setTimeout(() => {
-        window.location.href = "paus_mobile.html";
-    }, 500); // kleine Verzögerung, damit der Druckdialog schließen kann
-
-    // 2️⃣ Nach 5 Minuten zurück zur index.html (eine Ebene höher)
-    setTimeout(() => {
-        window.location.href = "../index.html";
-    }, 5 * 60 * 1000);
-};
     backBtn.onclick = () => history.back();
 };
 </script>
