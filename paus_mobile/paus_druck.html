@@ -50,7 +50,7 @@ html, body {
     position: relative;
 }
 
-/* Inhalt mittig (SCREEN) */
+/* Inhalt mittig */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
@@ -65,7 +65,7 @@ html, body {
 .offset-normal { transform: translateY(7mm); }
 .offset-vorgezogen { transform: translateY(4mm); }
 
-/* Logo (SCREEN) */
+/* Logo */
 .logo {
     position: absolute;
     right: 5mm;
@@ -111,7 +111,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =========================================================
-   PRINT-LOGIK
+   PRINT (MOPRIA)
 ========================================================= */
 
 /* PrintArea im Screen verstecken */
@@ -130,26 +130,22 @@ html, body {
         display: none !important;
     }
 
-    /* Android MUSS A6 HOCH sehen */
+    /* Mopria kann das */
     @page {
-        size: A6 portrait;
+        size: A6 landscape;
         margin: 0;
     }
 
-    /* PrintArea aktivieren */
     .print-only {
         display: block !important;
     }
 
-    /* === A6 quer durch Rotation === */
     #printArea {
-        width: 105mm;
-        height: 148mm;
-        transform: translateX(105mm) rotate(90deg);
-        transform-origin: top left;
+        width: 148mm;
+        height: 105mm;
     }
 
-    /* === TEXT WIRKLICH MITTIG === */
+    /* Text exakt mittig */
     .etikett-inner {
         height: 100% !important;
         margin-bottom: 0 !important;
@@ -159,11 +155,9 @@ html, body {
         text-align: center;
     }
 
-    /* === LOGO UNTEN RECHTS (NACH ROTATION) === */
+    /* Logo unten rechts */
     .logo {
         position: absolute;
-        top: auto !important;
-        left: auto !important;
         right: 5mm;
         bottom: 5mm;
         width: 40mm;
@@ -243,7 +237,7 @@ window.onload = () => {
     printContent.classList.add(cls);
 
     printBtn.onclick = () => {
-        setTimeout(() => window.print(), 120);
+        setTimeout(() => window.print(), 100);
     };
 
     backBtn.onclick = () => history.back();
