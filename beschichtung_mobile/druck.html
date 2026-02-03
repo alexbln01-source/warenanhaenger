@@ -150,25 +150,34 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* ===== DRUCK ===== */
+/* =========================================================
+   ✅ DRUCK-FIX: NUR PRINT – SONST NICHTS ÄNDERN
+   Ziel: Android/Mopria soll NUR #printArea drucken (A5 quer)
+========================================================= */
 @media print {
+
+    /* Wichtig: html/body nicht auf 210x148 fixieren (Android skaliert sonst falsch) */
     html, body {
         margin: 0 !important;
         padding: 0 !important;
-        width: 210mm !important;
-        height: 148mm !important;
+        background: white !important;
         overflow: visible !important;
+        height: auto !important;
     }
 
+    /* Alles andere ausblenden */
     .preview-wrapper,
     .bottom-bar {
         display: none !important;
     }
 
+    /* Nur Druckbereich anzeigen + feste A5-Quer Maße */
     #printArea {
         display: block !important;
         width: 210mm !important;
         height: 148mm !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
 
     @page {
@@ -233,23 +242,24 @@ window.onload = () => {
         case "WOB": html += `<div class="kunde-wob">WOB</div>`; break;
         case "WOBEILT": html += `<div class="kunde-wob-eilt">WOB</div><div class="sub-wob-eilt">„EILT SEHR“</div>`; break;
 
-        /* ===== ✅ EKO-DEKOR ===== */
         case "EKODEKOR":
             html += `<div class="kunde-ekodekor">EKO-Dekor</div><div class="sub-ekodekor">„Eloxieren“</div>`;
             break;
 
-       case "EKODEKOREILT":
-    html += `
-        <div class="kunde-ekodekor">EKO-Dekor</div>
-        <div class="sub-wob-eilt">„EILT SEHR“</div>
-        <div class="sub-ekodekor">„Eloxieren“</div>
-    `;
-    break;    
+        case "EKODEKOREILT":
+            html += `
+                <div class="kunde-ekodekor">EKO-Dekor</div>
+                <div class="sub-wob-eilt">„EILT SEHR“</div>
+                <div class="sub-ekodekor">„Eloxieren“</div>
+            `;
+            break;
+    }
+
     const noNameTypes = ["LP","LPEILT","SCHUETTE","SCHUETTEEILT","KLEY","KLEYEILT","WOB","WOBEILT","EKODEKOR","EKODEKOREILT"];
     if (kunde && !noNameTypes.includes(type)) {
         html += `<div class="print-name">(${kunde})</div>`;
     }
-}
+
     previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
