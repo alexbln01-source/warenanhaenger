@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+/* =========================================================
+   BASIS
+========================================================= */
 html, body {
     margin: 0;
     padding: 0;
@@ -14,9 +17,9 @@ html, body {
     height: 100%;
 }
 
-/* =======================
-   VORSCHAU – A6 QUER
-======================= */
+/* =========================================================
+   VORSCHAU (A6 QUER)
+========================================================= */
 .preview-wrapper {
     width: 100%;
     height: calc(100% - 150px);
@@ -32,13 +35,13 @@ html, body {
     box-shadow: 0 0 15px rgba(0,0,0,0.25);
 }
 
-@media (max-width: 900px) { .preview-area { transform: scale(0.51); } }
-@media (min-width: 901px) and (max-width: 1300px) { .preview-area { transform: scale(0.64); } }
-@media (min-width: 1301px) { .preview-area { transform: scale(0.72); } }
+@media (max-width: 900px) { .preview-area { transform: scale(0.55); } }
+@media (min-width: 901px) and (max-width: 1300px) { .preview-area { transform: scale(0.7); } }
+@media (min-width: 1301px) { .preview-area { transform: scale(0.8); } }
 
-/* =======================
-   ETIKETT (LOGISCH QUER)
-======================= */
+/* =========================================================
+   ETIKETT
+========================================================= */
 .etikett {
     width: 148mm;
     height: 105mm;
@@ -47,7 +50,7 @@ html, body {
     position: relative;
 }
 
-/* Inhalt */
+/* Inhalt mittig */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
@@ -71,7 +74,7 @@ html, body {
 }
 
 /* Text */
-.line { width: 100%; text-align: center; font-weight: bold; }
+.line { width: 100%; font-weight: bold; text-align: center; }
 .line-title { font-size: 40pt; }
 .line-kommission { font-size: 48pt; }
 .line-date { font-size: 48pt; }
@@ -84,7 +87,9 @@ html, body {
     display: inline-block;
 }
 
-/* Buttons */
+/* =========================================================
+   BUTTONS
+========================================================= */
 .bottom-bar {
     margin-top: 30px;
     height: 60px;
@@ -105,9 +110,15 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* =======================
-   DRUCK – ANDROID-SICHER
-======================= */
+/* =========================================================
+   PRINT-LOGIK
+========================================================= */
+
+/* PrintArea IM SCREEN verstecken */
+.print-only {
+    display: none;
+}
+
 @media print {
 
     body {
@@ -119,18 +130,21 @@ html, body {
         display: none !important;
     }
 
-    /* Android MUSS A6 PORTRAIT sehen */
+    /* Android MUSS A6 HOCH sehen */
     @page {
         size: A6 portrait;
         margin: 0;
     }
 
+    /* PrintArea aktivieren */
+    .print-only {
+        display: block !important;
+    }
+
     /* Inhalt drehen = A6 QUER */
     #printArea {
-        display: block !important;
         width: 105mm;
         height: 148mm;
-
         transform: rotate(90deg) translateY(-105mm);
         transform-origin: top left;
     }
@@ -140,7 +154,7 @@ html, body {
 
 <body>
 
-<!-- VORSCHAU -->
+<!-- ================= VORSCHAU ================= -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -150,13 +164,13 @@ html, body {
     </div>
 </div>
 
-<!-- DRUCK -->
-<div id="printArea" class="etikett">
+<!-- ================= DRUCK ================= -->
+<div id="printArea" class="etikett print-only">
     <div id="printContent" class="etikett-inner"></div>
     <img src="langen.png" class="logo">
 </div>
 
-<!-- BUTTONS -->
+<!-- ================= BUTTONS ================= -->
 <div class="bottom-bar">
     <button class="btn back-btn" id="backBtn">◀ Zurück</button>
     <button class="btn print-btn" id="printBtn">Drucken</button>
