@@ -19,13 +19,6 @@ html, body {
 }
 
 /* =======================
-   SCREEN FIX (ANDROID)
-======================= */
-@media screen {
-    .print-only { display: none !important; }
-}
-
-/* =======================
    VORSCHAU
 ======================= */
 .preview-wrapper {
@@ -45,13 +38,17 @@ html, body {
     transform-origin: center;
 }
 
+/* Vorschau-Skalierung (nur optisch!) */
 @media (max-width: 900px) {
-    .preview-area { transform: scale(0.52); }
+    .preview-area { transform: scale(0.55); }
 }
 @media (min-width: 901px) {
-    .preview-area { transform: scale(0.65); }
+    .preview-area { transform: scale(0.7); }
 }
 
+/* =======================
+   ETIKETT (A6 QUER)
+======================= */
 .etikett {
     width: 148mm;
     height: 105mm;
@@ -69,8 +66,8 @@ html, body {
 }
 
 .etikett-center div {
-    font-weight: bold;
     width: 100%;
+    font-weight: bold;
 }
 
 /* =======================
@@ -88,23 +85,23 @@ html, body {
     border: none;
     border-radius: 14px;
     font-size: 20px;
-    color: white;
     font-weight: bold;
+    color: white;
 }
 
 .back-btn  { background:#444; }
 .print-btn { background:#15803d; }
 
 /* =======================
-   PRINT (NUR FIX)
+   PRINT (ECHT A6 QUER)
 ======================= */
 .print-only { display: none; }
 
 @media print {
 
     html, body {
-        width: 210mm !important;
-        height: 148mm !important;
+        width: 148mm !important;
+        height: 105mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
@@ -121,15 +118,14 @@ html, body {
     }
 
     #printArea {
-        width: 210mm !important;
-        height: 148mm !important;
+        width: 148mm !important;
+        height: 105mm !important;
     }
 
     @page {
-        size: A5 landscape;
+        size: A6 landscape;
         margin: 0;
     }
-
 }
 </style>
 </head>
@@ -167,7 +163,7 @@ const BW_KREIS_SIZE = "50mm";
 const BW_TEXT_SIZE  = "25mm";
 const BW_ABSTAND    = "12mm";
 
-/* ================== KANTEN (ALLE KUNDEN) ================== */
+/* ================== KANTEN ================== */
 const kantenLayouts = {
 "Backhus":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
@@ -234,7 +230,7 @@ const kantenLayouts = {
 ]
 };
 
-/* ================== SCHWEISSEN (ALLE KUNDEN WIE FRÜHER) ================== */
+/* ================== SCHWEISSEN ================== */
 const schweissenLayouts = {
 "Bergmann M-H":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
