@@ -248,7 +248,10 @@ html, body {
 
 <script>
 window.onload = () => {
-
+const previewInner = document.getElementById("previewInner");
+const printInner   = document.getElementById("printInner");
+const printBtn     = document.getElementById("printBtn");
+const backBtn      = document.getElementById("backBtn");
     const qs = new URLSearchParams(location.search);
     const data = qs.has("data")
         ? JSON.parse(decodeURIComponent(qs.get("data")))
