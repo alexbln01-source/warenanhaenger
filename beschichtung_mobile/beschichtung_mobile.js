@@ -231,4 +231,3 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "../index.html?reload=" + Date.now();
     });
 
-});
