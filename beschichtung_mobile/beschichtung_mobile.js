@@ -214,19 +214,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.textContent = "Build " + build;
 });
 
-/* ============================================================
-   ZURÜCK – IMMER INDEX, IMMER NEU LADEN
-============================================================ */
-(function () {
-    const backBtn = document.getElementById("backBtn");
 
-    if (!backBtn) {
-        console.warn("Zurück-Button (#backBtn) nicht gefunden");
-        return;
-    }
-
-    backBtn.onclick = () => {
-        // absoluter Reload, kein History
-        window.location.replace("../index.html?reload=" + Date.now());
-    };
-})();
