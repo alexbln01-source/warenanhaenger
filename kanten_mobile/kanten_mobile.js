@@ -113,5 +113,5 @@ document.getElementById("btnDrucken").onclick = () => {
 
 /* ================= ZURÜCK ================= */
 document.getElementById("btnBack").onclick = () => {
-    window.location.href = "index.html?reload=" + Date.now();
+    window.location.replace("../index.html?reload=" + Date.now());
 };
