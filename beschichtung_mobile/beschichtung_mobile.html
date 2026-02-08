@@ -119,7 +119,13 @@
     <button id="eiltBtn">EILT SEHR: AUS</button>
 
     <div class="bottom-row">
-       <button id="backBtn" class="back-btn" type="button">◀ Zurück</button>
+       <button
+    id="backBtn"
+    class="back-btn"
+    type="button"
+    onclick="window.location.replace('../index.html?reload=' + Date.now())">
+    ◀ Zurück
+</button>
         <button id="druckenBtn" class="primary-btn">🖨️ Drucken</button>
     </div>
 
