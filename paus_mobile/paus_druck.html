@@ -11,7 +11,7 @@
    WARNBOX – DRUCKERHINWEIS (NUR SCREEN)
 ========================================================= */
 .warnbox {
-    margin: -15px auto -15px;   /* nah an der Vorschau, sauber */
+    margin: -15px auto -15px;
     max-width: 250px;
     background: #fff4f4;
     border: 2px solid #c80000;
@@ -22,7 +22,6 @@
     color: #c80000;
     font-size: 16px;
     box-shadow: 0 0 10px rgba(200,0,0,0.15);
-   animation: warnBlink 1.6s ease-in-out infinite;
 }
 
 .warnbox span {
@@ -32,10 +31,18 @@
     margin-top: 4px;
     color: #7a0000;
 }
-   @keyframes warnBlink {
-    0%   { box-shadow: 0 0 10px rgba(200,0,0,0.15); }
-    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.45); }
-    100% { box-shadow: 0 0 10px rgba(200,0,0,0.15); }
+
+/* 🔔 NUR DAS WARN-DREIECK BLINKT */
+.warn-icon {
+    display: inline-block;
+    margin-right: 6px;
+    animation: iconBlink 1.2s ease-in-out infinite;
+}
+
+@keyframes iconBlink {
+    0%   { opacity: 1; transform: scale(1); }
+    50%  { opacity: 0.3; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 /* Warnbox NICHT mitdrucken */
@@ -52,18 +59,6 @@ html, body {
     background: #dcdcdc;
     font-family: Arial, sans-serif;
     height: 100%;
-}
-
-/* =========================================================
-   DRUCKER-HINWEIS (NUR ÜBER VORSCHAU)
-========================================================= */
-.print-hint {
-    text-align: center;
-    font-weight: 900;
-    color: #c80000;
-    margin: 10px 0 6px;
-    font-size: 16px;
-    letter-spacing: 0.3px;
 }
 
 /* =========================================================
@@ -89,7 +84,7 @@ html, body {
 @media (min-width: 1301px) { .preview-area { transform: scale(0.8); } }
 
 /* =========================================================
-   ETIKETT (LOGIK VORSCHAU + DRUCK IDENTISCH)
+   ETIKETT
 ========================================================= */
 .etikett {
     width: 148mm;
@@ -99,19 +94,16 @@ html, body {
     position: relative;
 }
 
-/* Text-Zentrierfläche (Logo zählt NICHT) */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
     margin-bottom: 25mm;
-
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
 }
 
-/* ECHTER ZENTRIERBLOCK */
 .text-block {
     max-width: calc(148mm - 48mm);
     margin: 0 auto;
@@ -120,7 +112,6 @@ html, body {
 .offset-normal { transform: translateY(7mm); }
 .offset-vorgezogen { transform: translateY(4mm); }
 
-/* Logo */
 .logo {
     position: absolute;
     right: 5mm;
@@ -128,7 +119,6 @@ html, body {
     width: 40mm;
 }
 
-/* Text */
 .line { width: 100%; font-weight: bold; }
 .line-title { font-size: 40pt; }
 .line-kommission { font-size: 48pt; }
@@ -166,7 +156,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =========================================================
-   PRINT (A6 HOCH, KEINE SKALIERUNG)
+   PRINT
 ========================================================= */
 .print-only { display: none; }
 
@@ -179,7 +169,6 @@ html, body {
 
     body { background: white !important; }
 
-    .print-hint,
     .preview-wrapper,
     .bottom-bar {
         display: none !important;
@@ -194,7 +183,6 @@ html, body {
         height: 148mm;
         position: relative;
         overflow: hidden;
-        padding: 0 !important;
     }
 
     #printArea.etikett {
@@ -212,7 +200,6 @@ html, body {
 
 <body>
 
-
 <!-- ================= VORSCHAU ================= -->
 <div class="preview-wrapper">
     <div class="preview-area">
@@ -222,11 +209,13 @@ html, body {
         </div>
     </div>
 </div>
+
 <!-- ================= WARNBOX ================= -->
 <div class="warnbox">
-    ⚠️ Achtung!
+    <span class="warn-icon">⚠️</span> Achtung!
     <span>Papierformat <b>A6</b> auswählen</span>
 </div>
+
 <!-- ================= DRUCK ================= -->
 <div id="printArea" class="etikett print-only">
     <div id="printContent" class="etikett-inner"></div>
