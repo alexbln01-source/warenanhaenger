@@ -9,7 +9,7 @@ const kundenname = document.getElementById("kundeInput");
 const numKb      = document.getElementById("numKeyboard");
 const alphaKb    = document.getElementById("alphaKeyboard");
 
-const backBtn    = document.getElementById("backBtn");
+
 const druckenBtn = document.getElementById("druckenBtn");
 const eiltBtn    = document.getElementById("eiltBtn");
 
@@ -215,6 +215,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ================= ZURÜCK ================= */
-document.getElementById("btnBack").onclick = () => {
-    window.location.href = "../index.html?reload=" + Date.now();
-};
+document.addEventListener("DOMContentLoaded", () => {
+
+    const backBtn = document.getElementById("btnBack");
+
+    if (!backBtn) {
+        console.warn("btnBack nicht gefunden");
+        return;
+    }
+
+    backBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        // IMMER Index, IMMER neu laden
+        window.location.href = "../index.html?reload=" + Date.now();
+    });
+
+});
