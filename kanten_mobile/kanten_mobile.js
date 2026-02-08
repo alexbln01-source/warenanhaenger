@@ -1,86 +1,107 @@
-/* =====================================================
-   ZUSTAND
-===================================================== */
 let selectedCustomer = "";
 let selectedArt = "";
 
-/* =====================================================
-   DOM
-===================================================== */
 const popup = document.getElementById("keyboardPopup");
 const keyboardInput = document.getElementById("keyboardInput");
 const sonstigeBtn = document.getElementById("sonstigeBtn");
 const kundenArea = document.getElementById("kundenArea");
 
-/* Startzustand */
 popup.style.display = "none";
 kundenArea.classList.add("disabled");
 
-/* =====================================================
-   KUNDEN BUTTONS
-===================================================== */
+/* ================= HILFSFUNKTIONEN ================= */
+function clearArtSelection() {
+    document.querySelectorAll(".artBtn").forEach(b => b.classList.remove("active"));
+}
+
+function clearCustomerSelection() {
+    document.querySelectorAll(".kundeBtn").forEach(b => b.classList.remove("active"));
+}
+
+/* ================= ART BUTTONS ================= */
+const btnEiltSehr   = document.getElementById("btnEiltSehr");
+const btnKanten     = document.getElementById("btnKanten");
+const btnSchweissen = document.getElementById("btnSchweissen");
+const btnBohrwerk   = document.getElementById("btnBohrwerk");
+
+btnEiltSehr.onclick = () => {
+    selectedArt = "eilt_sehr";
+    selectedCustomer = "EILT_SEHR";
+
+    clearArtSelection();
+    btnEiltSehr.classList.add("active");
+
+    clearCustomerSelection();
+    popup.style.display = "none";
+    if (keyboardInput) keyboardInput.value = "";
+
+    kundenArea.classList.add("disabled");
+};
+
+btnKanten.onclick     = () => setNormalArt("kanten", btnKanten);
+btnSchweissen.onclick = () => setNormalArt("schweissen", btnSchweissen);
+btnBohrwerk.onclick   = () => setNormalArt("bohrwerk", btnBohrwerk);
+
+function setNormalArt(art, btn) {
+    selectedArt = art;
+
+    clearArtSelection();
+    btn.classList.add("active");
+
+    // Kunden wieder erforderlich
+    selectedCustomer = "";
+    clearCustomerSelection();
+
+    kundenArea.classList.remove("disabled");
+}
+
+/* ================= KUNDEN ================= */
 document.querySelectorAll(".kundeBtn").forEach(btn => {
     btn.onclick = () => {
+        if (kundenArea.classList.contains("disabled")) {
+            alert("Bitte zuerst eine Art auswählen.");
+            return;
+        }
 
-        document.querySelectorAll(".kundeBtn")
-            .forEach(b => b.classList.remove("active"));
-
+        clearCustomerSelection();
         btn.classList.add("active");
 
         const kunde = btn.dataset.kunde;
-
         if (kunde === "SONSTIGE") {
             selectedCustomer = "SONSTIGE";
-            openKeyboard();
+            popup.style.display = "flex";
         } else {
             selectedCustomer = kunde;
-            closeKeyboard();
+            popup.style.display = "none";
         }
     };
 });
 
-/* =====================================================
-   ART BUTTONS
-===================================================== */
-const btnKanten = document.getElementById("btnKanten");
-const btnSchweissen = document.getElementById("btnSchweissen");
-const btnBohrwerk = document.getElementById("btnBohrwerk");
-
-btnKanten.onclick     = () => setArt("kanten", btnKanten);
-btnSchweissen.onclick = () => setArt("schweissen", btnSchweissen);
-btnBohrwerk.onclick   = () => setArt("bohrwerk", btnBohrwerk);
-
-function setArt(art, btn) {
-    selectedArt = art;
-
-    document.querySelectorAll(".artBtn")
-        .forEach(b => b.classList.remove("active"));
-
-    btn.classList.add("active");
-    kundenArea.classList.remove("disabled");
-}
-
-/* =====================================================
-   DRUCKEN
-===================================================== */
+/* ================= DRUCK ================= */
 document.getElementById("btnDrucken").onclick = () => {
 
+    // Eigene Art: Anhänger Eilt Sehr
+    if (selectedArt === "eilt_sehr") {
+        location.href = "druck_kanten.html?kunde=EILT_SEHR";
+        return;
+    }
+
     if (!selectedArt) {
-        alert("Bitte Art auswählen!");
+        alert("Bitte eine Art auswählen.");
         return;
     }
 
     if (!selectedCustomer) {
-        alert("Bitte Kunden auswählen!");
+        alert("Bitte einen Kunden auswählen.");
         return;
     }
 
     let kundeName = selectedCustomer;
 
-    if (selectedCustomer === "SONSTIGE") {
+    if (kundeName === "SONSTIGE") {
         kundeName = keyboardInput.value.trim();
         if (!kundeName) {
-            alert("Bitte Kundennamen eingeben!");
+            alert("Bitte Kundennamen eingeben.");
             return;
         }
     }
@@ -90,98 +111,5 @@ document.getElementById("btnDrucken").onclick = () => {
         "&art=" + encodeURIComponent(selectedArt);
 };
 
-/* =====================================================
-   ZURÜCK
-===================================================== */
+/* ================= ZURÜCK ================= */
 document.getElementById("btnBack").onclick = () => history.back();
-
-/* =====================================================
-   POPUP TASTATUR
-   - PC: normale Tastatureingabe erlaubt
-   - Android/Zebra: nur Popup-Tastatur
-===================================================== */
-function openKeyboard() {
-    popup.style.display = "flex";
-    keyboardInput.value = "";
-
-    if (document.body.classList.contains("pc-device")) {
-        keyboardInput.removeAttribute("readonly");
-        keyboardInput.removeAttribute("tabindex");
-        keyboardInput.focus();
-    } else {
-        keyboardInput.setAttribute("readonly", "");
-        keyboardInput.setAttribute("tabindex", "-1");
-    }
-}
-
-function closeKeyboard() {
-    popup.style.display = "none";
-    keyboardInput.setAttribute("readonly", "");
-    keyboardInput.setAttribute("tabindex", "-1");
-}
-
-/* Buchstabentasten */
-document.querySelectorAll(".kb").forEach(k => {
-    k.onclick = () => {
-        if (["kbDelete","kbSpace","kbOk"].includes(k.id)) return;
-        keyboardInput.value += k.textContent;
-    };
-});
-
-kbDelete.onclick = () => keyboardInput.value = keyboardInput.value.slice(0, -1);
-kbSpace.onclick  = () => keyboardInput.value += " ";
-
-kbOk.onclick = () => {
-    const name = keyboardInput.value.trim();
-    if (!name) return;
-
-    sonstigeBtn.textContent = name;
-    selectedCustomer = name;
-    closeKeyboard();
-};
-
-kbCancel.onclick = closeKeyboard;
-
-/* Enter-Taste (nur relevant am PC) */
-keyboardInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-        e.preventDefault();
-        kbOk.click();
-    }
-});
-
-/* =====================================================
-   GERÄTEERKENNUNG
-===================================================== */
-const ua = navigator.userAgent.toLowerCase();
-const sw = screen.width;
-const sh = screen.height;
-const dpr = devicePixelRatio;
-
-const isMobile = /android|iphone|ipad|ipod/i.test(ua);
-const isTC21 = ua.includes("android") && sw === 360 && sh === 640;
-const isTC22 = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
-
-if (isTC21) document.body.classList.add("zebra-tc21");
-if (isTC22) document.body.classList.add("zebra-tc22");
-if (!isMobile && !isTC21 && !isTC22) {
-    document.body.classList.add("pc-device");
-}
-
-document.getElementById("deviceInfo").textContent =
-    isTC22 ? "Gerät: Zebra TC22" :
-    isTC21 ? "Gerät: Zebra TC21" :
-    isMobile ? "Gerät: Mobile" :
-    "Gerät: PC";
-
-/* =====================================================
-   BUILD
-===================================================== */
-const lm = new Date(document.lastModified);
-document.getElementById("buildInfo").textContent =
-    "Build " +
-    lm.getFullYear() +
-    String(lm.getMonth()+1).padStart(2,"0") +
-    String(lm.getDate()).padStart(2,"0") + "." +
-    String(lm.getHours()).padStart(2,"0") +
-    String(lm.getMinutes()).padStart(2,"0");

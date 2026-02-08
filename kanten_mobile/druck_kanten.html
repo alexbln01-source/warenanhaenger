@@ -93,19 +93,14 @@ html, body {
 .print-btn { background:#15803d; }
 
 /* =======================
-   PRINT (ECHT A6 QUER)
+   PRINT (A6 HOCH – INHALT GEDREHT)
 ======================= */
 .print-only { display: none; }
 
 @media print {
 
-    html, body {
-        width: 148mm !important;
-        height: 105mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    body {
         background: white !important;
-        overflow: visible !important;
     }
 
     .preview-wrapper,
@@ -117,14 +112,30 @@ html, body {
         display: block !important;
     }
 
-    #printArea {
-        width: 148mm !important;
-        height: 105mm !important;
+    @page {
+        size: A6 portrait;
+        margin: 0;
     }
 
-    @page {
-        size: A6 landscape;
-        margin: 0;
+    /* Blatt A6 hoch */
+    #printArea {
+        width: 105mm;
+        height: 148mm;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* KOMPLETTES ETIKETT WIE VORSCHAU, NUR GEDREHT */
+    #printArea.etikett {
+        width: 148mm;
+        height: 105mm;
+
+        position: absolute;
+        top: 21.5mm;     /* (148 - 105) / 2 */
+        left: -21.5mm;   /* -(148 - 105) / 2 */
+
+        transform: rotate(-90deg);
+        transform-origin: center;
     }
 }
 </style>
@@ -156,6 +167,38 @@ html, body {
 const qs    = new URLSearchParams(location.search);
 const kunde = qs.get("kunde") || "Sonstige Kunden";
 const art   = qs.get("art")   || "kanten";
+
+/* ===== DOM REFERENZEN (FIX FÜR LEERE VORSCHAU) ===== */
+const previewContent = document.getElementById("previewContent");
+const printContent   = document.getElementById("printContent");
+const printBtn       = document.getElementById("printBtn");
+const backBtn        = document.getElementById("backBtn");
+const isEiltSehr = (kunde === "EILT_SEHR");
+/* =================================================
+   SONDERFALL: EILT SEHR  (EINZIGE NEUE LOGIK)
+================================================= */
+if (kunde === "EILT_SEHR") {
+
+   const html = `
+    <div style="
+        width:100%;
+        height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:70pt;
+        font-weight:900;
+        color:#c80000;
+        text-align:center;
+    ">
+        EILT&nbsp;SEHR
+    </div>
+`;
+    previewContent.innerHTML = html;
+    printContent.innerHTML   = html;
+
+} else {   // <<< FIX: statt return
+}
 
 /* ================== BOHRWERK PARAMETER ================== */
 const BW_KUNDE_SIZE = "50pt";
@@ -315,9 +358,11 @@ let layouts = kantenLayouts;
 if(art==="schweissen") layouts = schweissenLayouts;
 if(art==="bohrwerk") layouts = bohrwerkLayouts;
 
-const html = render(layouts[kunde] || layouts["Sonstige Kunden"]);
-previewContent.innerHTML = html;
-printContent.innerHTML   = html;
+if (!isEiltSehr) {
+    const html = render(layouts[kunde] || layouts["Sonstige Kunden"]);
+    previewContent.innerHTML = html;
+    printContent.innerHTML   = html;
+}
 
 printBtn.onclick = () => window.print();
 backBtn.onclick  = () => history.back();
