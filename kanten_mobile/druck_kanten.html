@@ -399,7 +399,9 @@ if (!isEiltSehr) {
 }
 
 printBtn.onclick = () => window.print();
-backBtn.onclick  = () => history.back();
+backBtn.onclick = () => {
+    window.location.href = "kanten_mobile.html?reload=" + Date.now();
+};
 </script>
 
 </body>
