@@ -32,6 +32,11 @@
     margin-top: 4px;
     color: #7a0000;
 }
+   @keyframes warnBlink {
+    0%   { box-shadow: 0 0 10px rgba(200,0,0,0.15); }
+    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.45); }
+    100% { box-shadow: 0 0 10px rgba(200,0,0,0.15); }
+}
 
 /* Warnbox NICHT mitdrucken */
 @media print {
