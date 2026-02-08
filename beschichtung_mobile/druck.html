@@ -297,21 +297,19 @@ window.onload = () => {
         html += `<div class="print-name">(${kunde})</div>`;
     }
 
-    previewInner.innerHTML = html;
+ previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
     printBtn.onclick = () => window.print();
 
-    window.onafterprint = () => {
-        window.location.href = "../index.html?reload=" + Date.now();
-    };
-const backBtn = document.getElementById("backBtn");
-
-if (backBtn) {
     backBtn.onclick = () => {
         window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
     };
-}
+
+    window.onafterprint = () => {
+        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+    };
+};
 </script>
 
 </body>
