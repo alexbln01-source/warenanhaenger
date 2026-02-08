@@ -73,8 +73,13 @@ window.onload = () => {
 
     if (isZebra) kommission.focus();
 
-    // BACK BUTTON
-    backBtn.onclick = () => history.back();
+
+  // ============================================================
+//  ZURÜCK – IMMER INDEX, IMMER NEU LADEN
+// ============================================================
+backBtn.onclick = () => {
+    window.location.replace("../index.html?reload=" + Date.now());
+};
 
     // VORGEZOGEN BUTTON
     btnVorgezogen.onclick = () => {

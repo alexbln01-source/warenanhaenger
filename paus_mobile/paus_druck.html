@@ -229,12 +229,26 @@ html, body {
 window.onload = () => {
 
     const qs = new URLSearchParams(location.search);
-    const data = JSON.parse(decodeURIComponent(qs.get("data")));
 
-    const kom = data.kommission;
-    const dat = data.lieferdatum;
-    const farbe = data.farbe;
-    const vorgezogen = data.vorgezogen;
+    if (!qs.has("data")) {
+        console.error("❌ Keine Druckdaten übergeben");
+        previewContent.innerHTML = "<b>Keine Druckdaten vorhanden</b>";
+        return;
+    }
+
+    let data;
+    try {
+        data = JSON.parse(decodeURIComponent(qs.get("data")));
+    } catch (e) {
+        console.error("❌ Ungültige Druckdaten", e);
+        previewContent.innerHTML = "<b>Fehlerhafte Druckdaten</b>";
+        return;
+    }
+
+    const kom        = data.kommission || "";
+    const dat        = data.lieferdatum || "";
+    const farbe      = data.farbe || "black";
+    const vorgezogen = data.vorgezogen || false;
 
     let isPast = false;
     let finalDate = dat;
@@ -244,24 +258,14 @@ window.onload = () => {
         let d = clean.slice(0,2);
         let m = clean.slice(2,4);
         if (clean.includes(".")) [d,m] = clean.split(".");
-        const now = new Date();
-        const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const diff =
-            (today.getFullYear()-target.getFullYear())*12 +
-            (today.getMonth()-target.getMonth());
-
-        if (target < today && diff < 2) isPast = true;
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
-    let html = `
+    const html = `
       <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
         <div class="line line-title">PAUS</div>
         <div class="line line-kommission" style="color:${farbe};">${kom}</div>
-        <div class="line line-date">
-            <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
-        </div>
+        <div class="line line-date">${finalDate}</div>
         ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
       </div>
     `;
@@ -270,10 +274,8 @@ window.onload = () => {
     printContent.innerHTML   = html;
 
     printBtn.onclick = () => setTimeout(() => window.print(), 100);
-    backBtn.onclick = () => {
-    window.location.href = "paus_mobile.html?reload=" + Date.now();
+    backBtn.onclick  = () => window.location.replace("paus_mobile.html");
 };
 </script>
-
 </body>
 </html>
