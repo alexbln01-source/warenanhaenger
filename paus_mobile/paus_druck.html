@@ -6,6 +6,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
+/* =========================================================
+   WARNBOX – DRUCKERHINWEIS (NUR SCREEN)
+========================================================= */
+.warnbox {
+    margin: 6px auto 14px;   /* nah an der Vorschau, sauber */
+    max-width: 400px;
+    background: #fff4f4;
+    border: 2px solid #c80000;
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(200,0,0,0.15);
+}
+
+.warnbox span {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #7a0000;
+}
+
+/* Warnbox NICHT mitdrucken */
+@media print {
+    .warnbox { display: none !important; }
+}
+
 /* =========================================================
    BASIS
 ========================================================= */
@@ -18,11 +49,23 @@ html, body {
 }
 
 /* =========================================================
+   DRUCKER-HINWEIS (NUR ÜBER VORSCHAU)
+========================================================= */
+.print-hint {
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    margin: 10px 0 6px;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+}
+
+/* =========================================================
    VORSCHAU (A6 QUER)
 ========================================================= */
 .preview-wrapper {
     width: 100%;
-    height: calc(100% - 150px);
+    height: calc(100% - 180px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -64,7 +107,7 @@ html, body {
 
 /* ECHTER ZENTRIERBLOCK */
 .text-block {
-    max-width: calc(148mm - 48mm); /* 40mm Logo + 8mm Abstand */
+    max-width: calc(148mm - 48mm);
     margin: 0 auto;
 }
 
@@ -130,6 +173,7 @@ html, body {
 
     body { background: white !important; }
 
+    .print-hint,
     .preview-wrapper,
     .bottom-bar {
         display: none !important;
@@ -139,7 +183,6 @@ html, body {
         display: block !important;
     }
 
-    /* Blatt A6 hoch */
     #printArea {
         width: 105mm;
         height: 148mm;
@@ -148,15 +191,12 @@ html, body {
         padding: 0 !important;
     }
 
-    /* KOMPLETTES ETIKETT WIE VORSCHAU, NUR GEDREHT */
     #printArea.etikett {
         width: 148mm;
         height: 105mm;
-
         position: absolute;
-        top: 21.5mm;     /* (148 − 105) / 2 */
-        left: -21.5mm;   /* −(148 − 105) / 2 */
-
+        top: 21.5mm;
+        left: -21.5mm;
         transform: rotate(-90deg);
         transform-origin: center;
     }
@@ -165,6 +205,7 @@ html, body {
 </head>
 
 <body>
+
 
 <!-- ================= VORSCHAU ================= -->
 <div class="preview-wrapper">
@@ -175,7 +216,11 @@ html, body {
         </div>
     </div>
 </div>
-
+<!-- ================= WARNBOX ================= -->
+<div class="warnbox">
+    ⚠️ Achtung!
+    <span>Drucker mit <b>A6-Format</b> auswählen</span>
+</div>
 <!-- ================= DRUCK ================= -->
 <div id="printArea" class="etikett print-only">
     <div id="printContent" class="etikett-inner"></div>
@@ -232,11 +277,8 @@ window.onload = () => {
     previewContent.innerHTML = html;
     printContent.innerHTML   = html;
 
-    printBtn.onclick = () => {
-        setTimeout(() => window.print(), 100);
-    };
-
-    backBtn.onclick = () => history.back();
+    printBtn.onclick = () => setTimeout(() => window.print(), 100);
+    backBtn.onclick  = () => history.back();
 };
 </script>
 
