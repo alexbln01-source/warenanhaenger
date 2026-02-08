@@ -21,7 +21,9 @@
     font-weight: 900;
     color: #c80000;
     font-size: 16px;
-    box-shadow: 0 0 10px rgba(200,0,0,0.15);
+
+    /* 🔥 SCHNELLES PULSIEREN */
+    animation: warnPulse 0.8s ease-in-out infinite;
 }
 
 .warnbox span {
@@ -32,17 +34,11 @@
     color: #7a0000;
 }
 
-/* 🔔 NUR DAS WARN-DREIECK BLINKT */
-.warn-icon {
-    display: inline-block;
-    margin-right: 6px;
-    animation: iconBlink 1.2s ease-in-out infinite;
-}
-
-@keyframes iconBlink {
-    0%   { opacity: 1; transform: scale(1); }
-    50%  { opacity: 0.3; transform: scale(1.2); }
-    100% { opacity: 1; transform: scale(1); }
+/* Puls-Animation */
+@keyframes warnPulse {
+    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.2); }
+    50%  { box-shadow: 0 0 22px rgba(200,0,0,0.6); }
+    100% { box-shadow: 0 0 6px rgba(200,0,0,0.2); }
 }
 
 /* Warnbox NICHT mitdrucken */
@@ -119,6 +115,7 @@ html, body {
     width: 40mm;
 }
 
+/* Text */
 .line { width: 100%; font-weight: bold; }
 .line-title { font-size: 40pt; }
 .line-kommission { font-size: 48pt; }
@@ -212,7 +209,7 @@ html, body {
 
 <!-- ================= WARNBOX ================= -->
 <div class="warnbox">
-    <span class="warn-icon">⚠️</span> Achtung!
+    ⚠️ Achtung!
     <span>Papierformat <b>A6</b> auswählen</span>
 </div>
 
