@@ -306,10 +306,14 @@ window.onload = () => {
         window.location.href = "../index.html?reload=" + Date.now();
     };
 
-  <script>
-backBtn.onclick = () => {
-    window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-};
+<script>
+const backBtn = document.getElementById("backBtn");
+
+if (backBtn) {
+    backBtn.onclick = () => {
+        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+    };
+}
 </script>
 
 </body>
