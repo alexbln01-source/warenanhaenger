@@ -88,16 +88,31 @@ html, body {
 /* =====================================================
    🔴 ART: ANHÄNGER EILT SEHR
 ===================================================== */
+/* ===== STANDARD: alles untereinander für Eilt Sehr ===== */
 .artBtn.eilt-art {
-    background: #c80000;
-    color: white;
-    border-color: #900000;
-    font-weight: 900;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1;
 }
 
-.artBtn.eilt-art.active {
-    background: #a50000;
-    border-color: #700000;
+.artBtn.eilt-art .art-title {
+    display: block;
+}
+
+.artBtn.eilt-art .art-sub {
+    display: block;
+}
+
+/* ===== OPTIONAL: PC wieder einzeilig (falls du willst) ===== */
+body.pc-device .artBtn.eilt-art {
+    flex-direction: row;
+    gap: 6px;
+}
+
+body.pc-device .artBtn.eilt-art .art-title,
+body.pc-device .artBtn.eilt-art .art-sub {
+    display: inline;
 }
 
 /* =====================================================
