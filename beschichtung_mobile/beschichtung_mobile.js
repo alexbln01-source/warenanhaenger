@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.textContent = "Build " + build;
 });
 
-/* ============================================================
-   ZURÜCK BUTTON
-============================================================ */
-backBtn.onclick = () => history.back();
+/* ================= ZURÜCK ================= */
+document.getElementById("btnBack").onclick = () => {
+    window.location.replace("../index.html?reload=" + Date.now());
+};
