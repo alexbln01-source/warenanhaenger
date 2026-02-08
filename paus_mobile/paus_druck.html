@@ -270,7 +270,8 @@ window.onload = () => {
     printContent.innerHTML   = html;
 
     printBtn.onclick = () => setTimeout(() => window.print(), 100);
-    backBtn.onclick  = () => history.back();
+    backBtn.onclick = () => {
+    window.location.href = "paus_mobile.html?reload=" + Date.now();
 };
 </script>
 
