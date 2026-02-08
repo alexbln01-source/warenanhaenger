@@ -216,5 +216,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ================= ZURÜCK ================= */
 document.getElementById("btnBack").onclick = () => {
-    window.location.replace("../index.html?reload=" + Date.now());
+    window.location.href = "../index.html?reload=" + Date.now();
 };
