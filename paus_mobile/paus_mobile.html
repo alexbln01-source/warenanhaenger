@@ -93,27 +93,6 @@
     Neu laden
   </button>
 </div>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/service-worker.js").then(reg => {
 
-    // Wenn ein neuer Service Worker installiert wurde
-    navigator.serviceWorker.addEventListener("message", event => {
-      if (event.data === "UPDATE_AVAILABLE") {
-        const banner = document.getElementById("updateBanner");
-        if (banner) banner.style.display = "block";
-      }
-    });
-
-  }).catch(err => {
-    console.error("Service Worker Fehler:", err);
-  });
-}
-
-// Klick auf "Neu laden"
-document.getElementById("reloadBtn")?.addEventListener("click", () => {
-  window.location.reload(true);
-});
-</script>
 </body>
 </html>
