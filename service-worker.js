@@ -1,9 +1,15 @@
-self.addEventListener("install", e => {
-  self.skipWaiting();
+// service-worker.js
+
+self.addEventListener("install", event => {
+  console.log("[SW] installiert");
+  // KEIN skipWaiting!
 });
 
-self.addEventListener("activate", e => {
-  clients.claim();
+self.addEventListener("activate", event => {
+  console.log("[SW] aktiviert");
+  event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("fetch", () => {})
+self.addEventListener("fetch", event => {
+  // aktuell kein Cache – absichtlich leer
+});
