@@ -21,8 +21,6 @@
     font-weight: 900;
     color: #c80000;
     font-size: 16px;
-
-    /* 🔥 SCHNELLES PULSIEREN */
     animation: warnPulse 0.8s ease-in-out infinite;
 }
 
@@ -34,14 +32,12 @@
     color: #7a0000;
 }
 
-/* Puls-Animation */
 @keyframes warnPulse {
     0%   { box-shadow: 0 0 6px rgba(200,0,0,0.2); }
     50%  { box-shadow: 0 0 22px rgba(200,0,0,0.6); }
     100% { box-shadow: 0 0 6px rgba(200,0,0,0.2); }
 }
 
-/* Warnbox NICHT mitdrucken */
 @media print {
     .warnbox { display: none !important; }
 }
@@ -231,7 +227,6 @@ window.onload = () => {
     const qs = new URLSearchParams(location.search);
 
     if (!qs.has("data")) {
-        console.error("❌ Keine Druckdaten übergeben");
         previewContent.innerHTML = "<b>Keine Druckdaten vorhanden</b>";
         return;
     }
@@ -239,8 +234,7 @@ window.onload = () => {
     let data;
     try {
         data = JSON.parse(decodeURIComponent(qs.get("data")));
-    } catch (e) {
-        console.error("❌ Ungültige Druckdaten", e);
+    } catch {
         previewContent.innerHTML = "<b>Fehlerhafte Druckdaten</b>";
         return;
     }
@@ -254,10 +248,17 @@ window.onload = () => {
     let finalDate = dat;
 
     if (dat) {
-        let clean = dat.replace(/\s/g,"");
+        let clean = dat.replace(/\s/g, "");
         let d = clean.slice(0,2);
         let m = clean.slice(2,4);
         if (clean.includes(".")) [d,m] = clean.split(".");
+
+        const now = new Date();
+        const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
+        const today  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        if (target < today) isPast = true;
+
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
@@ -265,7 +266,9 @@ window.onload = () => {
       <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
         <div class="line line-title">PAUS</div>
         <div class="line line-kommission" style="color:${farbe};">${kom}</div>
-        <div class="line line-date">${finalDate}</div>
+        <div class="line line-date">
+            <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
+        </div>
         ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
       </div>
     `;
@@ -277,5 +280,6 @@ window.onload = () => {
     backBtn.onclick  = () => window.location.replace("paus_mobile.html");
 };
 </script>
+
 </body>
 </html>
