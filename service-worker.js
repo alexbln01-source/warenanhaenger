@@ -1,13 +1,20 @@
-const SW_VERSION = "paus-test-002";
+// service-worker.js
 
-self.addEventListener("install", () => {
-  self.skipWaiting();
+const CACHE_NAME = "warenanhaenger-v1";
+
+// Optional: später für Caching
+self.addEventListener("install", event => {
+  // NICHT skipWaiting → wichtig für PWA-Install
+  console.log("[SW] Installiert");
 });
 
-self.addEventListener("activate", async () => {
-  const allClients = await self.clients.matchAll({ type: "window" });
-  allClients.forEach(client => {
-    client.postMessage("UPDATE_AVAILABLE");
-  });
-  self.clients.claim();
+self.addEventListener("activate", event => {
+  console.log("[SW] Aktiviert");
+  event.waitUntil(self.clients.claim());
 });
+
+/*
+  Update-Info:
+  Der Service Worker selbst meldet KEIN Update.
+  Das macht die Seite (JS) über reg.waiting
+*/
