@@ -6,4 +6,4 @@ self.addEventListener("activate", e => {
   clients.claim();
 });
 
-self.addEventListener("fetch", () => {});
+self.addEventListener("fetch", () => {})
