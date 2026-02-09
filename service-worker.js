@@ -1,11 +1,9 @@
-// service-worker.js
-
-self.addEventListener("install", event => {
-  console.log("[SW] Installiert");
-  self.skipWaiting(); // WICHTIG für Updates
+self.addEventListener("install", e => {
+  self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
-  console.log("[SW] Aktiviert");
-  event.waitUntil(self.clients.claim());
+self.addEventListener("activate", e => {
+  clients.claim();
 });
+
+self.addEventListener("fetch", () => {});
