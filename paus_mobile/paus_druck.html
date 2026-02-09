@@ -11,8 +11,8 @@
    WARNBOX – DRUCKERHINWEIS (NUR SCREEN)
 ========================================================= */
 .warnbox {
-    margin: -15px auto -15px;
-    max-width: 250px;
+    margin: 6px auto 14px;   /* nah an der Vorschau, sauber */
+    max-width: 400px;
     background: #fff4f4;
     border: 2px solid #c80000;
     border-radius: 12px;
@@ -21,7 +21,7 @@
     font-weight: 900;
     color: #c80000;
     font-size: 16px;
-    animation: warnPulse 0.8s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(200,0,0,0.15);
 }
 
 .warnbox span {
@@ -32,12 +32,7 @@
     color: #7a0000;
 }
 
-@keyframes warnPulse {
-    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.2); }
-    50%  { box-shadow: 0 0 22px rgba(200,0,0,0.6); }
-    100% { box-shadow: 0 0 6px rgba(200,0,0,0.2); }
-}
-
+/* Warnbox NICHT mitdrucken */
 @media print {
     .warnbox { display: none !important; }
 }
@@ -54,11 +49,23 @@ html, body {
 }
 
 /* =========================================================
+   DRUCKER-HINWEIS (NUR ÜBER VORSCHAU)
+========================================================= */
+.print-hint {
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    margin: 10px 0 6px;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+}
+
+/* =========================================================
    VORSCHAU (A6 QUER)
 ========================================================= */
 .preview-wrapper {
     width: 100%;
-    height: calc(100% - 160px);
+    height: calc(100% - 180px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -76,7 +83,7 @@ html, body {
 @media (min-width: 1301px) { .preview-area { transform: scale(0.8); } }
 
 /* =========================================================
-   ETIKETT
+   ETIKETT (LOGIK VORSCHAU + DRUCK IDENTISCH)
 ========================================================= */
 .etikett {
     width: 148mm;
@@ -86,16 +93,19 @@ html, body {
     position: relative;
 }
 
+/* Text-Zentrierfläche (Logo zählt NICHT) */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
     margin-bottom: 25mm;
+
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
 }
 
+/* ECHTER ZENTRIERBLOCK */
 .text-block {
     max-width: calc(148mm - 48mm);
     margin: 0 auto;
@@ -104,6 +114,7 @@ html, body {
 .offset-normal { transform: translateY(7mm); }
 .offset-vorgezogen { transform: translateY(4mm); }
 
+/* Logo */
 .logo {
     position: absolute;
     right: 5mm;
@@ -149,7 +160,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =========================================================
-   PRINT
+   PRINT (A6 HOCH, KEINE SKALIERUNG)
 ========================================================= */
 .print-only { display: none; }
 
@@ -162,6 +173,7 @@ html, body {
 
     body { background: white !important; }
 
+    .print-hint,
     .preview-wrapper,
     .bottom-bar {
         display: none !important;
@@ -176,6 +188,7 @@ html, body {
         height: 148mm;
         position: relative;
         overflow: hidden;
+        padding: 0 !important;
     }
 
     #printArea.etikett {
@@ -193,6 +206,7 @@ html, body {
 
 <body>
 
+
 <!-- ================= VORSCHAU ================= -->
 <div class="preview-wrapper">
     <div class="preview-area">
@@ -202,13 +216,11 @@ html, body {
         </div>
     </div>
 </div>
-
 <!-- ================= WARNBOX ================= -->
 <div class="warnbox">
     ⚠️ Achtung!
-    <span>Papierformat <b>A6</b> auswählen</span>
+    <span>Drucker mit <b>A6-Format</b> auswählen</span>
 </div>
-
 <!-- ================= DRUCK ================= -->
 <div id="printArea" class="etikett print-only">
     <div id="printContent" class="etikett-inner"></div>
@@ -225,44 +237,33 @@ html, body {
 window.onload = () => {
 
     const qs = new URLSearchParams(location.search);
+    const data = JSON.parse(decodeURIComponent(qs.get("data")));
 
-    if (!qs.has("data")) {
-        previewContent.innerHTML = "<b>Keine Druckdaten vorhanden</b>";
-        return;
-    }
-
-    let data;
-    try {
-        data = JSON.parse(decodeURIComponent(qs.get("data")));
-    } catch {
-        previewContent.innerHTML = "<b>Fehlerhafte Druckdaten</b>";
-        return;
-    }
-
-    const kom        = data.kommission || "";
-    const dat        = data.lieferdatum || "";
-    const farbe      = data.farbe || "black";
-    const vorgezogen = data.vorgezogen || false;
+    const kom = data.kommission;
+    const dat = data.lieferdatum;
+    const farbe = data.farbe;
+    const vorgezogen = data.vorgezogen;
 
     let isPast = false;
     let finalDate = dat;
 
     if (dat) {
-        let clean = dat.replace(/\s/g, "");
+        let clean = dat.replace(/\s/g,"");
         let d = clean.slice(0,2);
         let m = clean.slice(2,4);
         if (clean.includes(".")) [d,m] = clean.split(".");
-
         const now = new Date();
         const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
-        const today  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const diff =
+            (today.getFullYear()-target.getFullYear())*12 +
+            (today.getMonth()-target.getMonth());
 
-        if (target < today) isPast = true;
-
+        if (target < today && diff < 2) isPast = true;
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
-    const html = `
+    let html = `
       <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
         <div class="line line-title">PAUS</div>
         <div class="line line-kommission" style="color:${farbe};">${kom}</div>
@@ -277,7 +278,7 @@ window.onload = () => {
     printContent.innerHTML   = html;
 
     printBtn.onclick = () => setTimeout(() => window.print(), 100);
-    backBtn.onclick  = () => window.location.replace("paus_mobile.html");
+    backBtn.onclick  = () => history.back();
 };
 </script>
 
