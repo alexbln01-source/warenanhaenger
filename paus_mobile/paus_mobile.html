@@ -66,5 +66,54 @@
     <div id="buildInfo" class="build-info"></div>
 
 </div>
+<div id="updateBanner" style="
+  display:none;
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #003a73;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-weight: bold;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  z-index: 999999;
+">
+  🔄 Update verfügbar
+  <button id="reloadBtn" style="
+    margin-left: 14px;
+    background: #00963d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+  ">
+    Neu laden
+  </button>
+</div>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js").then(reg => {
+
+    // Wenn ein neuer Service Worker installiert wurde
+    navigator.serviceWorker.addEventListener("message", event => {
+      if (event.data === "UPDATE_AVAILABLE") {
+        const banner = document.getElementById("updateBanner");
+        if (banner) banner.style.display = "block";
+      }
+    });
+
+  }).catch(err => {
+    console.error("Service Worker Fehler:", err);
+  });
+}
+
+// Klick auf "Neu laden"
+document.getElementById("reloadBtn")?.addEventListener("click", () => {
+  window.location.reload(true);
+});
+</script>
 </body>
 </html>
