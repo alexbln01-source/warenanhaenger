@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#003a73">
+
+<title>PWA Test</title>
+
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<h1>PWA TEST</h1>
+<p>Wenn diese Seite installierbar ist, ist alles OK.</p>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js")
+    .then(() => console.log("SW ok"))
+    .catch(err => console.error(err));
+}
+</script>
+
+</body>
+</html>
