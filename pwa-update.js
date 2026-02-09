@@ -1,40 +1,54 @@
+// pwa-update.js
+// Zeigt "Update verfügbar", wenn ein neuer Service Worker aktiv wird
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/service-worker.js").then(reg => {
+(function () {
+  if (!("serviceWorker" in navigator)) return;
 
-    // Wenn ein neuer SW wartet → Update verfügbar
-    if (reg.waiting) {
-      showUpdateBanner(reg);
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+
+    const banner = document.getElementById("updateBanner");
+    if (banner) {
+      banner.style.display = "block";
     }
-
-    // Wenn später ein Update kommt
-    reg.addEventListener("updatefound", () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener("statechange", () => {
-        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-          showUpdateBanner(reg);
-        }
-      });
-    });
   });
-}
 
-function showUpdateBanner(reg) {
-  const banner = document.getElementById("updateBanner");
-  const reloadBtn = document.getElementById("reloadBtn");
+  navigator.serviceWorker.register("/service-worker.js")
+    .then(reg => {
+      console.log("[PWA] Service Worker registriert");
 
-  if (!banner || !reloadBtn) return;
+      // Falls beim Laden bereits ein neuer SW wartet
+      if (reg.waiting) {
+        const banner = document.getElementById("updateBanner");
+        if (banner) banner.style.display = "block";
+      }
 
-  banner.style.display = "block";
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
 
-  reloadBtn.onclick = () => {
-    reg.waiting.postMessage({ type: "SKIP_WAITING" });
-  };
-}
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            const banner = document.getElementById("updateBanner");
+            if (banner) banner.style.display = "block";
+          }
+        });
+      });
+    })
+    .catch(err => {
+      console.error("[PWA] Service Worker Fehler:", err);
+    });
 
-// Service Worker reagiert darauf
-navigator.serviceWorker.addEventListener("message", event => {
-  if (event.data === "RELOAD_PAGE") {
-    window.location.reload();
-  }
-});
+  // Reload-Button
+  document.addEventListener("DOMContentLoaded", () => {
+    const reloadBtn = document.getElementById("reloadBtn");
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", () => {
+        window.location.reload();
+      });
+    }
+  });
+})();
