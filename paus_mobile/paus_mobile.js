@@ -73,9 +73,9 @@ window.onload = () => {
 
     if (isZebra) kommission.focus();
 
-    // BACK BUTTON
-  backBtn.onclick = () => {
-    window.location.href = "./paus_mobile.html";
+// BACK BUTTON
+backBtn.onclick = () => {
+    window.location.href = "../index.html";
 };
 
     // VORGEZOGEN BUTTON
