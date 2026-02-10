@@ -89,6 +89,7 @@ html, body {
 .vorgezogen-btn.active {
     outline: 3px solid #ff9800;
     background: #00963d;
+    outline-offset: 2px;
 }
 
 /* ===== INPUTS ===== */
