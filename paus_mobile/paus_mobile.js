@@ -74,7 +74,9 @@ window.onload = () => {
     if (isZebra) kommission.focus();
 
     // BACK BUTTON
-    backBtn.onclick = () => history.back();
+  backBtn.onclick = () => {
+    window.location.href = "../index.html";
+};
 
     // VORGEZOGEN BUTTON
     btnVorgezogen.onclick = () => {
@@ -84,6 +86,7 @@ window.onload = () => {
 
     // DRUCKEN BUTTON
     druckenBtn.onclick = () => {
+        sessionStorage.setItem("cameFrom", "paus");
 
         if (!kommission.value.trim()) return alert("Bitte Kommissionsnummer eingeben!");
         if (!lieferdatum.value.trim()) return alert("Bitte Lieferdatum eingeben!");
