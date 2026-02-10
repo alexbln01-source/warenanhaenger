@@ -174,7 +174,9 @@ html, body {
 .print-only { display: none; }
 
 @media print {
-
+.print-only {
+        display: block !important;
+    }    
     @page {
         size: A5 landscape;
         margin: 0;
