@@ -240,7 +240,13 @@ html, body {
 </div>
 
 <script>
+<script>
 window.onload = () => {
+
+    const previewContent = document.getElementById("previewContent");
+    const printContent   = document.getElementById("printContent");
+    const printBtn       = document.getElementById("printBtn");
+    const backBtn        = document.getElementById("backBtn");
 
     const qs = new URLSearchParams(location.search);
     const data = JSON.parse(decodeURIComponent(qs.get("data")));
@@ -269,7 +275,7 @@ window.onload = () => {
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
-    let html = `
+    const html = `
       <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
         <div class="line line-title">PAUS</div>
         <div class="line line-kommission" style="color:${farbe};">${kom}</div>
@@ -280,30 +286,29 @@ window.onload = () => {
       </div>
     `;
 
-   let wasPrinted = false;
+    let wasPrinted = false;
 
-previewContent.innerHTML = html;
-printContent.innerHTML   = html;
+    previewContent.innerHTML = html;
+    printContent.innerHTML   = html;
 
-printBtn.onclick = () => {
-    wasPrinted = true;
-    setTimeout(() => window.print(), 100);
-};
+    printBtn.onclick = () => {
+        wasPrinted = true;
+        setTimeout(() => window.print(), 100);
+    };
 
-/* 👉 nach dem Drucken automatisch zu PAUS */
-window.onafterprint = () => {
-    window.location.replace("paus_mobile.html");
-};
-
-/* 👉 Zurück-Button: abhängig vom Zustand */
-backBtn.onclick = () => {
-    if (wasPrinted) {
+    window.onafterprint = () => {
         window.location.replace("paus_mobile.html");
-    } else {
-        window.location.replace("index.html");
-    }
- };
+    };
+
+    backBtn.onclick = () => {
+        if (wasPrinted) {
+            window.location.replace("paus_mobile.html");
+        } else {
+            window.location.replace("index.html");
+        }
+    };
 };
+</script>
 </script>
 
 </body>
