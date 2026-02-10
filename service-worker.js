@@ -1,15 +1,9 @@
-// service-worker.js
-
-self.addEventListener("install", event => {
-  console.log("[SW] installiert");
+self.addEventListener("install", e => {
+  self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
-  console.log("[SW] aktiviert");
-  event.waitUntil(self.clients.claim());
+self.addEventListener("activate", e => {
+  clients.claim();
 });
 
-// 🔑 DAS IST DER SCHLÜSSEL
-self.addEventListener("fetch", event => {
-  event.respondWith(fetch(event.request));
-});
+self.addEventListener("fetch", () => {});

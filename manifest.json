@@ -1,11 +1,10 @@
 {
-  "name": "Warenanhänger",
-  "short_name": "Warenanhänger",
-  "start_url": "./",
-  "scope": "./",
+  "name": "Warenanhänger Terminal",
+  "short_name": "",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#003a73",
   "icons": [
     {
       "src": "icon192.png",
@@ -19,3 +18,4 @@
     }
   ]
 }
+
