@@ -296,23 +296,24 @@ window.onload = () => {
         setTimeout(() => window.print(), 100);
     };
 
-    /* ===== NACH DEM DRUCK IMMER ZU PAUS ===== */
-    window.onafterprint = () => {
-        if (wasPrinted) {
-            window.location.href = "../index.html";
-        }
-    };
+    /* ===== NACH DEM DRUCK ===== */
+window.onafterprint = () => {
+    sessionStorage.removeItem("cameFrom");
+    window.location.href = "../index.html";
+};
 
-    /* ===== ZURÜCK-BUTTON ===== */
-    backBtn.onclick = () => {
-        if (wasPrinted) {
-            // nach dem Drucken
-            window.location.href = "./paus_mobile.html";
-        } else {
-            // nur Vorschau
-            window.location.href = "./paus_mobile.html";
-        }
-    };
+/* ===== ZURÜCK-BUTTON ===== */
+backBtn.onclick = () => {
+    const cameFrom = sessionStorage.getItem("cameFrom");
+
+    if (cameFrom === "paus") {
+        // zurück zur PAUS-Seite
+        window.location.href = "./paus_mobile.html";
+    } else {
+        // Fallback: immer Index
+        window.location.href = "../index.html";
+    }
+};
 };
 </script>
 </body>
