@@ -285,35 +285,24 @@ window.onload = () => {
       </div>
     `;
 
-    let wasPrinted = false;
-
+    /* ✅ VORSCHAU + DRUCK FÜLLEN */
     previewContent.innerHTML = html;
     printContent.innerHTML   = html;
 
     /* ===== DRUCK ===== */
     printBtn.onclick = () => {
-        wasPrinted = true;
         setTimeout(() => window.print(), 100);
     };
 
-    /* ===== NACH DEM DRUCK ===== */
-window.onafterprint = () => {
-    sessionStorage.removeItem("cameFrom");
-    window.location.href = "../index.html";
-};
-
-/* ===== ZURÜCK-BUTTON ===== */
-backBtn.onclick = () => {
-    const cameFrom = sessionStorage.getItem("cameFrom");
-
-    if (cameFrom === "paus") {
-        // zurück zur PAUS-Seite
+    /* ===== NACH DEM DRUCK → PAUS ===== */
+    window.onafterprint = () => {
         window.location.href = "./paus_mobile.html";
-    } else {
-        // Fallback: immer Index
-        window.location.href = "../index.html";
-    }
-};
+    };
+
+    /* ===== ZURÜCK → PAUS ===== */
+    backBtn.onclick = () => {
+        window.location.href = "./paus_mobile.html";
+    };
 };
 </script>
 </body>
