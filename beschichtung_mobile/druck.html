@@ -175,34 +175,33 @@ html, body {
 
 @media print {
 
+    @page {
+        size: A5 landscape;
+        margin: 0;
+    }
+
     html, body {
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
-        overflow: visible !important;
-        height: auto !important;
     }
 
-    .preview-wrapper,
-    .bottom-bar,
-    .warnbox {
-        display: none !important;
+    /* 🔥 ANDROID-FIX */
+    body * {
+        visibility: hidden !important;
     }
 
-    .print-only {
-        display: block !important;
+    #printArea,
+    #printArea * {
+        visibility: visible !important;
     }
 
     #printArea {
-        width: 210mm !important;
-        height: 148mm !important;
-        page-break-inside: avoid;
-        break-inside: avoid;
-    }
-
-    @page {
-        size: A5 landscape;
-        margin: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 210mm;
+        height: 148mm;
     }
 }
 </style>
