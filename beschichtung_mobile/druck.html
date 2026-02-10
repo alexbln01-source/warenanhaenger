@@ -74,37 +74,66 @@ html, body {
 }
 
 /* =======================
-   KUNDEN
+   ===== KUNDEN =====
+   !!! 1:1 WIE BEI DIR !!!
 ======================= */
-.kunde-lp, .kunde-lp-eilt,
-.kunde-schuette, .kunde-schuette-eilt,
-.kunde-kley, .kunde-kley-eilt,
-.kunde-kaley,
-.kunde-wob, .kunde-wob-eilt,
-.kunde-comte-zn8, .kunde-comte-zni8,
-.kunde-chemisch, .kunde-dick, .kunde-blau,
-.kunde-pentz, .kunde-rcs, .kunde-coatinc,
-.kunde-ekodekor {
-    font-size: 80pt;
-    margin-bottom: 8mm;
-}
 
-.sub-lp-eilt, .sub-schuette-eilt, .sub-kley-eilt,
-.sub-wob-eilt {
-    font-size: 70pt;
-    margin-bottom: 6mm;
-}
+/* L&P */
+.kunde-lp { font-size: 80pt; margin-bottom: 8mm; }
+.kunde-lp-eilt { font-size: 80pt; margin-bottom: 8mm; }
+.sub-lp-eilt { font-size: 70pt; margin-bottom: 6mm; }
 
-.sub-comte-zn8, .sub-comte-zni8,
-.sub-chemisch, .sub-blau,
-.sub-pentz, .sub-rcs,
-.sub-coatinc, .sub-ekodekor {
-    font-size: 48pt;
-    margin-bottom: 1mm;
-}
+/* SCHÜTTE */
+.kunde-schuette { font-size: 80pt; margin-bottom: 8mm; }
+.kunde-schuette-eilt { font-size: 80pt; margin-bottom: 8mm; }
+.sub-schuette-eilt { font-size: 70pt; margin-bottom: 6mm; }
 
+/* KLEY */
+.kunde-kley { font-size: 80pt; margin-bottom: 8mm; }
+.kunde-kley-eilt { font-size: 80pt; margin-bottom: 8mm; }
+.sub-kley-eilt { font-size: 70pt; margin-bottom: 6mm; }
+
+/* KALEY */
+.kunde-kaley { font-size: 80pt; margin-bottom: 8mm; }
+
+/* WOB */
+.kunde-wob { font-size: 80pt; margin-bottom: 8mm; }
+.kunde-wob-eilt { font-size: 80pt; margin-bottom: 8mm; }
+.sub-wob-eilt { font-size: 70pt; margin-bottom: 6mm; }
+
+/* COMTE */
+.kunde-comte-zn8 { font-size: 80pt; margin-bottom: 1mm; }
+.sub-comte-zn8 { font-size: 48pt; margin-bottom: 1mm; }
+
+.kunde-comte-zni8 { font-size: 80pt; margin-bottom: 1mm; }
+.sub-comte-zni8 { font-size: 48pt; margin-bottom: 1mm; }
+
+.kunde-chemisch { font-size: 80pt; margin-bottom: 1mm; }
+.sub-chemisch { font-size: 48pt; margin-bottom: 1mm; }
+
+.kunde-dick { font-size: 80pt; margin-bottom: 1mm; }
 .sub-dick { font-size: 40pt; margin-bottom: 1mm; }
 
+.kunde-blau { font-size: 80pt; margin-bottom: 1mm; }
+.sub-blau { font-size: 48pt; margin-bottom: 1mm; }
+
+/* SONSTIGE */
+.kunde-pentz { font-size: 70pt; margin-bottom: 1mm; }
+.sub-pentz { font-size: 48pt; margin-bottom: 1mm; }
+
+.kunde-rcs { font-size: 80pt; margin-bottom: 1mm; }
+.sub-rcs { font-size: 48pt; margin-bottom: 1mm; }
+
+.kunde-coatinc { font-size: 80pt; margin-bottom: 1mm; }
+.sub-coatinc { font-size: 48pt; margin-bottom: 1mm; }
+
+/* EKO-DEKOR */
+.kunde-ekodekor { font-size: 80pt; margin-bottom: 1mm; }
+.sub-ekodekor { font-size: 48pt; margin-bottom: 1mm; }
+
+/* =======================
+   TEXTE
+======================= */
 .print-beistell { font-size: 60pt; margin-bottom: 6mm; }
 .print-name { font-size: 32pt; margin-top: 4mm; }
 
@@ -147,7 +176,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =======================
-   DRUCK (STABIL)
+   DRUCK – STABIL
 ======================= */
 .print-only { display: none; }
 
@@ -179,6 +208,7 @@ html, body {
 
 <body>
 
+<!-- ===== VORSCHAU ===== -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -193,6 +223,7 @@ html, body {
     <span>Papierformat <b>A5 quer</b> im Drucker auswählen</span>
 </div>
 
+<!-- ===== DRUCK ===== -->
 <div id="printArea" class="etikett print-only">
     <div class="etikett-center" id="printInner"></div>
     <img src="langen.png" class="logo">
