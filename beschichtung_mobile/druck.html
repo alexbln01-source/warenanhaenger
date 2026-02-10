@@ -186,7 +186,6 @@ html, body {
 ========================================================= */
 @media print {
 
-    /* Wichtig: html/body nicht auf 210x148 fixieren (Android skaliert sonst falsch) */
     html, body {
         margin: 0 !important;
         padding: 0 !important;
@@ -195,20 +194,23 @@ html, body {
         height: auto !important;
     }
 
-    /* Alles andere ausblenden */
-    .preview-wrapper,
-    .bottom-bar,
-    .warnbox {
+    /* alles ausblenden */
+    .warnbox,
+    .bottom-bar {
         display: none !important;
     }
 
-    /* Nur Druckbereich anzeigen + feste A5-Quer Maße */
-    #printArea {
-        display: block !important;
+    /* VORSCHAU DRUCKEN */
+    .preview-wrapper {
+        display: flex !important;
+        height: auto !important;
+    }
+
+    .preview-area {
+        transform: none !important;   /* 🔥 DAS ist der Punkt */
         width: 210mm !important;
         height: 148mm !important;
-        page-break-inside: avoid;
-        break-inside: avoid;
+        box-shadow: none !important;
     }
 
     @page {
