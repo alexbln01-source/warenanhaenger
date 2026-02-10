@@ -70,6 +70,7 @@ html, body {
 
 .color-btn.active {
     outline: 3px solid #ff9800;
+    outline-offset: 2px;
 }
 
 /* ===== VORGEZOGEN BUTTON ===== */
