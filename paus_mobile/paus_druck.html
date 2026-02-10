@@ -294,15 +294,15 @@ window.onload = () => {
         setTimeout(() => window.print(), 100);
     };
 
-    /* ===== NACH DEM DRUCK → PAUS ===== */
-    window.onafterprint = () => {
-        window.location.href = "./paus_mobile.html";
-    };
+   /* ===== NACH DEM DRUCK → PAUS ===== */
+window.onafterprint = () => {
+    window.location.replace("/paus_mobile.html");
+};
 
-    /* ===== ZURÜCK → PAUS ===== */
-    backBtn.onclick = () => {
-        window.location.href = "./paus_mobile.html";
-    };
+/* ===== ZURÜCK → PAUS ===== */
+backBtn.onclick = () => {
+    window.location.replace("/paus_mobile.html");
+};
 };
 </script>
 </body>
