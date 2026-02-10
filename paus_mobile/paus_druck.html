@@ -294,14 +294,14 @@ window.onload = () => {
         setTimeout(() => window.print(), 100);
     };
 
-   /* ===== NACH DEM DRUCK → PAUS ===== */
+ /* ===== NACH DEM DRUCK ===== */
 window.onafterprint = () => {
-    window.location.replace("/paus_mobile.html");
+    window.location.href = "paus_mobile.html";
 };
 
-/* ===== ZURÜCK → PAUS ===== */
+/* ===== ZURÜCK ===== */
 backBtn.onclick = () => {
-    window.location.replace("/paus_mobile.html");
+    window.location.href = "paus_mobile.html";
 };
 };
 </script>
