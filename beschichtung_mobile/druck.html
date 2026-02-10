@@ -186,28 +186,18 @@ html, body {
 ========================================================= */
 @media print {
 
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-        overflow: visible !important;
-        height: auto !important;
-    }
-
-    /* alles ausblenden */
     .warnbox,
     .bottom-bar {
         display: none !important;
     }
 
-    /* VORSCHAU DRUCKEN */
     .preview-wrapper {
         display: flex !important;
         height: auto !important;
     }
 
     .preview-area {
-        transform: none !important;   /* 🔥 DAS ist der Punkt */
+        transform: none !important;   /* DAS ist der Schlüssel */
         width: 210mm !important;
         height: 148mm !important;
         box-shadow: none !important;
