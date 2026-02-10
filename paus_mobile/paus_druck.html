@@ -296,14 +296,14 @@ window.onload = () => {
     };
 
     window.onafterprint = () => {
-        window.location.replace("paus_mobile.html");
+        window.location.href("paus_mobile.html");
     };
 
     backBtn.onclick = () => {
         if (wasPrinted) {
-            window.location.replace("paus_mobile.html");
+            window.location.href("paus_mobile.html");
         } else {
-            window.location.replace("index.html");
+            window.location.href("index.html");
         }
     };
 };
