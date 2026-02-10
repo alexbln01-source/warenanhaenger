@@ -75,7 +75,7 @@ window.onload = () => {
 
     // BACK BUTTON
   backBtn.onclick = () => {
-    window.location.href = "../index.html";
+    window.location.href = "./paus_mobile.html";
 };
 
     // VORGEZOGEN BUTTON
