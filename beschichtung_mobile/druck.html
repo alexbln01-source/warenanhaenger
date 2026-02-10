@@ -13,7 +13,6 @@ html, body {
     background: #dcdcdc;
     font-family: Arial, sans-serif;
     height: 100%;
-    overflow: hidden;
 }
 
 /* ================= VORSCHAU ================= */
@@ -30,16 +29,16 @@ html, body {
     height: 148mm;
     background: white;
     box-shadow: 0 0 15px rgba(0,0,0,0.25);
-    transform-origin: center;
+    transform-origin: top left;
 }
 
+/* NUR VORSCHAU SKALIEREN */
 @media (max-width: 900px) {
     .preview-area { transform: scale(0.36); }
 }
 @media (min-width: 901px) {
     .preview-area { transform: scale(0.45); }
 }
-
 /* ================= WARNBOX ================= */
 .warnbox {
     margin: -10px auto 10px;
