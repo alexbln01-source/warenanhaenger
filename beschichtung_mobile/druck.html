@@ -303,7 +303,22 @@ const backBtn      = document.getElementById("backBtn");
  previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
-    printBtn.onclick = () => window.print();
+   printBtn.onclick = () => {
+
+    // ❌ alles entfernen, was Android sonst mitrendert
+    document.querySelector(".preview-wrapper")?.remove();
+    document.querySelector(".warnbox")?.remove();
+    document.querySelector(".bottom-bar")?.remove();
+
+    // ✅ PrintArea sichtbar machen
+    const printArea = document.getElementById("printArea");
+    printArea.style.display = "block";
+
+    // ⏱️ Android braucht einen Render-Tick
+    setTimeout(() => {
+        window.print();
+    }, 200);
+};
 
     backBtn.onclick = () => {
         window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
