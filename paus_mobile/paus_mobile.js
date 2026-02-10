@@ -74,7 +74,7 @@ window.onload = () => {
     if (isZebra) kommission.focus();
 
 backBtn.onclick = () => {
-    window.location.replace("/index.html");
+    window.location.href = "./index.html";
 };
 
     // VORGEZOGEN BUTTON
