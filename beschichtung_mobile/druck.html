@@ -157,33 +157,37 @@ html, body {
 /* ================= PRINT ================= */
 @media print {
 
-    @page {
-        size: A5 landscape;
-        margin: 0;
-    }
+    body { background: white !important; }
 
-    html, body {
-        margin: 0;
-        padding: 0;
-        background: white;
-        height: auto;
-        overflow: visible;
-    }
-
-    /* alles ausblenden, was NICHT gedruckt werden soll */
     .preview-wrapper,
-    .warnbox,
     .bottom-bar {
         display: none !important;
     }
 
-    /* NUR das Etikett drucken */
-    .etikett {
+    .print-only {
         display: block !important;
-        width: 210mm;
+    }
+
+    @page {
+        size: A6 portrait;
+        margin: 0;
+    }
+
+    #printArea {
+        width: 105mm;
         height: 148mm;
         position: relative;
-        page-break-inside: avoid;
+        overflow: hidden;
+    }
+
+    #printArea.etikett {
+        width: 148mm;
+        height: 105mm;
+        position: absolute;
+        top: 21.5mm;
+        left: -21.5mm;
+        transform: rotate(-90deg);
+        transform-origin: center;
     }
 }
 </style>
