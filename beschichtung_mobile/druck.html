@@ -163,27 +163,27 @@ html, body {
     }
 
     html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
+        margin: 0;
+        padding: 0;
+        background: white;
+        height: auto;
+        overflow: visible;
     }
 
-    /* 🔥 ANDROID-PRINT-FIX */
-    body * {
-        visibility: hidden !important;
+    /* alles ausblenden, was NICHT gedruckt werden soll */
+    .preview-wrapper,
+    .warnbox,
+    .bottom-bar {
+        display: none !important;
     }
 
-    .etikett,
-    .etikett * {
-        visibility: visible !important;
-    }
-
+    /* NUR das Etikett drucken */
     .etikett {
-        position: absolute;
-        top: 0;
-        left: 0;
+        display: block !important;
         width: 210mm;
         height: 148mm;
+        position: relative;
+        page-break-inside: avoid;
     }
 }
 </style>
