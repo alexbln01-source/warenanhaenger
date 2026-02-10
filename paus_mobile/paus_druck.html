@@ -290,25 +290,30 @@ window.onload = () => {
     previewContent.innerHTML = html;
     printContent.innerHTML   = html;
 
+    /* ===== DRUCK ===== */
     printBtn.onclick = () => {
         wasPrinted = true;
         setTimeout(() => window.print(), 100);
     };
 
-   window.onafterprint = () => {
-    window.location.href = "./paus_mobile.html";
-};
+    /* ===== NACH DEM DRUCK IMMER ZU PAUS ===== */
+    window.onafterprint = () => {
+        if (wasPrinted) {
+            window.location.href = "./paus_mobile.html";
+        }
+    };
 
-backBtn.onclick = () => {
-    if (wasPrinted) {
-        window.location.href = "./paus_mobile.html";
-    } else {
-        window.location.href = "../index.html";
-    }
-};
+    /* ===== ZURÜCK-BUTTON ===== */
+    backBtn.onclick = () => {
+        if (wasPrinted) {
+            // nach dem Drucken
+            window.location.href = "./paus_mobile.html";
+        } else {
+            // nur Vorschau
+            window.location.href = "../index.html";
+        }
+    };
 };
 </script>
-
-
 </body>
 </html>
