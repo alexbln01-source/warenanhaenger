@@ -69,7 +69,7 @@ html, body {
 .color-btn[data-color="black"] { background: #333; }
 
 .color-btn.active {
-    outline: 3px solid #1a73e8;
+    outline: 3px solid #ff9800;
 }
 
 /* ===== VORGEZOGEN BUTTON ===== */
