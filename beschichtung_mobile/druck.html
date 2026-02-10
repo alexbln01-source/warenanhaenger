@@ -18,7 +18,7 @@ html, body {
 /* ===== VORSCHAU ===== */
 .preview-wrapper {
     width: 100%;
-    height: calc(100% - 220px); /* <- Platz für Warnbox + Buttons */
+    height: calc(100% - 220px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,7 +40,7 @@ html, body {
     .preview-area { transform: scale(0.45); }
 }
 
-/* ===== ✅ WARNBOX – DRUCKERHINWEIS ===== */
+/* ===== WARNBOX ===== */
 .warnbox {
     margin: -10px auto 10px;
     max-width: 280px;
@@ -65,8 +65,8 @@ html, body {
 }
 
 @keyframes warnPulse {
-    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
-    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
+    0% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+    50% { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
     100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
 }
 
@@ -90,7 +90,7 @@ html, body {
     font-weight: bold !important;
 }
 
-/* ===== ZENTRIERTER TEXTBEREICH ===== */
+/* ===== ZENTRIERTER TEXT ===== */
 .etikett-center {
     position: absolute;
     inset: 10mm;
@@ -102,31 +102,24 @@ html, body {
 }
 
 /* ===== KUNDEN ===== */
-
-/* L&P */
 .kunde-lp { font-size: 80pt; margin-bottom: 8mm; }
 .kunde-lp-eilt { font-size: 80pt; margin-bottom: 8mm; }
 .sub-lp-eilt { font-size: 70pt; margin-bottom: 6mm; }
 
-/* SCHÜTTE */
 .kunde-schuette { font-size: 80pt; margin-bottom: 8mm; }
 .kunde-schuette-eilt { font-size: 80pt; margin-bottom: 8mm; }
 .sub-schuette-eilt { font-size: 70pt; margin-bottom: 6mm; }
 
-/* KLEY */
 .kunde-kley { font-size: 80pt; margin-bottom: 8mm; }
 .kunde-kley-eilt { font-size: 80pt; margin-bottom: 8mm; }
 .sub-kley-eilt { font-size: 70pt; margin-bottom: 6mm; }
 
-/* KALEY */
 .kunde-kaley { font-size: 80pt; margin-bottom: 8mm; }
 
-/* WOB */
 .kunde-wob { font-size: 80pt; margin-bottom: 8mm; }
 .kunde-wob-eilt { font-size: 80pt; margin-bottom: 8mm; }
 .sub-wob-eilt { font-size: 70pt; margin-bottom: 6mm; }
 
-/* COMTE */
 .kunde-comte-zn8 { font-size: 80pt; margin-bottom: 1mm; }
 .sub-comte-zn8 { font-size: 48pt; margin-bottom: 1mm; }
 
@@ -142,7 +135,6 @@ html, body {
 .kunde-blau { font-size: 80pt; margin-bottom: 1mm; }
 .sub-blau { font-size: 48pt; margin-bottom: 1mm; }
 
-/* SONSTIGE */
 .kunde-pentz { font-size: 70pt; margin-bottom: 1mm; }
 .sub-pentz { font-size: 48pt; margin-bottom: 1mm; }
 
@@ -152,11 +144,9 @@ html, body {
 .kunde-coatinc { font-size: 80pt; margin-bottom: 1mm; }
 .sub-coatinc { font-size: 48pt; margin-bottom: 1mm; }
 
-/* ===== ✅ EKO-DEKOR (NEU) ===== */
 .kunde-ekodekor { font-size: 80pt; margin-bottom: 1mm; }
 .sub-ekodekor { font-size: 48pt; margin-bottom: 1mm; }
 
-/* ===== WEITERE TEXTE ===== */
 .print-beistell { font-size: 60pt; margin-bottom: 6mm; }
 .print-name { font-size: 32pt; margin-top: 4mm; }
 
@@ -180,13 +170,11 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* =========================================================
-   ✅ DRUCK-FIX: NUR PRINT – SONST NICHTS ÄNDERN
-   Ziel: Android/Mopria soll NUR #printArea drucken (A5 quer)
-========================================================= */
+/* ===== PRINT FIX (WIE PAUS) ===== */
+.print-only { display: none; }
+
 @media print {
 
-    /* Wichtig: html/body nicht auf 210x148 fixieren (Android skaliert sonst falsch) */
     html, body {
         margin: 0 !important;
         padding: 0 !important;
@@ -195,16 +183,17 @@ html, body {
         height: auto !important;
     }
 
-    /* Alles andere ausblenden */
     .preview-wrapper,
     .bottom-bar,
     .warnbox {
         display: none !important;
     }
 
-    /* Nur Druckbereich anzeigen + feste A5-Quer Maße */
-    #printArea {
+    .print-only {
         display: block !important;
+    }
+
+    #printArea {
         width: 210mm !important;
         height: 148mm !important;
         page-break-inside: avoid;
@@ -230,13 +219,13 @@ html, body {
     </div>
 </div>
 
-<!-- ✅ WARNBOX (NUR SCREEN) -->
 <div class="warnbox">
     ⚠️ Achtung!
     <span>Papierformat <b>A5 quer</b> im Drucker auswählen</span>
 </div>
 
-<div id="printArea" class="etikett" style="display:none;">
+<!-- ✅ HIER DIE ENTSCHEIDENDE ÄNDERUNG -->
+<div id="printArea" class="etikett print-only">
     <div class="etikett-center" id="printInner"></div>
     <img src="langen.png" class="logo">
 </div>
@@ -248,14 +237,13 @@ html, body {
 
 <script>
 window.onload = () => {
-const previewInner = document.getElementById("previewInner");
-const printInner   = document.getElementById("printInner");
-const printBtn     = document.getElementById("printBtn");
-const backBtn      = document.getElementById("backBtn");
+    const previewInner = document.getElementById("previewInner");
+    const printInner   = document.getElementById("printInner");
+    const printBtn     = document.getElementById("printBtn");
+    const backBtn      = document.getElementById("backBtn");
+
     const qs = new URLSearchParams(location.search);
-    const data = qs.has("data")
-        ? JSON.parse(decodeURIComponent(qs.get("data")))
-        : {};
+    const data = qs.has("data") ? JSON.parse(decodeURIComponent(qs.get("data"))) : {};
 
     const beistell = data.beistell || "";
     const type     = data.selectedType || "";
@@ -281,17 +269,11 @@ const backBtn      = document.getElementById("backBtn");
         case "COATINC": html += `<div class="kunde-coatinc">Coatinc 24</div><div class="sub-coatinc">„Verzinken“</div>`; break;
         case "WOB": html += `<div class="kunde-wob">WOB</div>`; break;
         case "WOBEILT": html += `<div class="kunde-wob-eilt">WOB</div><div class="sub-wob-eilt">„EILT SEHR“</div>`; break;
-
-        case "EKODEKOR":
-            html += `<div class="kunde-ekodekor">EKO-Dekor</div><div class="sub-ekodekor">„Eloxieren“</div>`;
-            break;
-
+        case "EKODEKOR": html += `<div class="kunde-ekodekor">EKO-Dekor</div><div class="sub-ekodekor">„Eloxieren“</div>`; break;
         case "EKODEKOREILT":
-            html += `
-                <div class="kunde-ekodekor">EKO-Dekor</div>
-                <div class="sub-wob-eilt">„EILT SEHR“</div>
-                <div class="sub-ekodekor">„Eloxieren“</div>
-            `;
+            html += `<div class="kunde-ekodekor">EKO-Dekor</div>
+                     <div class="sub-wob-eilt">„EILT SEHR“</div>
+                     <div class="sub-ekodekor">„Eloxieren“</div>`;
             break;
     }
 
@@ -300,18 +282,12 @@ const backBtn      = document.getElementById("backBtn");
         html += `<div class="print-name">(${kunde})</div>`;
     }
 
- previewInner.innerHTML = html;
+    previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
     printBtn.onclick = () => window.print();
-
-    backBtn.onclick = () => {
-        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-    };
-
-    window.onafterprint = () => {
-        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-    };
+    backBtn.onclick = () => window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+    window.onafterprint = () => window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
 };
 </script>
 
