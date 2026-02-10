@@ -305,7 +305,7 @@ const backBtn      = document.getElementById("backBtn");
  previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
-   printBtn.onclick = () => {
+  printBtn.onclick = () => window.print();
 
     // ❌ alles entfernen, was Android sonst mitrendert
     document.querySelector(".preview-wrapper")?.remove();
