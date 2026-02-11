@@ -57,26 +57,26 @@ html, body {
 /* Alle Buttons wenn fokussiert */
 button:focus {
     outline: 3px solid #ff9800;
-    outline-offset: 3px;
+    outline-offset: 2px;
 }
 
 /* Kundenbuttons wenn aktiv */
 .kunde-btn.active {
     outline: 3px solid #ff9800;
-    outline-offset: 3px;
+    outline-offset: 2px;
 }
 
 /* EILT Button wenn aktiviert */
 #eiltBtn.on {
     outline: 3px solid #ff9800;
-    outline-offset: 3px;
+    outline-offset: 2px;
 }
 
 /* Eingabefelder wenn aktiv */
 #beistellInput:focus,
 #kundeInput:focus {
     outline: 3px solid #ff9800;
-    outline-offset: 3px;
+    outline-offset: 2px;
 }
 /* =============================
    Eingabefelder
