@@ -281,18 +281,26 @@ const backBtn      = document.getElementById("backBtn");
       </div>
     `;
 
-   previewInner.innerHTML = html;
-    printInner.innerHTML   = html;
+let isPrinting = false;
 
-    printBtn.onclick = () => window.print();
+previewInner.innerHTML = html;
+printInner.innerHTML   = html;
 
-    backBtn.onclick = () => {
-        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-    };
+printBtn.onclick = () => {
+    isPrinting = true;
+    window.print();
+};
 
-    // window.onafterprint = () => {
-       // window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-    // };
+backBtn.onclick = () => {
+    window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+};
+
+window.onafterprint = () => {
+    if (isPrinting) {
+        setTimeout(() => {
+            window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+        }, 300);
+    }
 };
 </script>
 
