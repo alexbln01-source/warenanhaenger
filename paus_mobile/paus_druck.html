@@ -172,8 +172,11 @@ html, body {
     display: none; 
 }
 
-@media print {
+.print-only {
+    display: none;
+}
 
+@media print {
 
     @page {
         size: A6 portrait;
@@ -186,14 +189,12 @@ html, body {
         background: white !important;
     }
 
-    /* Alles ausblenden */
     .preview-wrapper,
     .warnbox,
     .bottom-bar {
         display: none !important;
     }
 
-    /* Druckbereich sichtbar machen */
     .print-only {
         display: block !important;
     }
@@ -207,7 +208,6 @@ html, body {
         overflow: hidden;
     }
 
-    /* Quer drehen */
     #printArea.etikett {
         width: 148mm;
         height: 105mm;
@@ -218,6 +218,7 @@ html, body {
         transform-origin: center;
     }
 }
+
 
 
 </style>
