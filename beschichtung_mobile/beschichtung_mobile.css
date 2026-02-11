@@ -58,6 +58,14 @@ button.active {
     outline-offset: 2px;   /* Abstand zwischen Button und Rahmen */
 }
 /* =============================
+   Aktives Eingabefeld – Orange Rahmen
+============================= */
+#beistellInput:focus,
+#kundeInput:focus {
+    outline: 3px solid #ff9800;
+    outline-offset: 2px;
+}
+/* =============================
    Eingabefelder
 ============================= */
 #beistellInput,
