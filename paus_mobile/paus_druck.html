@@ -173,6 +173,182 @@ html, body {
     display: none; 
 }
 
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>PAUS Druck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<style>
+
+/* =========================================================
+   WARNBOX – DRUCKERHINWEIS (NUR SCREEN)
+========================================================= */
+.warnbox {
+    margin: -10px auto 10px;
+    max-width: 280px;
+    background: #fff4f4;
+    border: 2px solid #c80000;
+    border-radius: 14px;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(200,0,0,0.2);
+    animation: warnPulse 0.9s ease-in-out infinite;
+}
+
+
+.warnbox span {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #7a0000;
+}
+@keyframes warnPulse {
+    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
+    100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+}
+/* Warnbox NICHT mitdrucken */
+@media print {
+    .warnbox { display: none !important; }
+}
+
+/* =========================================================
+   BASIS
+========================================================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #dcdcdc;
+    font-family: Arial, sans-serif;
+    height: 100%;
+}
+
+/* =========================================================
+   DRUCKER-HINWEIS (NUR ÜBER VORSCHAU)
+========================================================= */
+.print-hint {
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    margin: 10px 0 6px;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+}
+
+/* =========================================================
+   VORSCHAU (A6 QUER)
+========================================================= */
+.preview-wrapper {
+    width: 100%;
+    height: calc(100% - 180px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-area {
+    width: 148mm;
+    height: 105mm;
+    background: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+}
+
+@media (max-width: 900px) { .preview-area { transform: scale(0.55); } }
+@media (min-width: 901px) and (max-width: 1300px) { .preview-area { transform: scale(0.7); } }
+@media (min-width: 1301px) { .preview-area { transform: scale(0.8); } }
+
+/* =========================================================
+   ETIKETT (LOGIK VORSCHAU + DRUCK IDENTISCH)
+========================================================= */
+.etikett {
+    width: 148mm;
+    height: 105mm;
+    padding: 8mm;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Text-Zentrierfläche (Logo zählt NICHT) */
+.etikett-inner {
+    width: 100%;
+    height: calc(100% - 25mm);
+    margin-bottom: 25mm;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* ECHTER ZENTRIERBLOCK */
+.text-block {
+    max-width: calc(148mm - 48mm);
+    margin: 0 auto;
+}
+
+.offset-normal { transform: translateY(7mm); }
+.offset-vorgezogen { transform: translateY(4mm); }
+
+/* Logo */
+.logo {
+    position: absolute;
+    right: 5mm;
+    bottom: 4mm;
+    width: 40mm;
+}
+
+/* Text */
+.line { width: 100%; font-weight: bold; }
+.line-title { font-size: 40pt; }
+.line-kommission { font-size: 48pt; }
+.line-date { font-size: 48pt; }
+.line-vorgezogen { font-size: 40pt; }
+
+.date-past {
+    border: 3px solid red;
+    padding: 1px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+.bottom-bar {
+    margin-top: 30px;
+    height: 60px;
+    display: flex;
+    gap: 16px;
+    padding: 0 20px;
+}
+
+.btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+}
+
+.back-btn { background: #444; }
+.print-btn { background: #00963d; }
+
+/* =========================================================
+   PRINT (A6 HOCH, KEINE SKALIERUNG)
+========================================================= */
+.print-only { 
+    display: none; 
+}
+
 @media print {
 
     @page {
@@ -215,6 +391,110 @@ html, body {
         transform-origin: center;
     }
 }
+
+
+
+</style>
+
+<body>
+
+
+<!-- ================= VORSCHAU ================= -->
+<div class="preview-wrapper">
+    <div class="preview-area">
+        <div class="etikett">
+            <div id="previewContent" class="etikett-inner"></div>
+            <img src="langen.png" class="logo">
+        </div>
+    </div>
+</div>
+<!-- ================= WARNBOX ================= -->
+<div class="warnbox">
+    ⚠️ Achtung!
+    <span>Papierformat <b>A6</b> im Drucker auswählen</span>
+</div>
+<!-- ================= DRUCK ================= -->
+<div id="printArea" class="etikett print-only">
+    <div id="printContent" class="etikett-inner"></div>
+    <img src="langen.png" class="logo">
+</div>
+
+<!-- ================= BUTTONS ================= -->
+<div class="bottom-bar">
+    <button class="btn back-btn" id="backBtn">◀ Zurück</button>
+    <button class="btn print-btn" id="printBtn">Drucken</button>
+</div>
+
+<script>
+window.onload = () => {
+
+    const previewContent = document.getElementById("previewContent");
+    const printContent   = document.getElementById("printContent");
+    const printBtn       = document.getElementById("printBtn");
+    const backBtn        = document.getElementById("backBtn");
+
+    const qs = new URLSearchParams(location.search);
+    const data = JSON.parse(decodeURIComponent(qs.get("data")));
+
+    const kom = data.kommission;
+    const dat = data.lieferdatum;
+    const farbe = data.farbe;
+    const vorgezogen = data.vorgezogen;
+
+    let isPast = false;
+    let finalDate = dat;
+
+    if (dat) {
+        let clean = dat.replace(/\s/g,"");
+        let d = clean.slice(0,2);
+        let m = clean.slice(2,4);
+        if (clean.includes(".")) [d,m] = clean.split(".");
+        const now = new Date();
+        const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const diff =
+            (today.getFullYear()-target.getFullYear())*12 +
+            (today.getMonth()-target.getMonth());
+
+        if (target < today && diff < 2) isPast = true;
+        finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
+    }
+
+    const html = `
+      <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
+        <div class="line line-title">PAUS</div>
+        <div class="line line-kommission" style="color:${farbe};">${kom}</div>
+        <div class="line line-date">
+            <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
+        </div>
+        ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
+      </div>
+    `;
+
+    /* ✅ VORSCHAU + DRUCK FÜLLEN */
+    previewContent.innerHTML = html;
+    printContent.innerHTML   = html;
+
+    /* ===== DRUCK ===== */
+    printBtn.onclick = () => {
+        setTimeout(() => window.print(), 100);
+    };
+
+ /* ===== NACH DEM DRUCK ===== */
+window.onafterprint = () => {
+    window.location.href = "paus_mobile.html";
+};
+
+/* ===== ZURÜCK ===== */
+backBtn.onclick = () => {
+    window.location.href = "paus_mobile.html";
+};
+};
+   
+</script>
+</body>
+</html>
+
 
 
 
