@@ -21,7 +21,6 @@ html, body {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Bereich aus URL lesen (?bereich=...)
     const params  = new URLSearchParams(location.search);
     const bereich = params.get("bereich");
 
@@ -39,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* ============================================
-       ROUTING
+       ROUTING MIT CACHE-BREAKER
     ============================================ */
     const routes = {
         beschichtung: "beschichtung_mobile/beschichtung_mobile.html",
@@ -51,10 +50,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const ziel = routes[bereich];
 
     if (ziel) {
-        location.replace(ziel);
+        // 🔥 Immer frische Version laden
+        const versionTag = Date.now();
+        location.replace(ziel + "?v=" + versionTag);
     } else {
         console.warn("Unbekannter Bereich:", bereich);
     }
+
 });
 </script>
 
