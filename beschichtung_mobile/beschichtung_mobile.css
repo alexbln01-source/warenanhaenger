@@ -50,7 +50,13 @@ html, body {
     text-align: center;
     margin: 10px 0 6px 0;
 }
-
+/* =============================
+   Aktiver Button – Orange Rahmen mit Abstand
+============================= */
+button.active {
+    outline: 3px solid #ff9800;
+    outline-offset: 4px;   /* Abstand zwischen Button und Rahmen */
+}
 /* =============================
    Eingabefelder
 ============================= */
@@ -142,10 +148,8 @@ body.zebra-tc22 .kunde-btn {
 }
 
 .kunde-btn.active {
-     outline: 3px solid #ff9800;
     background: #00963d;
     color: white;
-    outline-offset: 2px;
 }
 
 /* =============================
