@@ -10,6 +10,15 @@
 <title>PAUS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- 🔥 BFCache Schutz -->
+<script>
+window.addEventListener("pageshow", function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+</script>
+
 <!-- 🔥 SOFORTIGER UPDATE CHECK -->
 <script>
 (async function () {
@@ -24,12 +33,10 @@
 
             localStorage.setItem("app_version", data.version);
 
-            // HARD RELOAD mit Cache-Break
             window.location.href =
                 window.location.origin +
                 window.location.pathname +
                 "?v=" + data.version + "&t=" + Date.now();
-
         }
 
     } catch (e) {
