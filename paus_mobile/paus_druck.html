@@ -292,13 +292,13 @@ printBtn.onclick = () => {
 };
 
 backBtn.onclick = () => {
-    window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+    window.location.replace("//beschichtung_mobile.html?reload=" + Date.now());
 };
 
 window.onafterprint = () => {
     if (isPrinting) {
         setTimeout(() => {
-            window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+            window.location.replace("//beschichtung_mobile.html?reload=" + Date.now());
         }, 300);
     }
 };
