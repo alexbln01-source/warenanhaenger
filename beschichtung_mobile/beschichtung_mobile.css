@@ -142,8 +142,10 @@ body.zebra-tc22 .kunde-btn {
 }
 
 .kunde-btn.active {
-    background: #007bff;
+     outline: 3px solid #ff9800;
+    background: #00963d;
     color: white;
+    outline-offset: 2px;
 }
 
 /* =============================
