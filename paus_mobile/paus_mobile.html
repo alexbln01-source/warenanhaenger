@@ -2,14 +2,46 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+
 <title>PAUS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="paus_mobile.css">
-<script defer src="paus_mobile.js"></script>
+<!-- 🔥 SOFORTIGER UPDATE CHECK -->
+<script>
+(async function () {
+
+    try {
+        const response = await fetch("version.json?cache=" + Date.now());
+        const data = await response.json();
+
+        const savedVersion = localStorage.getItem("app_version");
+
+        if (savedVersion !== data.version) {
+
+            localStorage.setItem("app_version", data.version);
+
+            // HARD RELOAD mit Cache-Break
+            window.location.href =
+                window.location.origin +
+                window.location.pathname +
+                "?v=" + data.version + "&t=" + Date.now();
+
+        }
+
+    } catch (e) {
+        console.log("Version check failed");
+    }
+
+})();
+</script>
+
+<link rel="stylesheet" href="paus_mobile.css?v=1">
+<script defer src="paus_mobile.js?v=1"></script>
+
 </head>
 
 <body>
@@ -70,6 +102,5 @@
 
 </div>
 
-<script src="update.js"></script>
 </body>
 </html>
