@@ -51,19 +51,32 @@ html, body {
     margin: 10px 0 6px 0;
 }
 /* =============================
-   Aktiver Button – Orange Rahmen mit Abstand
+   Einheitlicher Orange-Rahmen
 ============================= */
-button.active {
+
+/* Alle Buttons wenn fokussiert */
+button:focus {
     outline: 3px solid #ff9800;
-    outline-offset: 2px;   /* Abstand zwischen Button und Rahmen */
+    outline-offset: 3px;
 }
-/* =============================
-   Aktives Eingabefeld – Orange Rahmen
-============================= */
+
+/* Kundenbuttons wenn aktiv */
+.kunde-btn.active {
+    outline: 3px solid #ff9800;
+    outline-offset: 3px;
+}
+
+/* EILT Button wenn aktiviert */
+#eiltBtn.on {
+    outline: 3px solid #ff9800;
+    outline-offset: 3px;
+}
+
+/* Eingabefelder wenn aktiv */
 #beistellInput:focus,
 #kundeInput:focus {
     outline: 3px solid #ff9800;
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
 /* =============================
    Eingabefelder
