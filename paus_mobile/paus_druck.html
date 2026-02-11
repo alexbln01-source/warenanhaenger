@@ -5,10 +5,41 @@
 <title>PAUS Druck</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
 <style>
 
-/* ================= BASIS ================= */
+/* =========================================================
+   WARNBOX – DRUCKERHINWEIS (NUR SCREEN)
+========================================================= */
+.warnbox {
+    margin: 6px auto 14px;   /* nah an der Vorschau, sauber */
+    max-width: 400px;
+    background: #fff4f4;
+    border: 2px solid #c80000;
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(200,0,0,0.15);
+}
+
+.warnbox span {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #7a0000;
+}
+
+/* Warnbox NICHT mitdrucken */
+@media print {
+    .warnbox { display: none !important; }
+}
+
+/* =========================================================
+   BASIS
+========================================================= */
 html, body {
     margin: 0;
     padding: 0;
@@ -17,21 +48,21 @@ html, body {
     height: 100%;
 }
 
-/* ================= WARNBOX ================= */
-.warnbox {
-    margin: -10px auto 10px;
-    max-width: 280px;
-    background: #fff4f4;
-    border: 2px solid #c80000;
-    border-radius: 14px;
-    padding: 12px 16px;
+/* =========================================================
+   DRUCKER-HINWEIS (NUR ÜBER VORSCHAU)
+========================================================= */
+.print-hint {
     text-align: center;
     font-weight: 900;
     color: #c80000;
+    margin: 10px 0 6px;
     font-size: 16px;
+    letter-spacing: 0.3px;
 }
 
-/* ================= VORSCHAU ================= */
+/* =========================================================
+   VORSCHAU (A6 QUER)
+========================================================= */
 .preview-wrapper {
     width: 100%;
     height: calc(100% - 180px);
@@ -47,7 +78,13 @@ html, body {
     box-shadow: 0 0 15px rgba(0,0,0,0.25);
 }
 
-/* ================= ETIKETT ================= */
+@media (max-width: 900px) { .preview-area { transform: scale(0.55); } }
+@media (min-width: 901px) and (max-width: 1300px) { .preview-area { transform: scale(0.7); } }
+@media (min-width: 1301px) { .preview-area { transform: scale(0.8); } }
+
+/* =========================================================
+   ETIKETT (LOGIK VORSCHAU + DRUCK IDENTISCH)
+========================================================= */
 .etikett {
     width: 148mm;
     height: 105mm;
@@ -56,16 +93,19 @@ html, body {
     position: relative;
 }
 
+/* Text-Zentrierfläche (Logo zählt NICHT) */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
     margin-bottom: 25mm;
+
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
 }
 
+/* ECHTER ZENTRIERBLOCK */
 .text-block {
     max-width: calc(148mm - 48mm);
     margin: 0 auto;
@@ -74,6 +114,7 @@ html, body {
 .offset-normal { transform: translateY(7mm); }
 .offset-vorgezogen { transform: translateY(4mm); }
 
+/* Logo */
 .logo {
     position: absolute;
     right: 5mm;
@@ -81,6 +122,7 @@ html, body {
     width: 40mm;
 }
 
+/* Text */
 .line { width: 100%; font-weight: bold; }
 .line-title { font-size: 40pt; }
 .line-kommission { font-size: 48pt; }
@@ -94,7 +136,9 @@ html, body {
     display: inline-block;
 }
 
-/* ================= BUTTONS ================= */
+/* =========================================================
+   BUTTONS
+========================================================= */
 .bottom-bar {
     margin-top: 30px;
     height: 60px;
@@ -115,7 +159,9 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* ================= PRINT ================= */
+/* =========================================================
+   PRINT (A6 HOCH, KEINE SKALIERUNG)
+========================================================= */
 .print-only { display: none; }
 
 @media print {
@@ -125,12 +171,10 @@ html, body {
         margin: 0;
     }
 
-    body {
-        background: white !important;
-    }
+    body { background: white !important; }
 
+    .print-hint,
     .preview-wrapper,
-    .warnbox,
     .bottom-bar {
         display: none !important;
     }
@@ -144,6 +188,7 @@ html, body {
         height: 148mm;
         position: relative;
         overflow: hidden;
+        padding: 0 !important;
     }
 
     #printArea.etikett {
@@ -156,8 +201,9 @@ html, body {
         transform-origin: center;
     }
 }
-
 </style>
+</head>
+
 <body>
 
 
@@ -173,7 +219,7 @@ html, body {
 <!-- ================= WARNBOX ================= -->
 <div class="warnbox">
     ⚠️ Achtung!
-    <span>Papierformat <b>A6</b> im Drucker auswählen</span>
+    <span>Drucker mit <b>A6-Format</b> auswählen</span>
 </div>
 <!-- ================= DRUCK ================= -->
 <div id="printArea" class="etikett print-only">
@@ -189,11 +235,6 @@ html, body {
 
 <script>
 window.onload = () => {
-
-    const previewContent = document.getElementById("previewContent");
-    const printContent   = document.getElementById("printContent");
-    const printBtn       = document.getElementById("printBtn");
-    const backBtn        = document.getElementById("backBtn");
 
     const qs = new URLSearchParams(location.search);
     const data = JSON.parse(decodeURIComponent(qs.get("data")));
@@ -222,7 +263,7 @@ window.onload = () => {
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
-    const html = `
+    let html = `
       <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
         <div class="line line-title">PAUS</div>
         <div class="line line-kommission" style="color:${farbe};">${kom}</div>
@@ -233,29 +274,20 @@ window.onload = () => {
       </div>
     `;
 
-    /* ✅ VORSCHAU + DRUCK FÜLLEN */
-    previewContent.innerHTML = html;
-    printContent.innerHTML   = html;
+   previewInner.innerHTML = html;
+    printInner.innerHTML   = html;
 
-    /* ===== DRUCK ===== */
-    printBtn.onclick = () => {
-        setTimeout(() => window.print(), 100);
+    printBtn.onclick = () => window.print();
+
+    backBtn.onclick = () => {
+        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
     };
 
- /* ===== NACH DEM DRUCK ===== */
-window.onafterprint = () => {
-    window.location.href = "paus_mobile.html";
+    window.onafterprint = () => {
+        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+    };
 };
-
-/* ===== ZURÜCK ===== */
-backBtn.onclick = () => {
-    window.location.href = "paus_mobile.html";
-};
-};
-   
 </script>
+
 </body>
 </html>
-
-
-
