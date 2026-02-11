@@ -164,17 +164,21 @@ html, body {
 ========================================================= */
 .print-only { display: none; }
 
-@media print {
+ @media print {
 
     @page {
         size: A6 portrait;
         margin: 0;
     }
 
-    body { background: white !important; }
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+    }
 
-    .print-hint,
     .preview-wrapper,
+    .warnbox,
     .bottom-bar {
         display: none !important;
     }
@@ -188,7 +192,6 @@ html, body {
         height: 148mm;
         position: relative;
         overflow: hidden;
-        padding: 0 !important;
     }
 
     #printArea.etikett {
