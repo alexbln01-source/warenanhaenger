@@ -55,7 +55,7 @@ html, body {
 ============================= */
 button.active {
     outline: 3px solid #ff9800;
-    outline-offset: 4px;   /* Abstand zwischen Button und Rahmen */
+    outline-offset: 2px;   /* Abstand zwischen Button und Rahmen */
 }
 /* =============================
    Eingabefelder
@@ -148,7 +148,7 @@ body.zebra-tc22 .kunde-btn {
 }
 
 .kunde-btn.active {
-    background: #00963d;
+    background: #1a73e8;
     color: white;
 }
 
