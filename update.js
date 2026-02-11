@@ -1,47 +1,26 @@
 (function () {
 
-    fetch("version.json?nocache=" + Date.now(), {
-        cache: "no-store"(function () {
-
-    const CHECK_URL = "version.json?v=" + Date.now();
-
-    fetch(CHECK_URL, { cache: "no-store" })
-        .then(res => res.json())
+    fetch("version.json?ts=" + Date.now(), { cache: "reload" })
+        .then(response => response.json())
         .then(data => {
 
-            const currentVersion = localStorage.getItem("app_version");
+            const storedVersion = localStorage.getItem("app_version");
 
-            if (currentVersion !== data.version) {
+            if (storedVersion !== data.version) {
 
                 localStorage.setItem("app_version", data.version);
 
-                // 🔥 kompletter Hard Reload der App
-                window.location.href =
+                // 🔥 Vollständiger Reload mit Cache-Break
+                window.location.replace(
                     window.location.origin +
                     window.location.pathname +
-                    "?update=" + Date.now();
+                    "?v=" + Date.now()
+                );
             }
 
         })
         .catch(() => {
-            console.log("Update Check fehlgeschlagen");
+            console.log("Update-Check fehlgeschlagen");
         });
-
-})();
-    })
-    .then(response => response.json())
-    .then(data => {
-
-        const savedVersion = localStorage.getItem("app_version");
-
-        if (savedVersion !== data.version) {
-
-            localStorage.setItem("app_version", data.version);
-
-            window.location.href =
-                window.location.pathname + "?reload=" + Date.now();
-        }
-    })
-    .catch(() => {});
 
 })();
