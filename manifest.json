@@ -1,7 +1,7 @@
 {
   "name": "Warenanhänger Terminal",
   "short_name": "",
-  "start_url": "index.html",
+  "start_url": "index.html?launcher=true",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003a73",
@@ -18,4 +18,5 @@
     }
   ]
 }
+
 
