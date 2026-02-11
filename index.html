@@ -160,61 +160,7 @@ function checkCenteredOnce(){
 
 window.addEventListener("load",()=>{setTimeout(checkCenteredOnce,60);});
 window.addEventListener("pageshow",()=>{setTimeout(checkCenteredOnce,60);});
-
-/* ==========================================
-   🔄 3x Logo = KOMPLETTER RESET
-========================================== */
-document.addEventListener("DOMContentLoaded",()=>{
-
-    const logo=document.getElementById("logo");
-    if(!logo) return;
-
-    let clickCount=0;
-    let resetTimer;
-
-    logo.addEventListener("click",()=>{
-
-        clickCount++;
-
-        clearTimeout(resetTimer);
-        resetTimer=setTimeout(()=>{clickCount=0;},1200);
-
-        if(clickCount>=3){
-
-            clickCount=0;
-            logo.classList.add("logo-reset");
-
-            setTimeout(async()=>{
-
-                // Storage löschen
-                sessionStorage.clear();
-                localStorage.clear();
-
-                // Service Worker entfernen
-                if("serviceWorker" in navigator){
-                    const regs=await navigator.serviceWorker.getRegistrations();
-                    for(let reg of regs){
-                        await reg.unregister();
-                    }
-                }
-
-                // Cache löschen
-                if("caches" in window){
-                    const names=await caches.keys();
-                    for(let name of names){
-                        await caches.delete(name);
-                    }
-                }
-
-                // Hard Reload
-                window.location.href=
-                    window.location.pathname+"?reset="+Date.now();
-
-            },600);
-        }
-    });
-
-});
+        
 </script>
 
 </head>
