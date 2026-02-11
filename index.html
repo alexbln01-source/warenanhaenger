@@ -165,6 +165,55 @@ window.addEventListener("load", () => {
 window.addEventListener("pageshow", () => {
     setTimeout(checkCenteredOnce, 60);
 });
+/* ==========================================
+   🔄 3x Logo = KOMPLETTER RESET + HARD RELOAD
+========================================== */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const logo = document.getElementById("logo");
+    let clickCount = 0;
+    let resetTimer;
+
+    logo.addEventListener("click", () => {
+
+        clickCount++;
+
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+            clickCount = 0;
+        }, 1000);
+
+        if (clickCount === 3) {
+
+            // Speicher löschen
+            sessionStorage.clear();
+            localStorage.clear();
+
+            // Service Worker entfernen (falls vorhanden)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            // Cache löschen
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+
+            // Hard Reload
+            setTimeout(() => {
+                window.location.href =
+                    window.location.pathname + "?hardreload=" + Date.now();
+            }, 300);
+        }
+    });
+
+});
 </script>
 
 </head>
