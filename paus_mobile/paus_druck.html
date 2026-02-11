@@ -280,7 +280,9 @@ const backBtn      = document.getElementById("backBtn");
         ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
       </div>
     `;
-
+/* >>> DAS HAT GEFEHLT <<< */
+previewInner.innerHTML = html;
+printInner.innerHTML   = html;
 let isPrinting = false;
 
 printBtn.onclick = () => {
