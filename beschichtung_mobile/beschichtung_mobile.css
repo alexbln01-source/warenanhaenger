@@ -22,11 +22,9 @@ html, body {
 .page {
     width: 94vw;
     height: 92vh;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
     padding: 10px;
 }
 
@@ -50,34 +48,20 @@ html, body {
     text-align: center;
     margin: 10px 0 6px 0;
 }
-/* =============================
-   Einheitlicher Orange-Rahmen
-============================= */
 
-/* Alle Buttons wenn fokussiert */
-button:focus {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
-}
+/* ======================================================
+   🔶 EINHEITLICHER ORANGE-RAHMEN (FOKUS + AKTIV)
+====================================================== */
 
-/* Kundenbuttons wenn aktiv */
-.kunde-btn.active {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
-}
-
-/* EILT Button wenn aktiviert */
-#eiltBtn.on {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
-}
-
-/* Eingabefelder wenn aktiv */
+button:focus,
+.kunde-btn.active,
+#eiltBtn.on,
 #beistellInput:focus,
 #kundeInput:focus {
     outline: 3px solid #ff9800;
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
+
 /* =============================
    Eingabefelder
 ============================= */
@@ -97,13 +81,13 @@ button:focus {
 }
 
 /* =============================
-   GRID Standard (fallback)
+   GRID Standard
 ============================= */
 .kunden-grid {
     width: 100%;
     padding: 0 12px;
     display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     justify-items: stretch;
     justify-content: center;
@@ -121,14 +105,8 @@ body.zebra-tc21 .kunden-grid {
 
 body.zebra-tc21 .kunde-btn {
     width: 100px;
-    min-height: px;
     font-size: 12px;
     padding: 4px;
-}
-
-body.zebra-tc21 #eiltBtn {
-    margin-top: 14px;
-    margin-bottom: 18px;
 }
 
 /* =============================
@@ -218,40 +196,29 @@ body.zebra-tc22 .kunde-btn {
 .primary-btn { background: #00963d; }
 
 /* =============================
-   Fokus / Cursor
-============================= */
-button:focus {
-    outline: 4px solid #1a73e8;
-}
-
-/* =============================
-   Mobile Fokus
+   Mobile Fokus Klasse
 ============================= */
 .mobile-focus {
-    outline: 4px solid #1a73e8 !important;
+    outline: 3px solid #ff9800 !important;
+    outline-offset: 3px;
     border-radius: 14px;
 }
 
 /* =============================
-   PC â€“ kompakteres Layout
-   (Zebra / Mobile bleiben unverÃ¤ndert)
+   PC Layout
 ============================= */
 body.pc-device .page {
-    width: 80vw;          /* weniger Breite */
-    height: auto;         /* nicht auf Vollbild stretchen */
-    max-width: 1100px;    /* schÃ¶ner Desktop-Rahmen */
+    width: 80vw;
+    height: auto;
+    max-width: 1100px;
     padding-top: 20px;
 }
 
 body.pc-device .kunden-grid {
-    grid-template-columns: repeat(3, 317px);  /* statt 315px */
+    grid-template-columns: repeat(3, 317px);
     gap: 10px;
 }
 
-body.pc-device #eiltBtn {
-    margin-top: 12px;
-}
-
 body.pc-device .bottom-row {
-    margin-top: 40px;  /* statt margin-top: auto */
+    margin-top: 40px;
 }
