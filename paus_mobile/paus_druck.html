@@ -270,37 +270,35 @@ const backBtn      = document.getElementById("backBtn");
         finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
     }
 
-    let html = `
-      <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
-        <div class="line line-title">PAUS</div>
-        <div class="line line-kommission" style="color:${farbe};">${kom}</div>
-        <div class="line line-date">
-            <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
+    const html = `
+        <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
+            <div class="line line-title">PAUS</div>
+            <div class="line line-kommission" style="color:${farbe};">${kom}</div>
+            <div class="line line-date">
+                <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
+            </div>
+            ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
         </div>
-        ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
-      </div>
     `;
-/* >>> DAS HAT GEFEHLT <<< */
-previewInner.innerHTML = html;
-printInner.innerHTML   = html;
-let isPrinting = false;
 
-printBtn.onclick = () => {
-    isPrinting = true;
-    setTimeout(() => window.print(), 100);
-};
+    /* >>> INHALT SETZEN <<< */
+    previewInner.innerHTML = html;
+    printInner.innerHTML   = html;
 
-window.onafterprint = () => {
-    if (isPrinting) {
-        setTimeout(() => {
-            window.location.replace("paus_mobile.html");
-        }, 400);   // kleine Sicherheitspause
-    }
-};
+    /* >>> DRUCKEN <<< */
+    printBtn.onclick = () => {
+        window.print();
+    };
 
-backBtn.onclick = () => {
-    window.location.replace("paus_mobile.html");
-};
+    /* >>> NACH DRUCK ZURÜCK <<< */
+    window.addEventListener("focus", () => {
+        window.location.replace("paus_mobile.html");
+    });
+
+    /* >>> ZURÜCK BUTTON <<< */
+    backBtn.onclick = () => {
+        window.location.replace("paus_mobile.html");
+    };
 };
 </script>
 
