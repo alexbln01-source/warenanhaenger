@@ -2,52 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
 <title>PAUS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- 🔥 BFCache Schutz -->
-<script>
-window.addEventListener("pageshow", function (event) {
-    if (event.persisted) {
-        window.location.reload();
-    }
-});
-</script>
-
-<!-- 🔥 SOFORTIGER UPDATE CHECK -->
-<script>
-(async function () {
-
-    try {
-        const response = await fetch("version.json?cache=" + Date.now());
-        const data = await response.json();
-
-        const savedVersion = localStorage.getItem("app_version");
-
-        if (savedVersion !== data.version) {
-
-            localStorage.setItem("app_version", data.version);
-
-            window.location.href =
-                window.location.origin +
-                window.location.pathname +
-                "?v=" + data.version + "&t=" + Date.now();
-        }
-
-    } catch (e) {
-        console.log("Version check failed");
-    }
-
-})();
-</script>
-
-<link rel="stylesheet" href="paus_mobile.css?v=1">
-<script defer src="paus_mobile.js?v=1"></script>
+<link rel="stylesheet" href="paus_mobile.css">
+<script defer src="paus_mobile.js"></script>
 
 </head>
 
@@ -59,24 +18,19 @@ window.addEventListener("pageshow", function (event) {
 
     <h1 class="title">PAUS Lieferung</h1>
 
-    <!-- EINGABEN -->
     <input id="kommission" class="input-field" placeholder="Kommissionsnummer" autocomplete="off">
     <input id="lieferdatum" class="input-field" placeholder="TT.MM" autocomplete="off">
 
-    <!-- FARBAUSWAHL -->
     <div class="color-row">
         <button class="color-btn" data-color="red">Rot</button>
         <button class="color-btn" data-color="blue">Blau</button>
         <button class="color-btn" data-color="black">Schwarz</button>
     </div>
 
-    <!-- BUTTON: Auftrag vorgezogen -->
     <button id="btnVorgezogen" class="vorgezogen-btn">Auftrag vorgezogen</button>
 
-    <!-- Tastatur öffnen -->
     <button id="openKeyboardBtn" class="keyboard-open-btn">Tastatur öffnen</button>
 
-    <!-- POPUP TASTATUR -->
     <div id="keyboardPopup" class="keyboard-popup">
         <div class="keyboard-content">
             <h3 id="keyboardTitle">Eingabe</h3>
@@ -99,7 +53,6 @@ window.addEventListener("pageshow", function (event) {
         </div>
     </div>
 
-    <!-- UNTEN -->
     <div class="bottom-row">
         <button id="backBtn" class="back-btn">◀ Zurück</button>
         <button id="druckenBtn" class="primary-btn">🖨️ Drucken</button>
