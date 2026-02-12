@@ -151,20 +151,16 @@ function renderKeyboard() {
         ["Y","X","C","V","B","N","M"]
     ];
 
-    rows.forEach((letters, index) => {
+    rows.forEach(letters => {
 
         const row = document.createElement("div");
-        row.className = "keyboard-row";
-
-        if (letters.length === 10) row.classList.add("row-10");
-        if (letters.length === 9)  row.classList.add("row-9");
-        if (letters.length === 7)  row.classList.add("row-8");
+        row.className = "kbm-row";
 
         letters.forEach(letter => {
 
             const btn = document.createElement("button");
+            btn.className = "kbm-key";
             btn.textContent = letter;
-            btn.className = "keyboard-btn";
 
             btn.onclick = () => {
                 keyboardInput.value += letter;
@@ -176,20 +172,32 @@ function renderKeyboard() {
         keyboardGrid.appendChild(row);
     });
 
-    // Letzte Reihe (DEL + OK)
+    /* ===== UNTERE REIHE ===== */
+
     const bottomRow = document.createElement("div");
-    bottomRow.className = "keyboard-row row-8";
+    bottomRow.className = "kbm-row bottom-row";
 
+    // DEL
     const del = document.createElement("button");
+    del.className = "kbm-key";
     del.textContent = "⌫";
-    del.className = "keyboard-btn";
-    del.onclick = () =>
+    del.onclick = () => {
         keyboardInput.value =
-            keyboardInput.value.slice(0,-1);
+            keyboardInput.value.slice(0, -1);
+    };
 
+    // SPACE
+    const space = document.createElement("button");
+    space.className = "kbm-key space";
+    space.textContent = " ";
+    space.onclick = () => {
+        keyboardInput.value += " ";
+    };
+
+    // OK
     const ok = document.createElement("button");
+    ok.className = "kbm-key ok";
     ok.textContent = "OK";
-    ok.className = "keyboard-btn ok";
     ok.onclick = () => {
 
         if (!keyboardInput.value.trim()) {
@@ -201,12 +209,7 @@ function renderKeyboard() {
     };
 
     bottomRow.appendChild(del);
-
-    for (let i = 0; i < 5; i++) {
-        const spacer = document.createElement("div");
-        bottomRow.appendChild(spacer);
-    }
-
+    bottomRow.appendChild(space);
     bottomRow.appendChild(ok);
 
     keyboardGrid.appendChild(bottomRow);
