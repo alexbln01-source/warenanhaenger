@@ -197,11 +197,10 @@ button:focus {
     max-width: 900px;
     background: rgba(255,255,255,0.93);
     backdrop-filter: blur(10px);
-    padding: 10px 0;
+    padding: 10px 14px;   /* ← wieder mit Seitenabstand */
     border-radius: 16px;
     box-shadow: 0 4px 25px rgba(0,0,0,0.22);
 }
-
 .keyboard-title {
     font-size: 16px;
     margin-bottom: 6px;
@@ -209,7 +208,7 @@ button:focus {
 
 #keyboardInput {
     width: 100%;
-    margin: 0 20px 10px;   /* ← DAS macht es sichtbar schmaler */
+    margin: 0 0 10px 0;
     padding: 12px;
     font-size: 18px;
     border: 1px solid #777;
