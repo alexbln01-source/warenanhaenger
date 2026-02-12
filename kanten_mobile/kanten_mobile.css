@@ -191,10 +191,10 @@ button:focus {
 #keyboardPopup {
     
     
-    left: 50%;
-    transform: translateX(-50%);
-    width: 92%;
-    max-width: 420px;
+    left: 0%;
+    transform: none;
+    width: 100%;
+    max-width: 1000px;
 }
 
 .keyboard-box {
