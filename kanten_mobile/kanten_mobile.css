@@ -193,10 +193,8 @@ button:focus {
     bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 94%;
-    max-width: 900px;
-    display: none;
-    z-index: 9999;
+    width: 92%;
+    max-width: 420px;
 }
 
 .keyboard-box {
