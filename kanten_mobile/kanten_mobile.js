@@ -76,28 +76,41 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
         const kunde = btn.dataset.kunde;
 
-        if (kunde === "SONSTIGE") {
-            keyboardInput.classList.add("active-input");
+      if (kunde === "SONSTIGE") {
+    selectedCustomer = "SONSTIGE";
+    keyboardInput.value = "";
+    keyboardInput.classList.add("active-input");
 
-            selectedCustomer = "SONSTIGE";
+    if (isPC) {
+        // ✅ PC: KEIN Popup, normales Tippen
+        popup.style.display = "none";
 
-            popup.style.display = "flex";
-            keyboardInput.value = "";
+        // optional: direkt ins Feld springen (falls du ein Feld außerhalb Popup hast)
+        setTimeout(() => {
+            keyboardInput.focus();
+            keyboardInput.select();
+        }, 50);
 
-            if (typeof renderKeyboard === "function") {
-                renderKeyboard();
-            }
+        return;
+    }
 
-          setTimeout(() => {
-    keyboardInput.focus();
-    keyboardInput.select();
-}, 150);
+    // ✅ Mobile/Zebra: Popup + Mini-Keyboard
+    popup.style.display = "flex";
 
-        } else {
+    if (typeof renderKeyboard === "function") {
+        renderKeyboard();
+    }
 
-            selectedCustomer = kunde;
-            popup.style.display = "none";
-        }
+    setTimeout(() => {
+        keyboardInput.focus();
+        keyboardInput.select();
+    }, 150);
+
+} else {
+    selectedCustomer = kunde;
+    popup.style.display = "none";
+    keyboardInput.classList.remove("active-input");
+}
     };
 });
 
