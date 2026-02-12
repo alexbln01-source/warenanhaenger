@@ -220,22 +220,31 @@ button:focus {
 
 /* ================= TASTATUR GRID ================= */
 
+/* ================= QWERTZ LAYOUT ================= */
+
 .keyboard-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 12px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
 /* ================= BUTTONS ================= */
 
 .keyboard-btn {
-    padding: 18px 0;
-    font-size: 22px;
+    padding: 18px 16px;
+    font-size: 20px;
     font-weight: 700;
     border-radius: 16px;
     border: none;
     background: #e6ebf1;
     color: #003a73;
+    min-width: 48px;
     transition: 0.15s;
 }
 
@@ -243,22 +252,21 @@ button:focus {
     transform: scale(0.96);
 }
 
-/* SPACE größer */
+/* SPACE */
 .keyboard-btn.space {
-    grid-column: span 3;
+    flex: 2;
 }
 
-/* LÖSCHEN */
+/* DELETE */
 .keyboard-btn.delete {
     background: #d9534f;
     color: white;
 }
 
-/* OK BUTTON */
+/* OK */
 .keyboard-btn.ok {
     background: #00963d;
     color: white;
-    grid-column: span 2;
 }
 
 /* =====================================================
