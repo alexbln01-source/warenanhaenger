@@ -21,7 +21,7 @@ html, body {
 
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
 }
 
 /* =====================================================
@@ -30,6 +30,7 @@ html, body {
 #card {
     width: 94%;
     max-width: 900px;
+   margin-top: 20px;
 }
 
 /* =====================================================
