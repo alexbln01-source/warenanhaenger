@@ -192,7 +192,8 @@ button:focus {
 }
 
 .keyboard-box {
-    background: rgba(255,255,255,0.93);
+   width: 100%; 
+   background: rgba(255,255,255,0.93);
     backdrop-filter: blur(10px);
     padding: 10px 14px;
     border-radius: 16px;
