@@ -193,7 +193,7 @@ button:focus {
     bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 95%;
+    width: 105%;
     max-width: 420px;
     display: none;
     z-index: 9999;
