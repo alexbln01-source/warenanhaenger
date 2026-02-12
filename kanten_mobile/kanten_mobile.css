@@ -180,33 +180,29 @@ button:focus {
 /* =====================================================
    POPUP-TASTATUR
 ===================================================== */
-#keyboardPopup {
+.keyboard-popup {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.55);
+    inset: 0;
+    background: rgba(0,0,0,0.35);
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 999;
 }
 
-#keyboardBox {
-    width: 92%;
-    max-width: 520px;
+.keyboard-box {
     background: white;
-    padding: 22px;
+    padding: 20px;
     border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
 }
 
 .keyboard-title {
-    text-align: center;
     font-size: 20px;
     font-weight: bold;
-    margin-bottom: 12px;
-    color: #003a73;
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 #keyboardInput {
@@ -214,38 +210,27 @@ button:focus {
     padding: 14px;
     font-size: 22px;
     border-radius: 14px;
-    border: 2px solid #004a90;
-    margin-bottom: 12px;
+    border: 2px solid #003a73;
+    margin-bottom: 15px;
 }
 
-.kb-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
+.keyboard-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
 }
 
-.kb {
-    flex: 1;
-    padding: 14px 0;
-    font-size: 18px;
-    border-radius: 12px;
+.keyboard-btn {
+    padding: 16px;
+    font-size: 20px;
+    border-radius: 14px;
     border: none;
-    background: #f7f7f7;
+    background: #e6e6e6;
 }
 
-.kb.space         { flex: 4; }
-.kb.special.green { background: #00963d; color: white; }
-.kb.special.red   { background: #c80000; color: white; }
-
-.cancel {
-    width: 100%;
-    margin-top: 12px;
-    padding: 14px;
-    background: #666;
-    border-radius: 12px;
-    border: none;
+.keyboard-btn.ok {
+    background: #00963d;
     color: white;
-    font-size: 18px;
 }
 
 /* =====================================================
