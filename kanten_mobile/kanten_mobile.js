@@ -1,5 +1,5 @@
 // ✅ PC-Erkennung
-const isPC = window.matchMedia("(pointer:fine)").matches;
+const isPC = document.body.classList.contains("pc-device");
 let selectedCustomer = "";
 let selectedArt = "";
 
