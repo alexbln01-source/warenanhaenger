@@ -186,9 +186,7 @@ button:focus {
 
 #keyboardPopup {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    inset: 0;              /* ⬅️ ersetzt top/left/right/bottom */
     display: none;
     justify-content: center;
     align-items: flex-end;
@@ -196,7 +194,6 @@ button:focus {
     z-index: 999;
 }
 
-/* Container */
 .keyboard-box {
     width: 100%;
     background: #f4f4f4;
@@ -204,8 +201,9 @@ button:focus {
     border-top-left-radius: 28px;
     border-top-right-radius: 28px;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-       max-height: 20vh;   /* ⬅️ DAS ist der Schlüssel */
 
+    margin-bottom: 0;      /* wichtig */
+}
 }
 
 /* Titel */
