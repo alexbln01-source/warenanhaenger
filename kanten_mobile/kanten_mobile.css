@@ -208,8 +208,8 @@ button:focus {
 }
 
 #keyboardInput {
-    width: calc(100% - 60px);   /* ← sichtbar schmaler */
-    margin: 0 auto 8px;
+    width: 100%;
+    margin: 0 20px 10px;   /* ← DAS macht es sichtbar schmaler */
     padding: 12px;
     font-size: 18px;
     border: 1px solid #777;
