@@ -195,7 +195,7 @@ button:focus {
 
 .keyboard-box {
     width: 100%;
-    max-height: 65vh;   /* ⬅️ WICHTIG */
+    max-height: 40vh;   /* ⬅️ WICHTIG */
     background: #f4f4f4;
     border-top-left-radius: 25px;
     border-top-right-radius: 25px;
