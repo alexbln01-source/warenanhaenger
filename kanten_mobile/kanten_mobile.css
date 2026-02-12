@@ -182,91 +182,52 @@ button:focus {
 ===================================================== */
 .keyboard-popup {
     position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.25);
     display: none;
     justify-content: center;
-    align-items: center;
-    z-index: 2000;
+    align-items: flex-end;
+    z-index: 999;
 }
 
 .keyboard-box {
-    background: #ffffff;
-    padding: 22px;
-    border-radius: 22px;
-    width: 92%;
-    max-width: 560px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-}
-
-.keyboard-title {
-    font-size: 22px;
-    font-weight: 900;
-    text-align: center;
-    margin-bottom: 14px;
-    color: #003a73;
-}
-
-#keyboardInput {
     width: 100%;
-    padding: 16px;
-    font-size: 24px;
-    border-radius: 16px;
-    border: 3px solid #003a73;
-    margin-bottom: 18px;
-    text-align: center;
-    background: #f7f9fc;
-}
-
-/* ================= TASTATUR GRID ================= */
-
-/* ================= QWERTZ LAYOUT ================= */
-
-.keyboard-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    background: #f4f4f4;
+    padding: 20px;
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
 }
 
 .keyboard-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+    display: grid;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
-/* ================= BUTTONS ================= */
+.row-10 { grid-template-columns: repeat(10, 1fr); }
+.row-9  { grid-template-columns: repeat(9, 1fr); }
+.row-8  { grid-template-columns: repeat(8, 1fr); }
 
 .keyboard-btn {
-    padding: 18px 16px;
-    font-size: 20px;
-    font-weight: 700;
-    border-radius: 16px;
+    height: 70px;
+    font-size: 22px;
     border: none;
-    background: #e6ebf1;
-    color: #003a73;
-    min-width: 48px;
-    transition: 0.15s;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .keyboard-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
 }
 
-/* SPACE */
-.keyboard-btn.space {
-    flex: 2;
-}
-
-/* DELETE */
-.keyboard-btn.delete {
-    background: #d9534f;
-    color: white;
-}
-
-/* OK */
 .keyboard-btn.ok {
-    background: #00963d;
+    background: #4CAF50;
     color: white;
+    font-weight: bold;
 }
 
 /* =====================================================
