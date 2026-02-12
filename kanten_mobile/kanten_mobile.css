@@ -183,82 +183,81 @@ button:focus {
 /* =============================
    POPUP-TASTATUR – FIX STABIL
 ============================= */
+/* ===========================
+   MINI-KEYBOARD – IDENTISCH
+=========================== */
 
 #keyboardPopup {
     position: fixed;
-    inset: 0;              /* ⬅️ ersetzt top/left/right/bottom */
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 420px;
     display: none;
-    justify-content: center;
-    align-items: flex-end;
-    background: rgba(0,0,0,0.25);
-    z-index: 999;
+    z-index: 9999;
 }
 
 .keyboard-box {
-    width: 100%;
-    background: #f4f4f4;
-    padding: 14px;
-    border-top-left-radius: 28px;
-    border-top-right-radius: 28px;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-
-    margin-bottom: 0;      /* wichtig */
-
+    background: rgba(255,255,255,0.93);
+    backdrop-filter: blur(10px);
+    padding: 10px 14px;
+    border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.22);
 }
 
-/* Titel */
 .keyboard-title {
-    font-size: 18px;
-    margin-bottom: 8px;
+    font-size: 16px;
+    margin-bottom: 6px;
 }
 
-/* Eingabefeld */
 #keyboardInput {
     width: 100%;
-    height: 60px;
-    font-size: 22px;
-    border-radius: 12px;
-    border: 2px solid #2e7d32;
-    margin-bottom: 14px;
-    padding: 0 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    border: 1px solid #777;
+    border-radius: 14px;
 }
 
-/* Grid */
-#keyboardGrid {
-    width: 100%;
-}
-
-/* Reihen */
 .kbm-row {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    margin: 5px 0;
 }
 
-/* Tasten */
 .kbm-key {
     flex: 1;
-    height: 56px;
-    font-size: 20px;
+    margin: 4px;
+    padding: 11px 0;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 12px;
     border: none;
-    border-radius: 18px;
-    background: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    color: #003a73;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+    transition: transform 0.07s ease, background 0.1s;
 }
 
-/* SPACE breiter */
-.bottom-row .space {
-    flex: 4;
+.kbm-key:active {
+    transform: scale(0.92);
+    background: #dfe7f1;
 }
 
-/* OK Button */
+.kbm-key.del {
+    color: #b00020;
+}
+
 .kbm-key.ok {
-    background: #4CAF50;
+    background: #00963d;
     color: white;
-    font-weight: bold;
+    font-weight: 700;
 }
 
+.bottom-row .space {
+    flex: 3;
+}
 /* =====================================================
    DEVICE / BUILD INFO
 ===================================================== */
