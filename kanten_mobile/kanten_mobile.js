@@ -87,9 +87,10 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
                 renderKeyboard();
             }
 
-            setTimeout(() => {
-                keyboardInput.focus();
-            }, 50);
+          setTimeout(() => {
+    keyboardInput.focus();
+    keyboardInput.select();
+}, 150);
 
         } else {
 
