@@ -187,9 +187,8 @@ button:focus {
     bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 94%;
+    width: 94w
     max-width: 900px;
-    display: block;
     z-index: 9999;
 }
 
