@@ -1,6 +1,5 @@
 /* =====================================================
    GLOBAL RESET
-   - einheitliches Box-Modell
 ===================================================== */
 * {
     box-sizing: border-box;
@@ -8,8 +7,6 @@
 
 /* =====================================================
    GRUNDLAYOUT
-   - Vollbild
-   - zentrierter Inhalt (Terminal / Tablet)
 ===================================================== */
 html, body {
     margin: 0;
@@ -25,16 +22,16 @@ html, body {
 }
 
 /* =====================================================
-   HAUPTCONTAINER (CARD)
+   HAUPTCONTAINER
 ===================================================== */
 #card {
     width: 94%;
     max-width: 900px;
-   margin-top: 20px;
+    margin-top: 20px;
 }
 
 /* =====================================================
-   ÜBERSCHRIFTEN / LABELS
+   LABELS
 ===================================================== */
 .grid-label {
     font-size: 16px;
@@ -56,13 +53,13 @@ html, body {
     width: 100%;
     background: #ffffff;
     border-radius: 12px;
-    padding: 14px 10px 16px;
+    padding: 16px;
     margin-bottom: 16px;
     border: 1px solid #d0d6de;
 }
 
 /* =====================================================
-   ART-AUSWAHL
+   ART BUTTONS
 ===================================================== */
 .art-btn-row {
     display: grid;
@@ -87,47 +84,12 @@ html, body {
 }
 
 /* =====================================================
-   🔴 ART: ANHÄNGER EILT SEHR
-===================================================== */
-/* ===== STANDARD: alles untereinander für Eilt Sehr ===== */
-.artBtn.eilt-art {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    line-height: 1.1;
-}
-
-.artBtn.eilt-art .art-title {
-    display: block;
-}
-
-.artBtn.eilt-art .art-sub {
-    display: block;
-}
-
-/* ===== OPTIONAL: PC wieder einzeilig (falls du willst) ===== */
-body.pc-device .artBtn.eilt-art {
-    flex-direction: row;
-    gap: 6px;
-}
-
-body.pc-device .artBtn.eilt-art .art-title,
-body.pc-device .artBtn.eilt-art .art-sub {
-    display: inline;
-}
-
-/* =====================================================
    KUNDENAUSWAHL
 ===================================================== */
 #kundenArea {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-}
-
-#kundenArea.disabled {
-    opacity: 0.35;
-    pointer-events: none;
 }
 
 .kundeBtn {
@@ -147,11 +109,39 @@ body.pc-device .artBtn.eilt-art .art-sub {
 }
 
 /* =====================================================
+   KUNDENNAME BEREICH (JETZT SAUBER MITTIG)
+===================================================== */
+.kundenname-wrapper {
+    text-align: center;
+    margin-top: 14px;
+}
+
+.kundenname-wrapper label {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.kundenname-wrapper input {
+    width: 80%;
+    max-width: 500px;
+    display: block;
+    margin: 0 auto;
+
+    padding: 14px;
+    font-size: 18px;
+
+    border-radius: 16px;
+    border: 2px solid #2e7d32;
+    background: #ffffff;
+}
+
+/* =====================================================
    AKTIONSBUTTONS
 ===================================================== */
 #actionButtons {
     margin-top: 18px;
-    padding: 0 10px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
@@ -171,17 +161,8 @@ body.pc-device .artBtn.eilt-art .art-sub {
 #btnDrucken  { background: #00963d; }
 
 /* =====================================================
-   FOKUS-ANZEIGE
+   KEYBOARD POPUP (STABIL & ZENTRIERT)
 ===================================================== */
-button:focus {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
-}
-
-/* ===========================
-   MINI-KEYBOARD – IDENTISCH
-=========================== */
-    
 #keyboardPopup {
     position: fixed;
     bottom: 8px;
@@ -194,57 +175,45 @@ button:focus {
 
 .keyboard-box {
     width: 100%;
-    max-width: 900px;
-    background: rgba(255,255,255,0.93);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(10px);
-    padding: 10px 14px;
-    border-radius: 16px;
-    box-shadow: 0 4px 25px rgba(0,0,0,0.22);
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.25);
 }
 
 .keyboard-title {
     font-size: 16px;
-    margin-bottom: 8px;
-    text-align: center;      /* ← zentriert Text */
+    margin-bottom: 10px;
+    text-align: center;
 }
 
 #keyboardInput {
-    width: 80%;              /* etwas schmaler für schönere Optik */
-    display: block;          /* wichtig */
-    margin: 0 auto 12px;     /* horizontal zentriert */
-    padding: 12px;
+    width: 80%;
+    display: block;
+    margin: 0 auto 14px auto;
+    padding: 14px;
     font-size: 18px;
-    border: 1px solid #777;
-    border-radius: 14px;
+    border-radius: 16px;
+    border: 2px solid #2e7d32;
 }
 
 .kbm-row {
     display: flex;
     justify-content: center;
-    margin: 5px 0;
+    margin: 6px 0;
 }
 
 .kbm-key {
     flex: 1;
-    margin: 4px;
-    padding: 11px 0;
-    font-size: 17px;
+    margin: 5px;
+    padding: 13px 0;
+    font-size: 18px;
     font-weight: 600;
-    border-radius: 12px;
+    border-radius: 14px;
     border: none;
-    color: #003a73;
     background: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
-    transition: transform 0.07s ease, background 0.1s;
-}
-
-.kbm-key:active {
-    transform: scale(0.92);
-    background: #dfe7f1;
-}
-
-.kbm-key.del {
-    color: #b00020;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.18);
 }
 
 .kbm-key.ok {
@@ -253,11 +222,16 @@ button:focus {
     font-weight: 700;
 }
 
+.kbm-key.del {
+    color: #b00020;
+}
+
 .bottom-row .space {
     flex: 3;
 }
+
 /* =====================================================
-   DEVICE / BUILD INFO
+   DEVICE INFO
 ===================================================== */
 .device-info {
     position: fixed;
@@ -279,27 +253,3 @@ button:focus {
     color: #333;
     opacity: 0.7;
 }
-
-/* =====================================================
-   GERÄTESPEZIFISCH
-===================================================== */
-body.zebra-tc21 .artBtn   { min-height: 58px; font-size: 18px; }
-body.zebra-tc21 .kundeBtn { min-height: 50px; font-size: 13px; }
-
-body.zebra-tc22 .artBtn   { min-height: 62px; }
-body.zebra-tc22 .kundeBtn { min-height: 54px; }
-
-body.pc-device #card { max-width: 1100px; }
-
-body.zebra-tc22 .art-btn-row {
-    padding: 0 6px;
-    gap: 6px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-body.zebra-tc22 .artBtn {
-    font-size: 14px;
-    padding: 10px 4px;
-    min-height: 52px;
-    line-height: 1.1;
-}   
