@@ -215,12 +215,7 @@ html, body {
     background: #ffffff;
     box-shadow: 0 3px 6px rgba(0,0,0,0.18);
 }
-/* =====================================
-   ORANGE FOKUS MARKIERUNG (wieder aktiv)
-===================================== */
-
-button:focus,
-.kbm-key:focus {
+.kbm-key.active {
     outline: 3px solid #ff9800;
     outline-offset: 2px;
 }
