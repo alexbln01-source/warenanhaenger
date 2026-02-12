@@ -201,14 +201,15 @@ button:focus {
     border-radius: 16px;
     box-shadow: 0 4px 25px rgba(0,0,0,0.22);
 }
+
 .keyboard-title {
     font-size: 16px;
     margin-bottom: 6px;
 }
 
 #keyboardInput {
-    width: 100%;
-    margin: 0 0 10px 0;
+    width: 85%;          /* ← schmaler */
+    margin: 0 auto 8px;  /* ← zentrieren */
     padding: 12px;
     font-size: 18px;
     border: 1px solid #777;
@@ -299,4 +300,4 @@ body.zebra-tc22 .artBtn {
     padding: 10px 4px;
     min-height: 52px;
     line-height: 1.1;
-}
+}   
