@@ -178,23 +178,19 @@ button:focus {
     outline-offset: 2px;
 }
 
-/* =====================================================
-   POPUP-TASTATUR (STABIL & ZEBRA-OPTIMIERT)
-===================================================== */
-/* =============================
-   POPUP-TASTATUR – FIX STABIL
-============================= */
 /* ===========================
    MINI-KEYBOARD – IDENTISCH
 =========================== */
-
+    
 #keyboardPopup {
-    
-    
-    left: 0%;
-    transform: none;
-    width: 100%;
-    max-width: 1000px;
+    position: fixed;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;          /* ← HIER */
+    max-width: 420px;    /* ← UND HIER */
+    display: none;
+    z-index: 9999;
 }
 
 .keyboard-box {
