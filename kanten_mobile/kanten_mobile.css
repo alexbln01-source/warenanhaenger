@@ -215,10 +215,7 @@ html, body {
     background: #ffffff;
     box-shadow: 0 3px 6px rgba(0,0,0,0.18);
 }
-.kbm-key.active {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
-}
+
 
 .kbm-key.ok {
     background: #00963d;
@@ -256,4 +253,17 @@ html, body {
     font-size: 13px;
     color: #333;
     opacity: 0.7;
+}
+/* =====================================================
+   GLOBAL FOCUS (ORANGE MARKIERUNG)
+===================================================== */
+button:focus {
+    outline: 3px solid #ff9800;
+    outline-offset: 2px;
+}
+
+/* Optional: kein Standard-Blau auf Mobile */
+button:focus-visible {
+    outline: 3px solid #ff9800;
+    outline-offset: 2px;
 }
