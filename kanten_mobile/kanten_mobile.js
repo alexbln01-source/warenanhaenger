@@ -141,66 +141,45 @@ document.getElementById("btnBack").onclick = () => {
 /* ================= TASTATUR ================= */
 
 const keyboardKeys = document.getElementById("keyboardKeys");
-const kbClose      = document.getElementById("kbClose");
 const kbOK         = document.getElementById("kbOK");
+const kbClose      = document.getElementById("kbClose");
 
 function renderKeyboard() {
 
     keyboardKeys.innerHTML = "";
 
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const keys = [
+        "A","B","C","D","E","F","G",
+        "H","I","J","K","L","M","N",
+        "O","P","Q","R","S","T","U",
+        "V","W","X","Y","Z",
+        " "
+    ];
 
-    for (let i = 0; i < letters.length; i += 10) {
-
-        const row = document.createElement("div");
-        row.className = "kb-row";
-
-        letters.slice(i, i + 10).forEach(letter => {
-            const btn = document.createElement("button");
-            btn.className = "kb";
-            btn.textContent = letter;
-            btn.onclick = () => {
-                keyboardInput.value += letter;
-            };
-            row.appendChild(btn);
-        });
-
-        keyboardKeys.appendChild(row);
-    }
-
-    // Sondertasten-Zeile
-    const specialRow = document.createElement("div");
-    specialRow.className = "kb-row";
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "kb special red";
-    delBtn.textContent = "Löschen";
-    delBtn.onclick = () => {
-        keyboardInput.value =
-            keyboardInput.value.slice(0, -1);
-    };
-
-    specialRow.appendChild(delBtn);
-    keyboardKeys.appendChild(specialRow);
+    keys.forEach(key => {
+        const btn = document.createElement("button");
+        btn.textContent = key;
+        btn.className = "kbKey";
+        btn.onclick = () => {
+            keyboardInput.value += key;
+        };
+        keyboardKeys.appendChild(btn);
+    });
 }
 
 /* OK Button */
-if (kbOK) {
-    kbOK.onclick = () => {
-        const value = keyboardInput.value.trim();
-        if (!value) {
-            alert("Bitte Kundennamen eingeben.");
-            return;
-        }
+kbOK.onclick = () => {
 
-        selectedCustomer = value;
-        popup.style.display = "none";
-    };
-}
+    if (!keyboardInput.value.trim()) {
+        alert("Bitte Kundennamen eingeben.");
+        return;
+    }
+
+    selectedCustomer = "SONSTIGE";
+    popup.style.display = "none";
+};
 
 /* Schließen Button */
-if (kbClose) {
-    kbClose.onclick = () => {
-        popup.style.display = "none";
-    };
-}
+kbClose.onclick = () => {
+    popup.style.display = "none";
+};
