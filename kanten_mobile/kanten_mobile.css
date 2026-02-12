@@ -180,51 +180,53 @@ button:focus {
 /* =====================================================
    POPUP-TASTATUR (STABIL & ZEBRA-OPTIMIERT)
 ===================================================== */
-.keyboard-popup {
+#keyboardPopup {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(0,0,0,0.25);
     display: none;
     justify-content: center;
     align-items: flex-end;
+    background: rgba(0,0,0,0.25);
     z-index: 999;
 }
 
-.keyboard-box {
+#keyboardGrid {
     width: 100%;
     background: #f4f4f4;
-    padding: 20px;
+    padding: 15px;
     border-top-left-radius: 25px;
     border-top-right-radius: 25px;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
 }
 
-.keyboard-row {
-    display: grid;
-    gap: 12px;
-    margin-bottom: 12px;
+.kbm-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.row-10 { grid-template-columns: repeat(10, 1fr); }
-.row-9  { grid-template-columns: repeat(9, 1fr); }
-.row-8  { grid-template-columns: repeat(8, 1fr); }
-
-.keyboard-btn {
-    height: 70px;
-    font-size: 22px;
+.kbm-key {
+    flex: 1;
+    height: 65px;
+    font-size: 20px;
     border: none;
     border-radius: 16px;
     background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.keyboard-btn:active {
+.kbm-key:active {
     transform: scale(0.95);
 }
 
-.keyboard-btn.ok {
+.bottom-row .space {
+    flex: 4;
+}
+
+.kbm-key.ok {
     background: #4CAF50;
     color: white;
     font-weight: bold;
