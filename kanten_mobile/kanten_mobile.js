@@ -77,6 +77,7 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
         const kunde = btn.dataset.kunde;
 
         if (kunde === "SONSTIGE") {
+            keyboardInput.classList.add("active-input");
 
             selectedCustomer = "SONSTIGE";
 
