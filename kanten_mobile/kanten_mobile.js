@@ -1,6 +1,8 @@
+// ================= GERÄTEERKENNUNG =================
+// true = Touchgerät (Zebra / Tablet / Handy)
+// false = PC / Mac mit echter Tastatur
+const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
 
-// ✅ 100% sichere PC-Erkennung
-const isPC = window.matchMedia("(pointer:fine)").matches;
 let selectedCustomer = "";
 let selectedArt = "";
 
@@ -79,41 +81,36 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
         const kunde = btn.dataset.kunde;
 
-      if (kunde === "SONSTIGE") {
-    selectedCustomer = "SONSTIGE";
-    keyboardInput.value = "";
-    keyboardInput.classList.add("active-input");
+        if (kunde === "SONSTIGE") {
 
-    if (isPC) {
-        // ✅ PC: KEIN Popup, normales Tippen
-        popup.style.display = "none";
+            selectedCustomer = "SONSTIGE";
+            keyboardInput.value = "";
 
-        // optional: direkt ins Feld springen (falls du ein Feld außerhalb Popup hast)
-        setTimeout(() => {
-            keyboardInput.focus();
-            keyboardInput.select();
-        }, 50);
+            if (isTouchDevice) {
+                // 📱 TOUCH → Popup anzeigen
+                popup.style.display = "flex";
 
-        return;
-    }
+                if (typeof renderKeyboard === "function") {
+                    renderKeyboard();
+                }
 
-    // ✅ Mobile/Zebra: Popup + Mini-Keyboard
-    popup.style.display = "flex";
+                setTimeout(() => {
+                    keyboardInput.focus();
+                }, 150);
 
-    if (typeof renderKeyboard === "function") {
-        renderKeyboard();
-    }
+            } else {
+                // 💻 PC / MAC → KEIN Popup
+                popup.style.display = "none";
 
-    setTimeout(() => {
-        keyboardInput.focus();
-        keyboardInput.select();
-    }, 150);
+                setTimeout(() => {
+                    keyboardInput.focus();
+                }, 50);
+            }
 
-} else {
-    selectedCustomer = kunde;
-    popup.style.display = "none";
-    keyboardInput.classList.remove("active-input");
-}
+        } else {
+            selectedCustomer = kunde;
+            popup.style.display = "none";
+        }
     };
 });
 
@@ -156,7 +153,9 @@ document.getElementById("btnDrucken").onclick = () => {
 document.getElementById("btnBack").onclick = () => {
     window.location.replace("../index.html?reload=" + Date.now());
 };
+
 /* ================= TASTATUR ================= */
+
 const keyboardGrid = document.getElementById("keyboardGrid");
 
 function renderKeyboard() {
@@ -190,12 +189,11 @@ function renderKeyboard() {
         keyboardGrid.appendChild(row);
     });
 
-    /* ===== UNTERE REIHE ===== */
+    // ===== UNTERE REIHE =====
 
     const bottomRow = document.createElement("div");
     bottomRow.className = "kbm-row bottom-row";
 
-    // DEL
     const del = document.createElement("button");
     del.className = "kbm-key";
     del.textContent = "⌫";
@@ -204,7 +202,6 @@ function renderKeyboard() {
             keyboardInput.value.slice(0, -1);
     };
 
-    // SPACE
     const space = document.createElement("button");
     space.className = "kbm-key space";
     space.textContent = "␣";
@@ -212,7 +209,6 @@ function renderKeyboard() {
         keyboardInput.value += " ";
     };
 
-    // OK
     const ok = document.createElement("button");
     ok.className = "kbm-key ok";
     ok.textContent = "OK";
