@@ -139,47 +139,59 @@ document.getElementById("btnBack").onclick = () => {
     window.location.replace("../index.html?reload=" + Date.now());
 };
 /* ================= TASTATUR ================= */
-
-const keyboardKeys = document.getElementById("keyboardKeys");
-const kbOK         = document.getElementById("kbOK");
-const kbClose      = document.getElementById("kbClose");
+const keyboardGrid = document.getElementById("keyboardGrid");
 
 function renderKeyboard() {
 
-    keyboardKeys.innerHTML = "";
+    keyboardGrid.innerHTML = "";
 
-    const keys = [
+    const letters = [
         "A","B","C","D","E","F","G",
         "H","I","J","K","L","M","N",
         "O","P","Q","R","S","T","U",
-        "V","W","X","Y","Z",
-        " "
+        "V","W","X","Y","Z"
     ];
 
-    keys.forEach(key => {
+    letters.forEach(letter => {
         const btn = document.createElement("button");
-        btn.textContent = key;
-        btn.className = "kbKey";
+        btn.textContent = letter;
+        btn.className = "keyboard-btn";
         btn.onclick = () => {
-            keyboardInput.value += key;
+            keyboardInput.value += letter;
         };
-        keyboardKeys.appendChild(btn);
+        keyboardGrid.appendChild(btn);
     });
+
+    // Leerzeichen
+    const space = document.createElement("button");
+    space.textContent = "SPACE";
+    space.className = "keyboard-btn";
+    space.onclick = () => keyboardInput.value += " ";
+    keyboardGrid.appendChild(space);
+
+    // Löschen
+    const del = document.createElement("button");
+    del.textContent = "⌫";
+    del.className = "keyboard-btn";
+    del.onclick = () =>
+        keyboardInput.value =
+            keyboardInput.value.slice(0,-1);
+    keyboardGrid.appendChild(del);
+
+    // OK Button
+    const ok = document.createElement("button");
+    ok.textContent = "OK";
+    ok.className = "keyboard-btn ok";
+    ok.onclick = () => {
+
+        if (!keyboardInput.value.trim()) {
+            alert("Bitte Kundennamen eingeben.");
+            return;
+        }
+
+        selectedCustomer = "SONSTIGE";
+        popup.style.display = "none";
+    };
+
+    keyboardGrid.appendChild(ok);
 }
-
-/* OK Button */
-kbOK.onclick = () => {
-
-    if (!keyboardInput.value.trim()) {
-        alert("Bitte Kundennamen eingeben.");
-        return;
-    }
-
-    selectedCustomer = "SONSTIGE";
-    popup.style.display = "none";
-};
-
-/* Schließen Button */
-kbClose.onclick = () => {
-    popup.style.display = "none";
-};
