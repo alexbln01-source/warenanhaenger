@@ -204,12 +204,14 @@ button:focus {
 
 .keyboard-title {
     font-size: 16px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    text-align: center;      /* ← zentriert Text */
 }
 
 #keyboardInput {
-    width: 85%;          /* ← schmaler */
-    margin: 0 auto 8px;  /* ← zentrieren */
+    width: 80%;              /* etwas schmaler für schönere Optik */
+    display: block;          /* wichtig */
+    margin: 0 auto 12px;     /* horizontal zentriert */
     padding: 12px;
     font-size: 18px;
     border: 1px solid #777;
