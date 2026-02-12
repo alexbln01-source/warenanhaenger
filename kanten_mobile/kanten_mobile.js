@@ -145,40 +145,48 @@ function renderKeyboard() {
 
     keyboardGrid.innerHTML = "";
 
-    const letters = [
-        "A","B","C","D","E","F","G",
-        "H","I","J","K","L","M","N",
-        "O","P","Q","R","S","T","U",
-        "V","W","X","Y","Z"
+    const rows = [
+        ["Q","W","E","R","T","Z","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L"],
+        ["Y","X","C","V","B","N","M"]
     ];
 
-    letters.forEach(letter => {
-        const btn = document.createElement("button");
-        btn.textContent = letter;
-        btn.className = "keyboard-btn";
-        btn.onclick = () => {
-            keyboardInput.value += letter;
-        };
-        keyboardGrid.appendChild(btn);
+    rows.forEach((letters, index) => {
+
+        const row = document.createElement("div");
+        row.className = "keyboard-row";
+
+        if (letters.length === 10) row.classList.add("row-10");
+        if (letters.length === 9)  row.classList.add("row-9");
+        if (letters.length === 7)  row.classList.add("row-8");
+
+        letters.forEach(letter => {
+
+            const btn = document.createElement("button");
+            btn.textContent = letter;
+            btn.className = "keyboard-btn";
+
+            btn.onclick = () => {
+                keyboardInput.value += letter;
+            };
+
+            row.appendChild(btn);
+        });
+
+        keyboardGrid.appendChild(row);
     });
 
-    // Leerzeichen
-    const space = document.createElement("button");
-    space.textContent = "SPACE";
-    space.className = "keyboard-btn";
-    space.onclick = () => keyboardInput.value += " ";
-    keyboardGrid.appendChild(space);
+    // Letzte Reihe (DEL + OK)
+    const bottomRow = document.createElement("div");
+    bottomRow.className = "keyboard-row row-8";
 
-    // Löschen
     const del = document.createElement("button");
     del.textContent = "⌫";
     del.className = "keyboard-btn";
     del.onclick = () =>
         keyboardInput.value =
             keyboardInput.value.slice(0,-1);
-    keyboardGrid.appendChild(del);
 
-    // OK Button
     const ok = document.createElement("button");
     ok.textContent = "OK";
     ok.className = "keyboard-btn ok";
@@ -189,9 +197,17 @@ function renderKeyboard() {
             return;
         }
 
-        selectedCustomer = "SONSTIGE";
         popup.style.display = "none";
     };
 
-    keyboardGrid.appendChild(ok);
+    bottomRow.appendChild(del);
+
+    for (let i = 0; i < 5; i++) {
+        const spacer = document.createElement("div");
+        bottomRow.appendChild(spacer);
+    }
+
+    bottomRow.appendChild(ok);
+
+    keyboardGrid.appendChild(bottomRow);
 }
