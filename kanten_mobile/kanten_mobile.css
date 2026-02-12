@@ -185,19 +185,19 @@ button:focus {
 #keyboardPopup {
     position: fixed;
     bottom: 8px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;  /* ← wichtig */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 94vw;
+    max-width: 900px;
     z-index: 9999;
 }
 
 .keyboard-box {
-    width: 94%;
+    width: 100%;
     max-width: 900px;
     background: rgba(255,255,255,0.93);
     backdrop-filter: blur(10px);
-    padding: 10px 0;
+    padding: 10px 14px;
     border-radius: 16px;
     box-shadow: 0 4px 25px rgba(0,0,0,0.22);
 }
