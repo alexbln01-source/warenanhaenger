@@ -16,15 +16,15 @@
 
     <div class="grid-label spacer-top">WARENANHÄNGER AUSWÄHLEN</div>
 
-   <div class="art-btn-row">
-    <button id="btnKanten" class="artBtn">Kanten</button>
-    <button id="btnSchweissen" class="artBtn">Schweißen</button>
-    <button id="btnBohrwerk" class="artBtn">Bohrwerk</button>
-    <button id="btnEiltSehr" class="artBtn eilt-art">
-        <span class="art-title">Anhänger</span>
-        <span class="art-sub">Eilt Sehr</span>
-    </button>
-</div>
+    <div class="art-btn-row">
+        <button id="btnKanten" class="artBtn">Kanten</button>
+        <button id="btnSchweissen" class="artBtn">Schweißen</button>
+        <button id="btnBohrwerk" class="artBtn">Bohrwerk</button>
+        <button id="btnEiltSehr" class="artBtn eilt-art">
+            <span class="art-title">Anhänger</span>
+            <span class="art-sub">Eilt Sehr</span>
+        </button>
+    </div>
 
     <div class="grid-label">KUNDE AUSWÄHLEN</div>
 
@@ -50,19 +50,34 @@
         <button id="btnBack">◀ Zurück</button>
         <button id="btnDrucken">🖨️ Drucken</button>
     </div>
+
 </div>
 
-<div id="keyboardPopup">
+<!-- ================= TASTATUR POPUP ================= -->
+
+<div id="keyboardPopup" style="display:none;">
     <div id="keyboardBox">
-        <div class="keyboard-title">Kundenname eingeben</div>
+
+        <div class="keyboard-title">
+            Kundenname eingeben
+        </div>
+
         <input id="keyboardInput" type="text" readonly>
 
-        <!-- Tastatur (unverändert) -->
+        <!-- Dynamische Tasten -->
+        <div id="keyboardKeys"></div>
+
+        <div class="keyboard-actions">
+            <button id="kbOK">OK</button>
+            <button id="kbClose">Schließen</button>
+        </div>
+
     </div>
 </div>
 
 <div id="buildInfo" class="build-info"></div>
 
 <script src="kanten_mobile.js"></script>
+
 </body>
 </html>
