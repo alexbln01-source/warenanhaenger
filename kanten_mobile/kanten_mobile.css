@@ -208,7 +208,7 @@ button:focus {
 }
 
 #keyboardInput {
-    width: 92%;          /* ← schmaler */
+    width: 85%;          /* ← schmaler */
     margin: 0 auto 8px;  /* ← zentrieren */
     padding: 12px;
     font-size: 18px;
