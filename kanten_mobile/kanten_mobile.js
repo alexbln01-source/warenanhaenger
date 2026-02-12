@@ -189,7 +189,7 @@ function renderKeyboard() {
     // SPACE
     const space = document.createElement("button");
     space.className = "kbm-key space";
-    space.textContent = " ";
+    space.textContent = "␣";
     space.onclick = () => {
         keyboardInput.value += " ";
     };
