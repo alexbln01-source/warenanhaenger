@@ -204,7 +204,7 @@ button:focus {
     border-top-left-radius: 28px;
     border-top-right-radius: 28px;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-       max-height: 52vh;   /* ⬅️ DAS ist der Schlüssel */
+       max-height: 30vh;   /* ⬅️ DAS ist der Schlüssel */
 
 }
 
