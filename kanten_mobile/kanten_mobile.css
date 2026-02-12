@@ -190,7 +190,6 @@ button:focus {
     display: none;
     z-index: 9999;
 }
-}
 
 .keyboard-box {
     background: rgba(255,255,255,0.93);
