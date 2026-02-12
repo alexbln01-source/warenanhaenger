@@ -233,14 +233,14 @@ button:focus {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 /* Tasten */
 .kbm-key {
     flex: 1;
-    height: 65px;
-    font-size: 22px;
+    height: 56px;
+    font-size: 20px;
     border: none;
     border-radius: 18px;
     background: white;
