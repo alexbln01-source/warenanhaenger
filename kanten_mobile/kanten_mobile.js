@@ -138,3 +138,69 @@ document.getElementById("btnDrucken").onclick = () => {
 document.getElementById("btnBack").onclick = () => {
     window.location.replace("../index.html?reload=" + Date.now());
 };
+/* ================= TASTATUR ================= */
+
+const keyboardKeys = document.getElementById("keyboardKeys");
+const kbClose      = document.getElementById("kbClose");
+const kbOK         = document.getElementById("kbOK");
+
+function renderKeyboard() {
+
+    keyboardKeys.innerHTML = "";
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+    for (let i = 0; i < letters.length; i += 10) {
+
+        const row = document.createElement("div");
+        row.className = "kb-row";
+
+        letters.slice(i, i + 10).forEach(letter => {
+            const btn = document.createElement("button");
+            btn.className = "kb";
+            btn.textContent = letter;
+            btn.onclick = () => {
+                keyboardInput.value += letter;
+            };
+            row.appendChild(btn);
+        });
+
+        keyboardKeys.appendChild(row);
+    }
+
+    // Sondertasten-Zeile
+    const specialRow = document.createElement("div");
+    specialRow.className = "kb-row";
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "kb special red";
+    delBtn.textContent = "Löschen";
+    delBtn.onclick = () => {
+        keyboardInput.value =
+            keyboardInput.value.slice(0, -1);
+    };
+
+    specialRow.appendChild(delBtn);
+    keyboardKeys.appendChild(specialRow);
+}
+
+/* OK Button */
+if (kbOK) {
+    kbOK.onclick = () => {
+        const value = keyboardInput.value.trim();
+        if (!value) {
+            alert("Bitte Kundennamen eingeben.");
+            return;
+        }
+
+        selectedCustomer = value;
+        popup.style.display = "none";
+    };
+}
+
+/* Schließen Button */
+if (kbClose) {
+    kbClose.onclick = () => {
+        popup.style.display = "none";
+    };
+}
