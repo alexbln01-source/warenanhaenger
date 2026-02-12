@@ -55,8 +55,8 @@
 
 <!-- ================= TASTATUR POPUP ================= -->
 
-<div id="keyboardPopup" style="display:none;">
-    <div id="keyboardBox">
+<div id="keyboardPopup" class="keyboard-popup">
+    <div class="keyboard-box">
 
         <div class="keyboard-title">
             Kundenname eingeben
@@ -64,13 +64,7 @@
 
         <input id="keyboardInput" type="text" readonly>
 
-        <!-- Dynamische Tasten -->
-        <div id="keyboardKeys"></div>
-
-        <div class="keyboard-actions">
-            <button id="kbOK">OK</button>
-            <button id="kbClose">Schließen</button>
-        </div>
+        <div id="keyboardGrid" class="keyboard-grid"></div>
 
     </div>
 </div>
