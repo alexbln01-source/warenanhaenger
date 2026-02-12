@@ -1,3 +1,5 @@
+// ✅ PC-Erkennung
+const isPC = window.matchMedia("(pointer:fine)").matches;
 let selectedCustomer = "";
 let selectedArt = "";
 
