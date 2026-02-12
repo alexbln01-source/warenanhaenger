@@ -1,5 +1,6 @@
-// ✅ PC-Erkennung
-const isPC = document.body.classList.contains("pc-device");
+
+// ✅ 100% sichere PC-Erkennung
+const isPC = window.matchMedia("(pointer:fine)").matches;
 let selectedCustomer = "";
 let selectedArt = "";
 
