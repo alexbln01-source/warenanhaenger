@@ -1,45 +1,36 @@
 // ============================================================
-// DEVICE DETECTION (ROBUST & EINFACH)
-// ============================================================
-
-const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
-const isPC = !isTouchDevice;
-
-let selectedCustomer = "";
-let selectedArt = "";
-
-// ============================================================
-// DEVICE INFO ANZEIGE
+// DEVICE INFO (oben links / unten rechts)
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", function () {
 
     const buildInfo = document.getElementById("buildInfo");
 
-    if (buildInfo) {
-        buildInfo.innerHTML = `
-            <div style="
-                position:fixed;
-                top:8px;
-                left:10px;
-                font-size:13px;
-                font-weight:700;
-                color:#444;">
-                Gerät: ${isPC ? "PC" : "Touch"}
-            </div>
+    if (!buildInfo) return;
 
-            <div style="
-                position:fixed;
-                bottom:6px;
-                right:10px;
-                font-size:11px;
-                opacity:0.6;
-                color:#444;">
-                Build 20260213.1338
-            </div>
-        `;
-    }
+    buildInfo.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 8px;
+            left: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #444;
+            z-index: 9999;">
+            ${isPC ? "PC" : "Touch"}
+        </div>
 
+        <div style="
+            position: fixed;
+            bottom: 8px;
+            right: 12px;
+            font-size: 11px;
+            opacity: 0.6;
+            color: #444;
+            z-index: 9999;">
+            Build 20260213.1338
+        </div>
+    `;
 });
    // =============== PC INPUT FELD =================
 let pcInputWrapper = null;
