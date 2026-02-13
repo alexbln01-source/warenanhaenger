@@ -401,37 +401,63 @@ window.addEventListener("load", () => {
         html += `<div class="print-name">(${kunde})</div>`;
     }
 
-    previewInner.innerHTML = html;
-    printInner.innerHTML   = html;
-
- window.onload = () => {
+  window.onload = () => {
 
     const previewInner = document.getElementById("previewInner");
     const printInner   = document.getElementById("printInner");
     const printBtn     = document.getElementById("printBtn");
     const backBtn      = document.getElementById("backBtn");
 
+    const qs = new URLSearchParams(location.search);
+    const data = qs.has("data")
+        ? JSON.parse(decodeURIComponent(qs.get("data")))
+        : {};
+
+    const beistell = data.beistell || "";
+    const type     = data.selectedType || "";
+    const kunde    = data.kundename || "";
+
+    let html = `<div class="print-beistell">${beistell}</div>`;
+
+    // hier dein kompletter switch(type) {...}
+
+    const noNameTypes = [
+        "LP","LPEILT","SCHUETTE","SCHUETTEEILT",
+        "KLEY","KLEYEILT","WOB","WOBEILT",
+        "EKODEKOR","EKODEKOREILT"
+    ];
+
+    if (kunde && !noNameTypes.includes(type)) {
+        html += `<div class="print-name">(${kunde})</div>`;
+    }
+
+    // ✅ ERST HIER einsetzen
+    previewInner.innerHTML = html;
+    printInner.innerHTML   = html;
+
     /* PRINT */
     printBtn.addEventListener("click", () => {
 
         window.print();
 
-        // Nur auf Mobile zurückspringen
         if (!document.body.classList.contains("pc-device")) {
             setTimeout(() => {
-                window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+                window.location.replace(
+                    "beschichtung_mobile.html?reload=" + Date.now()
+                );
             }, 800);
         }
     });
 
     /* BACK */
     backBtn.addEventListener("click", () => {
-        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+        window.location.replace(
+            "beschichtung_mobile.html?reload=" + Date.now()
+        );
     });
 
 };
-
-</script>
+    </script>
 
 </body>
 </html>
