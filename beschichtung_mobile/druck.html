@@ -309,14 +309,10 @@ window.addEventListener("load", () => {
     const backBtn      = document.getElementById("backBtn");
 
     const qs = new URLSearchParams(location.search);
-    const data = qs.has("data")
-        ? JSON.parse(decodeURIComponent(qs.get("data")))
-        : {};
-
-    const beistell = data.beistell || "";
-    const type     = data.selectedType || "";
-    const kunde    = data.kundename || "";
-
+const kunde = qs.get("kunde") || "";
+const type  = qs.get("type")  || "";
+const beistell = qs.get("beistell") || "";
+    
     let html = `<div class="print-beistell">${beistell}</div>`;
 
     switch (type) {
