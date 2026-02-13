@@ -1,4 +1,3 @@
-
 // ============================================================
 // DEVICE DETECTION (ROBUST & EINFACH)
 // ============================================================
@@ -13,18 +12,35 @@ let selectedArt = "";
 // DEVICE INFO ANZEIGE
 // ============================================================
 
-const buildInfo = document.getElementById("buildInfo");
+document.addEventListener("DOMContentLoaded", function () {
 
-if (buildInfo) {
-    buildInfo.innerHTML = `
-        <div style="font-weight:700;">
-            Gerät: ${isPC ? "PC" : "Touch"}
-        </div>
-        <div style="font-size:12px; opacity:0.7;">
-            Build: KANTEN v1.0
-        </div>
-    `;
-}
+    const buildInfo = document.getElementById("buildInfo");
+
+    if (buildInfo) {
+        buildInfo.innerHTML = `
+            <div style="
+                position:fixed;
+                top:8px;
+                left:10px;
+                font-size:13px;
+                font-weight:700;
+                color:#444;">
+                Gerät: ${isPC ? "PC" : "Touch"}
+            </div>
+
+            <div style="
+                position:fixed;
+                bottom:6px;
+                right:10px;
+                font-size:11px;
+                opacity:0.6;
+                color:#444;">
+                Build 20260213.1338
+            </div>
+        `;
+    }
+
+});
    // =============== PC INPUT FELD =================
 let pcInputWrapper = null;
 
