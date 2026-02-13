@@ -294,13 +294,15 @@ html, body {
 </div>
 
 <script>
-/* PC automatisch erkennen (Mouse/Trackpad) */
+
+/* PC automatisch erkennen */
 document.addEventListener("DOMContentLoaded", () => {
     const isPC = window.matchMedia("(pointer:fine)").matches;
     if (isPC) document.body.classList.add("pc-device");
 });
 
 window.addEventListener("load", () => {
+
     const previewInner = document.getElementById("previewInner");
     const printInner   = document.getElementById("printInner");
     const printBtn     = document.getElementById("printBtn");
@@ -318,25 +320,32 @@ window.addEventListener("load", () => {
     let html = `<div class="print-beistell">${beistell}</div>`;
 
     switch (type) {
+
         case "LP":
             html += `<div class="kunde-lp">L&P</div>`;
             break;
+
         case "LPEILT":
-            html += `<div class="kunde-lp-eilt">L&P</div><div class="sub-lp-eilt">„EILT SEHR“</div>`;
+            html += `<div class="kunde-lp-eilt">L&P</div>
+                     <div class="sub-lp-eilt">„EILT SEHR“</div>`;
             break;
 
         case "SCHUETTE":
             html += `<div class="kunde-schuette">Schütte</div>`;
             break;
+
         case "SCHUETTEEILT":
-            html += `<div class="kunde-schuette-eilt">Schütte</div><div class="sub-schuette-eilt">„EILT SEHR“</div>`;
+            html += `<div class="kunde-schuette-eilt">Schütte</div>
+                     <div class="sub-schuette-eilt">„EILT SEHR“</div>`;
             break;
 
         case "KLEY":
             html += `<div class="kunde-kley">Kleymann</div>`;
             break;
+
         case "KLEYEILT":
-            html += `<div class="kunde-kley-eilt">Kleymann</div><div class="sub-kley-eilt">„EILT SEHR“</div>`;
+            html += `<div class="kunde-kley-eilt">Kleymann</div>
+                     <div class="sub-kley-eilt">„EILT SEHR“</div>`;
             break;
 
         case "KALEY":
@@ -344,48 +353,63 @@ window.addEventListener("load", () => {
             break;
 
         case "COMTEZN8":
-            html += `<div class="kunde-comte-zn8">Comte</div><div class="sub-comte-zn8">„Zn8“</div>`;
+            html += `<div class="kunde-comte-zn8">Comte</div>
+                     <div class="sub-comte-zn8">„Zn8“</div>`;
             break;
+
         case "COMTEZNI8":
-            html += `<div class="kunde-comte-zni8">Comte</div><div class="sub-comte-zni8">„ZnI8“</div>`;
+            html += `<div class="kunde-comte-zni8">Comte</div>
+                     <div class="sub-comte-zni8">„ZnI8“</div>`;
             break;
+
         case "CHEMISCH":
-            html += `<div class="kunde-chemisch">Comte</div><div class="sub-chemisch">„Chemisch Vernickeln“</div>`;
+            html += `<div class="kunde-chemisch">Comte</div>
+                     <div class="sub-chemisch">„Chemisch Vernickeln“</div>`;
             break;
+
         case "DICK":
-            html += `<div class="kunde-dick">Comte</div><div class="sub-dick">„Dickschichtpassivierung“</div>`;
+            html += `<div class="kunde-dick">Comte</div>
+                     <div class="sub-dick">„Dickschichtpassivierung“</div>`;
             break;
+
         case "BLAU":
-            html += `<div class="kunde-blau">Comte</div><div class="sub-blau">„Blau“</div>`;
+            html += `<div class="kunde-blau">Comte</div>
+                     <div class="sub-blau">„Blau“</div>`;
             break;
 
         case "PENTZ":
-            html += `<div class="kunde-pentz">Pentz & Gerdes</div><div class="sub-pentz">„ZN8“</div>`;
+            html += `<div class="kunde-pentz">Pentz & Gerdes</div>
+                     <div class="sub-pentz">„ZN8“</div>`;
             break;
+
         case "RCS":
-            html += `<div class="kunde-rcs">RCS</div><div class="sub-rcs">„Schweißen“</div>`;
+            html += `<div class="kunde-rcs">RCS</div>
+                     <div class="sub-rcs">„Schweißen“</div>`;
             break;
+
         case "COATINC":
-            html += `<div class="kunde-coatinc">Coatinc 24</div><div class="sub-coatinc">„Verzinken“</div>`;
+            html += `<div class="kunde-coatinc">Coatinc 24</div>
+                     <div class="sub-coatinc">„Verzinken“</div>`;
             break;
 
         case "WOB":
             html += `<div class="kunde-wob">WOB</div>`;
             break;
+
         case "WOBEILT":
-            html += `<div class="kunde-wob-eilt">WOB</div><div class="sub-wob-eilt">„EILT SEHR“</div>`;
+            html += `<div class="kunde-wob-eilt">WOB</div>
+                     <div class="sub-wob-eilt">„EILT SEHR“</div>`;
             break;
 
         case "EKODEKOR":
-            html += `<div class="kunde-ekodekor">EKO-Dekor</div><div class="sub-ekodekor">„Eloxieren“</div>`;
+            html += `<div class="kunde-ekodekor">EKO-Dekor</div>
+                     <div class="sub-ekodekor">„Eloxieren“</div>`;
             break;
 
         case "EKODEKOREILT":
-            html += `
-                <div class="kunde-ekodekor">EKO-Dekor</div>
-                <div class="sub-wob-eilt">„EILT SEHR“</div>
-                <div class="sub-ekodekor">„Eloxieren“</div>
-            `;
+            html += `<div class="kunde-ekodekor">EKO-Dekor</div>
+                     <div class="sub-wob-eilt">„EILT SEHR“</div>
+                     <div class="sub-ekodekor">„Eloxieren“</div>`;
             break;
     }
 
@@ -401,42 +425,11 @@ window.addEventListener("load", () => {
         html += `<div class="print-name">(${kunde})</div>`;
     }
 
-  window.onload = () => {
-
-    const previewInner = document.getElementById("previewInner");
-    const printInner   = document.getElementById("printInner");
-    const printBtn     = document.getElementById("printBtn");
-    const backBtn      = document.getElementById("backBtn");
-
-    const qs = new URLSearchParams(location.search);
-    const data = qs.has("data")
-        ? JSON.parse(decodeURIComponent(qs.get("data")))
-        : {};
-
-    const beistell = data.beistell || "";
-    const type     = data.selectedType || "";
-    const kunde    = data.kundename || "";
-
-    let html = `<div class="print-beistell">${beistell}</div>`;
-
-    // hier dein kompletter switch(type) {...}
-
-    const noNameTypes = [
-        "LP","LPEILT","SCHUETTE","SCHUETTEEILT",
-        "KLEY","KLEYEILT","WOB","WOBEILT",
-        "EKODEKOR","EKODEKOREILT"
-    ];
-
-     if (kunde && !noNameTypes.includes(type)) {
-        html += `<div class="print-name">(${kunde})</div>`;
-    }
-
     previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
     /* PRINT */
     printBtn.addEventListener("click", () => {
-
         window.print();
 
         if (!document.body.classList.contains("pc-device")) {
@@ -456,7 +449,6 @@ window.addEventListener("load", () => {
     });
 
 });
-
 </script>
 </body>
 </html>
