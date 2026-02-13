@@ -427,11 +427,10 @@ window.addEventListener("load", () => {
         "EKODEKOR","EKODEKOREILT"
     ];
 
-    if (kunde && !noNameTypes.includes(type)) {
+     if (kunde && !noNameTypes.includes(type)) {
         html += `<div class="print-name">(${kunde})</div>`;
     }
 
-    // ✅ ERST HIER einsetzen
     previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
@@ -456,8 +455,8 @@ window.addEventListener("load", () => {
         );
     });
 
-};
-    </script>
+});
 
+</script>
 </body>
 </html>
