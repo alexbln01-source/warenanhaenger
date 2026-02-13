@@ -5,6 +5,32 @@ const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
 console.log("TouchDevice:", isTouchDevice);
 let selectedCustomer = "";
 let selectedArt = "";
+// ============================================================
+// DEVICE INFO ANZEIGE
+// ============================================================
+
+const buildInfo = document.getElementById("buildInfo");
+
+let deviceLabel = "";
+
+if (isPC) {
+    deviceLabel = "PC";
+} else if (isZebra) {
+    deviceLabel = "Zebra";
+} else if (isMobile) {
+    deviceLabel = "Mobile";
+} else {
+    deviceLabel = "Unbekannt";
+}
+
+buildInfo.innerHTML = `
+    <div style="font-weight:700;">
+        Gerät: ${deviceLabel}
+    </div>
+    <div style="font-size:12px; opacity:0.7;">
+        Build: KANTEN v1.0
+    </div>
+`;
 // ================= PC INPUT FELD =================
 let pcInputWrapper = null;
 
