@@ -161,7 +161,7 @@ html, body {
     }
 
     /* =========================
-       💻 PC → A5 landscape (wie vorher)
+       💻 PC → A5 quer
     ========================== */
     body.pc-device {
         page: pc;
@@ -173,9 +173,7 @@ html, body {
     }
 
     /* =========================
-       📱 MOBILE → A6 portrait
-       + Inhalt als Querformat drehen
-       + sauber zentrieren
+       📱 MOBILE → A6 hochformat
     ========================== */
     body:not(.pc-device) {
         page: mobile;
@@ -186,8 +184,8 @@ html, body {
         margin: 0;
     }
 
-    /* A6-Seitenrahmen */
-    body:not(.pc-device) #printArea.print-only {
+    /* A6-Seite */
+    body:not(.pc-device) #printArea {
         width: 105mm;
         height: 148mm;
         position: relative;
@@ -195,35 +193,21 @@ html, body {
         background: white;
     }
 
-    /* Das Etikett selbst wird A6-Quer (148x105) und zentriert rotiert */
-    body:not(.pc-device) #printArea.print-only .etikett {
+    /* 👉 WICHTIG: NUR den inneren Inhalt drehen */
+    body:not(.pc-device) #printArea > * {
+        position: absolute;
         width: 148mm;
         height: 105mm;
 
-        /* A6-angepasst: sonst sitzt alles zu weit außen */
-        padding: 7mm;
-
-        position: absolute;
         left: 50%;
         top: 50%;
 
         transform: translate(-50%, -50%) rotate(90deg);
         transform-origin: center center;
-
-        box-shadow: none !important;
     }
 
-    /* Innenbereich an A6-Padding anpassen */
-    body:not(.pc-device) #printArea.print-only .etikett-center {
-        inset: 7mm;
-    }
+}
 
-    /* Logo-Position für A6 neu (sonst “zu weit weg”) */
-    body:not(.pc-device) #printArea.print-only .logo {
-        right: 7mm;
-        bottom: 7mm;
-        width: 30mm; /* optional: etwas kleiner für A6 */
-    }
 }
 </style>
 </head>
