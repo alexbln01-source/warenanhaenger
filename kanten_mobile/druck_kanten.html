@@ -398,21 +398,11 @@ if (!isEiltSehr) {
     printContent.innerHTML   = html;
 }
 
-/* >>> DRUCKEN <<< */
-printBtn.onclick = () => {
-    window.print();
-};
-
-/* >>> NACH DRUCK ZURÜCK (PC + Mobile) <<< */
-window.onafterprint = function () {
-    window.location.replace("../index.html");
-};
-
-/* >>> ZURÜCK BUTTON <<< */
+printBtn.onclick = () => window.print();
 backBtn.onclick = () => {
-    window.location.replace("kanten_mobile.html");
-});
-
+    window.location.replace("kanten_mobile.html?reload=" + Date.now());
+};
 </script>
+
 </body>
 </html>
