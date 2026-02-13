@@ -404,9 +404,9 @@ printBtn.onclick = () => {
 };
 
 /* >>> NACH DRUCK ZURÜCK (PC + Mobile) <<< */
-window.addEventListener("focus", () => {
+window.onafterprint = function () {
     window.location.replace("../index.html");
-});
+};
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
