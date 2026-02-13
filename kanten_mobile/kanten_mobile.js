@@ -2,9 +2,8 @@
 //  KANTEN – kanten_mobile.js
 // ============================================================
 
-
 // ============================================================
-//  DEVICE DETECTION (wie in PAUS)
+//  DEVICE DETECTION (wie PAUS)
 // ============================================================
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = window.screen.width;
@@ -17,6 +16,27 @@ const isZebra = isTC22 || isTC21 || ua.includes("zebra");
 const isMobile = /android|iphone|ipad|ipod/.test(ua);
 const isPC     = !isZebra && !isMobile;
 
+// ============================================================
+//  DOM ELEMENTE
+// ============================================================
+const deviceInfo   = document.getElementById("deviceInfo");
+const buildInfo    = document.getElementById("buildInfo");
+
+const popup         = document.getElementById("keyboardPopup");
+const keyboardInput = document.getElementById("keyboardInput");
+const keyboardGrid  = document.getElementById("keyboardGrid");
+
+const kundenArea = document.getElementById("kundenArea");
+
+const btnEiltSehr   = document.getElementById("btnEiltSehr");
+const btnKanten     = document.getElementById("btnKanten");
+const btnSchweissen = document.getElementById("btnSchweissen");
+const btnBohrwerk   = document.getElementById("btnBohrwerk");
+
+const btnBack    = document.getElementById("btnBack");
+const btnDrucken = document.getElementById("btnDrucken");
+
+let sonstigeBtn = null;
 
 // ============================================================
 //  STATE
@@ -24,51 +44,8 @@ const isPC     = !isZebra && !isMobile;
 let selectedCustomer = "";
 let selectedArt = "";
 
-
 // ============================================================
-//  DOM VARIABLEN (werden erst nach DOM geladen gesetzt!)
-// ============================================================
-let deviceInfo;
-let buildInfo;
-
-let popup;
-let keyboardInput;
-let keyboardGrid;
-let kundenArea;
-
-let btnEiltSehr;
-let btnKanten;
-let btnSchweissen;
-let btnBohrwerk;
-
-let btnBack;
-let btnDrucken;
-
-
-// ============================================================
-//  BODY KLASSEN
-// ============================================================
-if (isPC) document.body.classList.add("pc-device");
-if (isTC21) document.body.classList.add("zebra-tc21");
-if (isTC22) document.body.classList.add("zebra-tc22");
-
-
-// ============================================================
-//  BUILD FORMAT
-// ============================================================
-function buildStamp() {
-  const d = new Date(document.lastModified);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${y}${m}${day}.${hh}${mm}`;
-}
-
-
-// ============================================================
-//  DEVICE INFO + BUILD
+//  DEVICE INFO
 // ============================================================
 function setCornerInfo() {
 
@@ -80,7 +57,6 @@ function setCornerInfo() {
 
   if (deviceInfo) {
     deviceInfo.textContent = "Gerät: " + deviceLabel;
-
     deviceInfo.style.position = "fixed";
     deviceInfo.style.top = "8px";
     deviceInfo.style.left = "12px";
@@ -89,7 +65,6 @@ function setCornerInfo() {
 
   if (buildInfo) {
     buildInfo.textContent = "Build " + buildStamp();
-
     buildInfo.style.position = "fixed";
     buildInfo.style.bottom = "8px";
     buildInfo.style.right = "12px";
@@ -97,6 +72,15 @@ function setCornerInfo() {
   }
 }
 
+function buildStamp() {
+  const d = new Date(document.lastModified);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  return `${y}${m}${day}.${hh}${mm}`;
+}
 
 // ============================================================
 //  PC INPUT POPUP
@@ -114,34 +98,19 @@ function createPcInput() {
   pcInputWrapper.style.top = "50%";
   pcInputWrapper.style.left = "50%";
   pcInputWrapper.style.transform = "translate(-50%, -50%)";
-  pcInputWrapper.style.background = "#ffffff";
-  pcInputWrapper.style.padding = "22px";
-  pcInputWrapper.style.borderRadius = "14px";
+  pcInputWrapper.style.background = "#fff";
+  pcInputWrapper.style.padding = "20px";
+  pcInputWrapper.style.borderRadius = "12px";
   pcInputWrapper.style.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
   pcInputWrapper.style.zIndex = "10000";
-  pcInputWrapper.style.textAlign = "center";
 
   pcInputWrapper.innerHTML = `
-    <div style="font-weight:800; margin-bottom:10px; color:#003a73;">
-      Kundenname eingeben
-    </div>
-
-    <input id="pcCustomerInput"
-           type="text"
-           placeholder="Kundenname"
-           style="
-             width:320px;
-             padding:14px;
-             font-size:20px;
-             border-radius:10px;
-             border:2px solid #1976d2;
-             outline:none;
-             text-align:center;
-           ">
-
-    <div style="display:flex; gap:10px; justify-content:center; margin-top:14px;">
-      <button id="pcCustomerCancel">Abbrechen</button>
+    <div style="font-weight:800; margin-bottom:10px;">Kundenname eingeben</div>
+    <input id="pcCustomerInput" type="text"
+      style="width:300px; padding:12px; font-size:18px; text-align:center;">
+    <div style="margin-top:10px;">
       <button id="pcCustomerOk">OK</button>
+      <button id="pcCustomerCancel">Abbrechen</button>
     </div>
   `;
 
@@ -154,25 +123,24 @@ function createPcInput() {
   };
 
   pcInputWrapper.querySelector("#pcCustomerOk").onclick = () => {
-    if (!pcCustomerInput.value.trim()) {
-      alert("Bitte Kundennamen eingeben.");
-      return;
+
+    const name = pcCustomerInput.value.trim();
+    if (!name) return alert("Bitte Kundennamen eingeben.");
+
+    selectedCustomer = name;
+
+    if (sonstigeBtn) {
+      sonstigeBtn.textContent = name;
     }
+
     pcInputWrapper.style.display = "none";
   };
-
-  pcCustomerInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      pcInputWrapper.querySelector("#pcCustomerOk").click();
-    }
-  });
 }
 
 function openPcInput() {
   if (!pcInputWrapper) return;
   pcInputWrapper.style.display = "block";
-  setTimeout(() => pcCustomerInput.focus(), 20);
+  setTimeout(()=>pcCustomerInput.focus(),20);
 }
 
 function hidePcInput() {
@@ -180,33 +148,164 @@ function hidePcInput() {
   pcInputWrapper.style.display = "none";
 }
 
-
 // ============================================================
-//  INIT (JETZT ALLES RICHTIG)
+//  INIT
 // ============================================================
 document.addEventListener("DOMContentLoaded", () => {
-
-  // DOM holen
-  deviceInfo   = document.getElementById("deviceInfo");
-  buildInfo    = document.getElementById("buildInfo");
-
-  popup         = document.getElementById("keyboardPopup");
-  keyboardInput = document.getElementById("keyboardInput");
-  keyboardGrid  = document.getElementById("keyboardGrid");
-  kundenArea    = document.getElementById("kundenArea");
-
-  btnEiltSehr   = document.getElementById("btnEiltSehr");
-  btnKanten     = document.getElementById("btnKanten");
-  btnSchweissen = document.getElementById("btnSchweissen");
-  btnBohrwerk   = document.getElementById("btnBohrwerk");
-
-  btnBack    = document.getElementById("btnBack");
-  btnDrucken = document.getElementById("btnDrucken");
-
-  popup.style.display = "none";
-  kundenArea.classList.add("disabled");
 
   setCornerInfo();
   createPcInput();
 
+  sonstigeBtn = document.querySelector('[data-kunde="SONSTIGE"]');
+
+  popup.style.display = "none";
+  kundenArea.classList.add("disabled");
 });
+
+// ============================================================
+//  HILFSFUNKTIONEN
+// ============================================================
+function clearArtSelection() {
+  document.querySelectorAll(".artBtn")
+    .forEach(b => b.classList.remove("active"));
+}
+
+function clearCustomerSelection() {
+  document.querySelectorAll(".kundeBtn")
+    .forEach(b => b.classList.remove("active"));
+}
+
+// Reset Sonstige Button
+function resetSonstigeButton() {
+  if (sonstigeBtn) {
+    sonstigeBtn.textContent = "Sonstige Kunden";
+  }
+}
+
+// ============================================================
+//  ART BUTTONS
+// ============================================================
+btnEiltSehr.onclick = () => {
+  selectedArt = "eilt_sehr";
+  selectedCustomer = "EILT_SEHR";
+
+  clearArtSelection();
+  btnEiltSehr.classList.add("active");
+
+  clearCustomerSelection();
+  resetSonstigeButton();
+
+  kundenArea.classList.add("disabled");
+};
+
+btnKanten.onclick     = () => setNormalArt("kanten", btnKanten);
+btnSchweissen.onclick = () => setNormalArt("schweissen", btnSchweissen);
+btnBohrwerk.onclick   = () => setNormalArt("bohrwerk", btnBohrwerk);
+
+function setNormalArt(art, btn) {
+  selectedArt = art;
+
+  clearArtSelection();
+  btn.classList.add("active");
+
+  selectedCustomer = "";
+  clearCustomerSelection();
+  resetSonstigeButton();
+
+  kundenArea.classList.remove("disabled");
+}
+
+// ============================================================
+//  KUNDEN
+// ============================================================
+document.querySelectorAll(".kundeBtn").forEach(btn => {
+
+  btn.onclick = () => {
+
+    if (kundenArea.classList.contains("disabled"))
+      return alert("Bitte zuerst eine Art auswählen.");
+
+    clearCustomerSelection();
+    btn.classList.add("active");
+
+    const kunde = btn.dataset.kunde;
+
+    if (kunde === "SONSTIGE") {
+
+      selectedCustomer = "SONSTIGE";
+
+      if (isPC) {
+        openPcInput();
+      } else {
+        popup.style.display = "flex";
+        renderKeyboard();
+      }
+
+    } else {
+      selectedCustomer = kunde;
+      popup.style.display = "none";
+      hidePcInput();
+    }
+  };
+});
+
+// ============================================================
+//  DRUCK
+// ============================================================
+btnDrucken.onclick = () => {
+
+  if (!selectedArt)
+    return alert("Bitte eine Art auswählen.");
+
+  if (!selectedCustomer)
+    return alert("Bitte einen Kunden auswählen.");
+
+  let kundeName = selectedCustomer;
+
+  location.href =
+    "druck_kanten.html?kunde=" + encodeURIComponent(kundeName) +
+    "&art=" + encodeURIComponent(selectedArt);
+};
+
+// ============================================================
+//  ZURÜCK
+// ============================================================
+btnBack.onclick = () => {
+  window.location.replace("../index.html");
+};
+
+// ============================================================
+//  ZEBRA TASTATUR
+// ============================================================
+function renderKeyboard() {
+
+  keyboardGrid.innerHTML = "";
+
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  letters.forEach(letter => {
+    const btn = document.createElement("button");
+    btn.textContent = letter;
+    btn.onclick = () => keyboardInput.value += letter;
+    keyboardGrid.appendChild(btn);
+  });
+
+  const ok = document.createElement("button");
+  ok.textContent = "OK";
+
+  ok.onclick = () => {
+
+    const name = keyboardInput.value.trim();
+    if (!name) return alert("Bitte Kundennamen eingeben.");
+
+    selectedCustomer = name;
+
+    if (sonstigeBtn) {
+      sonstigeBtn.textContent = name;
+    }
+
+    popup.style.display = "none";
+  };
+
+  keyboardGrid.appendChild(ok);
+}
