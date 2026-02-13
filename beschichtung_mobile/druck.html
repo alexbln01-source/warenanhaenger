@@ -16,7 +16,7 @@ html, body {
 }
 
 /* =======================
-   VORSCHAU (NUR SCREEN)
+   VORSCHAU
 ======================= */
 .preview-wrapper {
     width: 100%;
@@ -42,7 +42,7 @@ html, body {
 }
 
 /* =======================
-   ETIKETT (STANDARD = A5 QUER für Vorschau / PC-Print)
+   ETIKETT (Basis Quer)
 ======================= */
 .etikett {
     width: 210mm;
@@ -93,24 +93,8 @@ html, body {
     font-weight: 900;
     color: #c80000;
     font-size: 16px;
-    box-shadow: 0 0 10px rgba(200,0,0,0.2);
-    animation: warnPulse 0.9s ease-in-out infinite;
-}
-.warnbox span {
-    display: block;
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: 4px;
-    color: #7a0000;
 }
 
-@keyframes warnPulse {
-    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
-    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
-    100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
-}
-
-/* Warnbox NICHT drucken */
 @media print {
     .warnbox { display: none !important; }
 }
@@ -138,7 +122,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =======================
-   DRUCK – STABIL
+   DRUCKLOGIK
 ======================= */
 .print-only { display: none; }
 
@@ -160,9 +144,7 @@ html, body {
         display: block !important;
     }
 
-    /* =========================
-       💻 PC → A5 quer
-    ========================== */
+    /* ================= PC ================= */
     body.pc-device {
         page: pc;
     }
@@ -172,9 +154,11 @@ html, body {
         margin: 0;
     }
 
-    /* =========================
-       📱 MOBILE → A6 hochformat
-    ========================== */
+    body.pc-device .print-rotate {
+        transform: none !important;
+    }
+
+    /* ================= MOBILE ================= */
     body:not(.pc-device) {
         page: mobile;
     }
@@ -184,30 +168,24 @@ html, body {
         margin: 0;
     }
 
-    /* A6-Seite */
     body:not(.pc-device) #printArea {
         width: 105mm;
         height: 148mm;
         position: relative;
         overflow: hidden;
-        background: white;
     }
 
-    /* 👉 WICHTIG: NUR den inneren Inhalt drehen */
-    body:not(.pc-device) #printArea > * {
-        position: absolute;
-        width: 148mm;
-        height: 105mm;
+    body:not(.pc-device) .print-rotate {
+        width: 210mm;
+        height: 148mm;
 
+        position: absolute;
         left: 50%;
         top: 50%;
 
         transform: translate(-50%, -50%) rotate(90deg);
         transform-origin: center center;
     }
-
-}
-
 }
 </style>
 </head>
@@ -226,13 +204,15 @@ html, body {
 
 <div class="warnbox">
     ⚠️ Achtung!
-    <span>Papierformat <b>A5 quer</b> im Drucker auswählen</span>
+    <span>Papierformat korrekt auswählen</span>
 </div>
 
 <!-- ===== DRUCK ===== -->
-<div id="printArea" class="etikett print-only">
-    <div class="etikett-center" id="printInner"></div>
-    <img src="langen.png" class="logo">
+<div id="printArea" class="print-only">
+    <div class="etikett print-rotate">
+        <div class="etikett-center" id="printInner"></div>
+        <img src="langen.png" class="logo">
+    </div>
 </div>
 
 <div class="bottom-bar">
@@ -242,11 +222,15 @@ html, body {
 
 <script>
 /* PC automatisch erkennen */
-if (window.matchMedia("(pointer:fine)").matches) {
-    document.body.classList.add("pc-device");
-}
+document.addEventListener("DOMContentLoaded", () => {
+    const isPC = window.matchMedia("(pointer:fine)").matches;
+    if (isPC) {
+        document.body.classList.add("pc-device");
+    }
+});
 
 window.onload = () => {
+
     const previewInner = document.getElementById("previewInner");
     const printInner   = document.getElementById("printInner");
     const printBtn     = document.getElementById("printBtn");
@@ -258,15 +242,9 @@ window.onload = () => {
         : {};
 
     const beistell = data.beistell || "";
-    const type     = data.selectedType || "";
     const kunde    = data.kundename || "";
 
     let html = `<div class="print-beistell">${beistell}</div>`;
-
-    /* (dein Switch bleibt bei dir 1:1 – ich lasse ihn weg, weil du hier nur Demo drin hattest)
-       Wenn du ihn drin hast: einfach wieder einsetzen, der Druck/Rotate-Teil bleibt gleich.
-    */
-
     if (kunde) {
         html += `<div class="print-name">(${kunde})</div>`;
     }
