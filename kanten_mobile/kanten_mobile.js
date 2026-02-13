@@ -2,7 +2,7 @@
 // true = Touchgerät (Zebra / Tablet / Handy)
 // false = PC / Mac mit echter Tastatur
 const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
-
+console.log("TouchDevice:", isTouchDevice);
 let selectedCustomer = "";
 let selectedArt = "";
 // ================= PC INPUT FELD =================
