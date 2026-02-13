@@ -42,7 +42,7 @@ html, body {
 }
 
 /* =======================
-   ETIKETT BASIS (Quer)
+   ETIKETT BASIS
 ======================= */
 .etikett {
     width: 210mm;
@@ -73,15 +73,11 @@ html, body {
     text-align: center;
 }
 
-/* =======================
-   TEXTE
-======================= */
+/* TEXTE */
 .print-beistell { font-size: 60pt; margin-bottom: 6mm; }
 .print-name { font-size: 32pt; margin-top: 4mm; }
 
-/* =======================
-   WARNBOX
-======================= */
+/* WARNBOX */
 .warnbox {
     margin: -10px auto 10px;
     max-width: 280px;
@@ -99,9 +95,7 @@ html, body {
     .warnbox { display: none !important; }
 }
 
-/* =======================
-   BUTTONS
-======================= */
+/* BUTTONS */
 .bottom-bar {
     height: 60px;
     display: flex;
@@ -121,9 +115,7 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* =======================
-   DRUCKLOGIK
-======================= */
+/* DRUCKLOGIK */
 .print-only { display: none; }
 
 @media print {
@@ -144,10 +136,8 @@ html, body {
         display: block !important;
     }
 
-    /* ================= PC ================= */
-    body.pc-device {
-        page: pc;
-    }
+    /* PC */
+    body.pc-device { page: pc; }
 
     @page pc {
         size: A5 landscape;
@@ -159,10 +149,8 @@ html, body {
         position: static;
     }
 
-    /* ================= MOBILE ================= */
-    body:not(.pc-device) {
-        page: mobile;
-    }
+    /* MOBILE */
+    body:not(.pc-device) { page: mobile; }
 
     @page mobile {
         size: A6 portrait;
@@ -176,20 +164,13 @@ html, body {
         overflow: hidden;
     }
 
-    /* KORREKT GEDREHT + ZENTRIERT */
     body:not(.pc-device) .print-rotate {
-
         width: 148mm;
         height: 105mm;
-
         position: absolute;
         top: 50%;
         left: 50%;
-
-        transform:
-            translate(-50%, -50%)
-            rotate(90deg);
-
+        transform: translate(-50%, -50%) rotate(90deg);
         transform-origin: center center;
     }
 }
@@ -198,7 +179,6 @@ html, body {
 
 <body>
 
-<!-- ===== VORSCHAU ===== -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -213,7 +193,6 @@ html, body {
     <span>Papierformat korrekt auswählen</span>
 </div>
 
-<!-- ===== DRUCK ===== -->
 <div id="printArea" class="print-only">
     <div class="etikett print-rotate">
         <div class="etikett-center" id="printInner"></div>
@@ -227,10 +206,8 @@ html, body {
 </div>
 
 <script>
-/* PC automatisch erkennen */
 document.addEventListener("DOMContentLoaded", () => {
-    const isPC = window.matchMedia("(pointer:fine)").matches;
-    if (isPC) {
+    if (window.matchMedia("(pointer:fine)").matches) {
         document.body.classList.add("pc-device");
     }
 });
@@ -248,10 +225,64 @@ window.onload = () => {
         : {};
 
     const beistell = data.beistell || "";
+    const type     = data.selectedType || "";
     const kunde    = data.kundename || "";
 
     let html = `<div class="print-beistell">${beistell}</div>`;
-    if (kunde) {
+
+    switch(type) {
+
+        case "LP":
+            html += `<div style="font-size:80pt;">L&P</div>`;
+            break;
+
+        case "LPEILT":
+            html += `<div style="font-size:80pt;">L&P</div>
+                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
+            break;
+
+        case "SCHUETTE":
+            html += `<div style="font-size:80pt;">Schütte</div>`;
+            break;
+
+        case "SCHUETTEEILT":
+            html += `<div style="font-size:80pt;">Schütte</div>
+                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
+            break;
+
+        case "KLEY":
+            html += `<div style="font-size:80pt;">Kleymann</div>`;
+            break;
+
+        case "KLEYEILT":
+            html += `<div style="font-size:80pt;">Kleymann</div>
+                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
+            break;
+
+        case "WOB":
+            html += `<div style="font-size:80pt;">WOB</div>`;
+            break;
+
+        case "WOBEILT":
+            html += `<div style="font-size:80pt;">WOB</div>
+                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
+            break;
+
+        case "EKODEKOR":
+            html += `<div style="font-size:80pt;">EKO-Dekor</div>
+                     <div style="font-size:48pt;">„Eloxieren“</div>`;
+            break;
+
+        case "EKODEKOREILT":
+            html += `<div style="font-size:80pt;">EKO-Dekor</div>
+                     <div style="font-size:70pt;">„EILT SEHR“</div>
+                     <div style="font-size:48pt;">„Eloxieren“</div>`;
+            break;
+    }
+
+    const noNameTypes = ["LP","LPEILT","SCHUETTE","SCHUETTEEILT","KLEY","KLEYEILT","WOB","WOBEILT","EKODEKOR","EKODEKOREILT"];
+
+    if (kunde && !noNameTypes.includes(type)) {
         html += `<div class="print-name">(${kunde})</div>`;
     }
 
