@@ -406,8 +406,12 @@ window.addEventListener("load", () => {
 
     /* Click-Handler robust (Mobile) */
     printBtn.addEventListener("click", () => {
-        window.print();
-    }, { passive: true });
+    window.print();
+});
+
+window.onafterprint = function () {
+    window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+};
 
     backBtn.addEventListener("click", () => {
         window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
