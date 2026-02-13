@@ -437,11 +437,9 @@ printBtn.onclick = () => {
     window.print();
 };
 
-/* >>> NACH DRUCK ZURÜCK (nur Mobile) <<< */
+/* >>> NACH DRUCK ZURÜCK (PC + Mobile) <<< */
 window.addEventListener("focus", () => {
-    if (!document.body.classList.contains("pc-device")) {
-        window.location.replace("../index.html");
-    }
+    window.location.replace("../index.html");
 });
 
 /* >>> ZURÜCK BUTTON <<< */
