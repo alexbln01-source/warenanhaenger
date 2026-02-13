@@ -42,7 +42,7 @@ html, body {
 }
 
 /* =======================
-   ETIKETT (A5 QUER)
+   ETIKETT STANDARD (PC QUER)
 ======================= */
 .etikett {
     width: 210mm;
@@ -50,6 +50,12 @@ html, body {
     padding: 10mm;
     box-sizing: border-box;
     position: relative;
+}
+
+/* MOBILE HOCHFORMAT */
+body:not(.pc-device) .etikett {
+    width: 148mm;
+    height: 210mm;
 }
 
 .logo {
@@ -74,64 +80,6 @@ html, body {
 }
 
 /* =======================
-   ===== KUNDEN =====
-   !!! 1:1 WIE BEI DIR !!!
-======================= */
-
-/* L&P */
-.kunde-lp { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-lp-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-lp-eilt { font-size: 70pt; margin-bottom: 6mm; }
-
-/* SCHÜTTE */
-.kunde-schuette { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-schuette-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-schuette-eilt { font-size: 70pt; margin-bottom: 6mm; }
-
-/* KLEY */
-.kunde-kley { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-kley-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-kley-eilt { font-size: 70pt; margin-bottom: 6mm; }
-
-/* KALEY */
-.kunde-kaley { font-size: 80pt; margin-bottom: 8mm; }
-
-/* WOB */
-.kunde-wob { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-wob-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-wob-eilt { font-size: 70pt; margin-bottom: 6mm; }
-
-/* COMTE */
-.kunde-comte-zn8 { font-size: 80pt; margin-bottom: 1mm; }
-.sub-comte-zn8 { font-size: 48pt; margin-bottom: 1mm; }
-
-.kunde-comte-zni8 { font-size: 80pt; margin-bottom: 1mm; }
-.sub-comte-zni8 { font-size: 48pt; margin-bottom: 1mm; }
-
-.kunde-chemisch { font-size: 80pt; margin-bottom: 1mm; }
-.sub-chemisch { font-size: 48pt; margin-bottom: 1mm; }
-
-.kunde-dick { font-size: 80pt; margin-bottom: 1mm; }
-.sub-dick { font-size: 40pt; margin-bottom: 1mm; }
-
-.kunde-blau { font-size: 80pt; margin-bottom: 1mm; }
-.sub-blau { font-size: 48pt; margin-bottom: 1mm; }
-
-/* SONSTIGE */
-.kunde-pentz { font-size: 70pt; margin-bottom: 1mm; }
-.sub-pentz { font-size: 48pt; margin-bottom: 1mm; }
-
-.kunde-rcs { font-size: 80pt; margin-bottom: 1mm; }
-.sub-rcs { font-size: 48pt; margin-bottom: 1mm; }
-
-.kunde-coatinc { font-size: 80pt; margin-bottom: 1mm; }
-.sub-coatinc { font-size: 48pt; margin-bottom: 1mm; }
-
-/* EKO-DEKOR */
-.kunde-ekodekor { font-size: 80pt; margin-bottom: 1mm; }
-.sub-ekodekor { font-size: 48pt; margin-bottom: 1mm; }
-
-/* =======================
    TEXTE
 ======================= */
 .print-beistell { font-size: 60pt; margin-bottom: 6mm; }
@@ -152,26 +100,12 @@ html, body {
     color: #c80000;
     font-size: 16px;
     box-shadow: 0 0 10px rgba(200,0,0,0.2);
-    animation: warnPulse 0.9s ease-in-out infinite;
-}
-.warnbox span {
-    display: block;
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: 4px;
-    color: #7a0000;
 }
 
-@keyframes warnPulse {
-    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
-    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
-    100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
-}
-
-/* Warnbox NICHT drucken */
 @media print {
     .warnbox { display: none !important; }
 }
+
 /* =======================
    BUTTONS
 ======================= */
@@ -195,7 +129,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =======================
-   DRUCK – STABIL
+   DRUCK SETTINGS
 ======================= */
 .print-only { display: none; }
 
@@ -217,8 +151,23 @@ html, body {
         display: block !important;
     }
 
-    @page {
+    /* ===== PC → A5 QUER ===== */
+    body.pc-device {
+        page: pcLandscape;
+    }
+
+    @page pcLandscape {
         size: A5 landscape;
+        margin: 0;
+    }
+
+    /* ===== MOBILE → A5 HOCH ===== */
+    body:not(.pc-device) {
+        page: mobilePortrait;
+    }
+
+    @page mobilePortrait {
+        size: A5 portrait;
         margin: 0;
     }
 }
@@ -239,7 +188,7 @@ html, body {
 
 <div class="warnbox">
     ⚠️ Achtung!
-    <span>Papierformat <b>A5 quer</b> im Drucker auswählen</span>
+    <span>Papierformat automatisch je nach Gerät</span>
 </div>
 
 <!-- ===== DRUCK ===== -->
@@ -254,6 +203,11 @@ html, body {
 </div>
 
 <script>
+/* ===== PC ERKENNUNG ===== */
+if (window.matchMedia("(pointer:fine)").matches) {
+    document.body.classList.add("pc-device");
+}
+
 window.onload = () => {
     const previewInner = document.getElementById("previewInner");
     const printInner   = document.getElementById("printInner");
@@ -271,47 +225,8 @@ window.onload = () => {
 
     let html = `<div class="print-beistell">${beistell}</div>`;
 
-    switch (type) {
-        case "LP": html += `<div class="kunde-lp">L&P</div>`; break;
-        case "LPEILT": html += `<div class="kunde-lp-eilt">L&P</div><div class="sub-lp-eilt">„EILT SEHR“</div>`; break;
-
-        case "SCHUETTE": html += `<div class="kunde-schuette">Schütte</div>`; break;
-        case "SCHUETTEEILT": html += `<div class="kunde-schuette-eilt">Schütte</div><div class="sub-schuette-eilt">„EILT SEHR“</div>`; break;
-
-        case "KLEY": html += `<div class="kunde-kley">Kleymann</div>`; break;
-        case "KLEYEILT": html += `<div class="kunde-kley-eilt">Kleymann</div><div class="sub-kley-eilt">„EILT SEHR“</div>`; break;
-
-        case "KALEY": html += `<div class="kunde-kaley">Kaley</div>`; break;
-
-        case "COMTEZN8": html += `<div class="kunde-comte-zn8">Comte</div><div class="sub-comte-zn8">„Zn8“</div>`; break;
-        case "COMTEZNI8": html += `<div class="kunde-comte-zni8">Comte</div><div class="sub-comte-zni8">„ZnI8“</div>`; break;
-        case "CHEMISCH": html += `<div class="kunde-chemisch">Comte</div><div class="sub-chemisch">„Chemisch Vernickeln“</div>`; break;
-        case "DICK": html += `<div class="kunde-dick">Comte</div><div class="sub-dick">„Dickschichtpassivierung“</div>`; break;
-        case "BLAU": html += `<div class="kunde-blau">Comte</div><div class="sub-blau">„Blau“</div>`; break;
-
-        case "PENTZ": html += `<div class="kunde-pentz">Pentz & Gerdes</div><div class="sub-pentz">„ZN8“</div>`; break;
-        case "RCS": html += `<div class="kunde-rcs">RCS</div><div class="sub-rcs">„Schweißen“</div>`; break;
-        case "COATINC": html += `<div class="kunde-coatinc">Coatinc 24</div><div class="sub-coatinc">„Verzinken“</div>`; break;
-
-        case "WOB": html += `<div class="kunde-wob">WOB</div>`; break;
-        case "WOBEILT": html += `<div class="kunde-wob-eilt">WOB</div><div class="sub-wob-eilt">„EILT SEHR“</div>`; break;
-
-        case "EKODEKOR":
-            html += `<div class="kunde-ekodekor">EKO-Dekor</div><div class="sub-ekodekor">„Eloxieren“</div>`;
-            break;
-
-        case "EKODEKOREILT":
-            html += `
-                <div class="kunde-ekodekor">EKO-Dekor</div>
-                <div class="sub-wob-eilt">„EILT SEHR“</div>
-                <div class="sub-ekodekor">„Eloxieren“</div>
-            `;
-            break;
-    }
-
-    const noNameTypes = ["LP","LPEILT","SCHUETTE","SCHUETTEEILT","KLEY","KLEYEILT","WOB","WOBEILT","EKODEKOR","EKODEKOREILT"];
-    if (kunde && !noNameTypes.includes(type)) {
-        html += `<div class="print-name">(${kunde})</div>`;
+    if (kunde) {
+        html += `<div class="print-name">${kunde}</div>`;
     }
 
     previewInner.innerHTML = html;
