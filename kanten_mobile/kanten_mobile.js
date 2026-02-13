@@ -1,5 +1,5 @@
 // ============================================================
-// DEVICE DETECTION (ROBUST & EINFACH)
+// DEVICE DETECTION
 // ============================================================
 
 const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
@@ -7,39 +7,33 @@ const isPC = !isTouchDevice;
 
 let selectedCustomer = "";
 let selectedArt = "";
+
 // ============================================================
-// DEVICE INFO (oben links / unten rechts)
+// DOM READY
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const buildInfo = document.getElementById("buildInfo");
+    const deviceInfo = document.getElementById("deviceInfo");
+    const buildInfo  = document.getElementById("buildInfo");
 
-    if (!buildInfo) return;
+    // DEVICE INFO (oben links)
+    if (deviceInfo) {
+        deviceInfo.textContent = isPC ? "PC" : "Touch";
+    }
 
-    buildInfo.innerHTML = `
-        <div style="
-            position: fixed;
-            top: 8px;
-            left: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #444;
-            z-index: 9999;">
-            ${isPC ? "PC" : "Touch"}
-        </div>
+    // BUILD INFO (unten rechts automatisch)
+    if (buildInfo) {
+        const d = new Date(document.lastModified);
+        const stamp =
+            d.getFullYear() +
+            String(d.getMonth()+1).padStart(2,"0") +
+            String(d.getDate()).padStart(2,"0") + "." +
+            String(d.getHours()).padStart(2,"0") +
+            String(d.getMinutes()).padStart(2,"0");
 
-        <div style="
-            position: fixed;
-            bottom: 8px;
-            right: 12px;
-            font-size: 11px;
-            opacity: 0.6;
-            color: #444;
-            z-index: 9999;">
-            Build 20260213.1338
-        </div>
-    `;
+        buildInfo.textContent = "Build " + stamp;
+    }
 });
    // =============== PC INPUT FELD =================
 let pcInputWrapper = null;
