@@ -78,7 +78,7 @@ function setCornerInfo() {
     buildInfo.style.bottom = "8px";
     buildInfo.style.right = "12px";
   }
-}
+
 
   // ---- UNTEN RECHTS ----
   if (buildInfo) {
