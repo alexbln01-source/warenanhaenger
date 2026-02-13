@@ -1,95 +1,14 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Warenanhänger</title>
-<link rel="stylesheet" href="kanten_mobile.css">
-</head>
-<body>
-
-<div id="card">
-
-    <div class="grid-label spacer-top">WARENANHÄNGER AUSWÄHLEN</div>
-
-    <div class="art-btn-row">
-        <button id="btnKanten" class="artBtn">Kanten</button>
-        <button id="btnSchweissen" class="artBtn">Schweißen</button>
-        <button id="btnBohrwerk" class="artBtn">Bohrwerk</button>
-        <button id="btnEiltSehr" class="artBtn eilt-art">
-            <span class="art-title">Anhänger</span>
-            <span class="art-sub">Eilt Sehr</span>
-        </button>
-    </div>
-
-    <div class="grid-label">KUNDE AUSWÄHLEN</div>
-
-    <!-- PC Eingabefeld -->
-    <div id="pcInputWrapper" style="display:none; margin:10px 0;">
-        <input id="pcKeyboardInput"
-               type="text"
-               placeholder="Kundennamen eingeben"
-               style="width:100%; padding:10px; font-size:18px;">
-    </div>
-
-    <div class="section">
-        <div id="kundenArea" class="disabled">
-            <button class="kundeBtn" data-kunde="Backhus">Backhus</button>
-            <button class="kundeBtn" data-kunde="Bergmann M-H">Bergmann M-H</button>
-            <button class="kundeBtn" data-kunde="Bücker">Bücker</button>
-            <button class="kundeBtn" data-kunde="FVG">FVG</button>
-            <button class="kundeBtn" data-kunde="Grimme">Grimme</button>
-            <button class="kundeBtn" data-kunde="Janzen">Janzen</button>
-            <button class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
-            <button class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
-            <button class="kundeBtn" data-kunde="PAUS">PAUS</button>
-            <button class="kundeBtn" data-kunde="TOS">TOS</button>
-            <button class="kundeBtn" data-kunde="SONSTIGE">
-                Sonstige Kunden
-            </button>
-        </div>
-    </div>
-
-    <div id="actionButtons">
-        <button id="btnBack">◀ Zurück</button>
-        <button id="btnDrucken">🖨️ Drucken</button>
-    </div>
-
-</div>
-
-<!-- ================= TASTATUR POPUP ================= -->
-
-<div id="keyboardPopup" class="keyboard-popup">
-    <div class="keyboard-box">
-
-        <div class="keyboard-title">
-            Kundenname eingeben
-        </div>
-
-        <input id="keyboardInput" type="text" readonly>
-
-        <div id="keyboardGrid" class="keyboard-grid"></div>
-
-    </div>
-</div>
-
-<script>
-
-/* ================= GERÄTEERKENNUNG ================= */
+// ================= GERÄTEERKENNUNG =================
+// true = Touchgerät (Zebra / Tablet / Handy)
+// false = PC / Mac mit echter Tastatur
 const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
 
 let selectedCustomer = "";
 let selectedArt = "";
 
-const popup            = document.getElementById("keyboardPopup");
-const keyboardInput    = document.getElementById("keyboardInput");
-const keyboardGrid     = document.getElementById("keyboardGrid");
-const kundenArea       = document.getElementById("kundenArea");
-
-const pcInputWrapper   = document.getElementById("pcInputWrapper");
-const pcKeyboardInput  = document.getElementById("pcKeyboardInput");
+const popup         = document.getElementById("keyboardPopup");
+const keyboardInput = document.getElementById("keyboardInput");
+const kundenArea    = document.getElementById("kundenArea");
 
 popup.style.display = "none";
 kundenArea.classList.add("disabled");
@@ -108,36 +27,37 @@ function clearCustomerSelection() {
 
 /* ================= ART BUTTONS ================= */
 
-document.getElementById("btnEiltSehr").onclick = () => {
+const btnEiltSehr   = document.getElementById("btnEiltSehr");
+const btnKanten     = document.getElementById("btnKanten");
+const btnSchweissen = document.getElementById("btnSchweissen");
+const btnBohrwerk   = document.getElementById("btnBohrwerk");
+
+btnEiltSehr.onclick = () => {
 
     selectedArt = "eilt_sehr";
     selectedCustomer = "EILT_SEHR";
 
     clearArtSelection();
-    document.getElementById("btnEiltSehr").classList.add("active");
+    btnEiltSehr.classList.add("active");
 
     clearCustomerSelection();
 
     popup.style.display = "none";
-    pcInputWrapper.style.display = "none";
+    keyboardInput.value = "";
+
     kundenArea.classList.add("disabled");
 };
 
-document.getElementById("btnKanten").onclick =
-    () => setNormalArt("kanten", "btnKanten");
+btnKanten.onclick     = () => setNormalArt("kanten", btnKanten);
+btnSchweissen.onclick = () => setNormalArt("schweissen", btnSchweissen);
+btnBohrwerk.onclick   = () => setNormalArt("bohrwerk", btnBohrwerk);
 
-document.getElementById("btnSchweissen").onclick =
-    () => setNormalArt("schweissen", "btnSchweissen");
-
-document.getElementById("btnBohrwerk").onclick =
-    () => setNormalArt("bohrwerk", "btnBohrwerk");
-
-function setNormalArt(art, btnId) {
+function setNormalArt(art, btn) {
 
     selectedArt = art;
 
     clearArtSelection();
-    document.getElementById(btnId).classList.add("active");
+    btn.classList.add("active");
 
     selectedCustomer = "";
     clearCustomerSelection();
@@ -161,38 +81,51 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
         const kunde = btn.dataset.kunde;
 
-        if (kunde === "SONSTIGE") {
+      if (kunde === "SONSTIGE") {
 
-            selectedCustomer = "SONSTIGE";
-            keyboardInput.value = "";
-            pcKeyboardInput.value = "";
+    selectedCustomer = "SONSTIGE";
+    keyboardInput.value = "";
 
-            if (isTouchDevice) {
+    if (isTouchDevice) {
+        // 📱 TOUCH → Popup + Mini-Keyboard
+        keyboardInput.setAttribute("readonly", "readonly");
+        popup.style.display = "flex";
 
-                popup.style.display = "flex";
-                pcInputWrapper.style.display = "none";
+        if (typeof renderKeyboard === "function") {
+            renderKeyboard();
+        }
 
-                renderKeyboard();
+        setTimeout(() => {
+            keyboardInput.focus();
+            keyboardInput.select();
+        }, 150);
 
-                setTimeout(() => {
-                    keyboardInput.focus();
-                }, 150);
+    } else {
+        // 💻 PC / MAC → Popup öffnen + normales Tippen erlauben
+        keyboardInput.removeAttribute("readonly");
+        popup.style.display = "flex";
 
-            } else {
+        // Mini-Keyboard ausblenden (nur PC-Tastatur)
+        keyboardGrid.style.display = "none";
 
-                popup.style.display = "none";
-                pcInputWrapper.style.display = "block";
+        setTimeout(() => {
+            keyboardInput.focus();
+            keyboardInput.select();
+        }, 50);
+    }
 
-                setTimeout(() => {
-                    pcKeyboardInput.focus();
-                }, 50);
-            }
+} else {
+    selectedCustomer = kunde;
+    popup.style.display = "none";
+
+    // wichtig: wieder zurücksetzen
+    keyboardInput.setAttribute("readonly", "readonly");
+    keyboardGrid.style.display = "";
+}
 
         } else {
-
             selectedCustomer = kunde;
             popup.style.display = "none";
-            pcInputWrapper.style.display = "none";
         }
     };
 });
@@ -219,13 +152,7 @@ document.getElementById("btnDrucken").onclick = () => {
     let kundeName = selectedCustomer;
 
     if (kundeName === "SONSTIGE") {
-
-        if (isTouchDevice) {
-            kundeName = keyboardInput.value.trim();
-        } else {
-            kundeName = pcKeyboardInput.value.trim();
-        }
-
+        kundeName = keyboardInput.value.trim();
         if (!kundeName) {
             alert("Bitte Kundennamen eingeben.");
             return;
@@ -243,7 +170,9 @@ document.getElementById("btnBack").onclick = () => {
     window.location.replace("../index.html?reload=" + Date.now());
 };
 
-/* ================= MINI KEYBOARD ================= */
+/* ================= TASTATUR ================= */
+
+const keyboardGrid = document.getElementById("keyboardGrid");
 
 function renderKeyboard() {
 
@@ -276,6 +205,8 @@ function renderKeyboard() {
         keyboardGrid.appendChild(row);
     });
 
+    // ===== UNTERE REIHE =====
+
     const bottomRow = document.createElement("div");
     bottomRow.className = "kbm-row bottom-row";
 
@@ -298,6 +229,12 @@ function renderKeyboard() {
     ok.className = "kbm-key ok";
     ok.textContent = "OK";
     ok.onclick = () => {
+
+        if (!keyboardInput.value.trim()) {
+            alert("Bitte Kundennamen eingeben.");
+            return;
+        }
+
         popup.style.display = "none";
     };
 
@@ -307,8 +244,3 @@ function renderKeyboard() {
 
     keyboardGrid.appendChild(bottomRow);
 }
-
-</script>
-
-</body>
-</html>
