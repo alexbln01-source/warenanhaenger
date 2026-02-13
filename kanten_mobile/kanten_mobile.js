@@ -73,7 +73,7 @@ function setCornerInfo() {
     deviceInfo.style.left = "12px";
     deviceInfo.style.right = "auto";
     deviceInfo.style.bottom = "auto";
-    deviceInfo.style.transform = "none";   // 🔥 DAS FEHLT BEI DIR
+    deviceInfo.style.transform = "none";
     deviceInfo.style.margin = "0";
     deviceInfo.style.zIndex = "9999";
   }
@@ -86,12 +86,11 @@ function setCornerInfo() {
     buildInfo.style.right = "12px";
     buildInfo.style.left = "auto";
     buildInfo.style.top = "auto";
-    buildInfo.style.transform = "none";    // 🔥 auch hier sicherheitshalber
+    buildInfo.style.transform = "none";
     buildInfo.style.margin = "0";
     buildInfo.style.zIndex = "9999";
   }
 }
-
 // Format: 20260213.1338
 function buildStamp() {
   const d = new Date(document.lastModified);
