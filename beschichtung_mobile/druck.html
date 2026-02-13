@@ -16,7 +16,7 @@ html, body {
 }
 
 /* =======================
-   VORSCHAU (UNVERÄNDERT)
+   VORSCHAU (NUR SCREEN)
 ======================= */
 .preview-wrapper {
     width: 100%;
@@ -42,7 +42,7 @@ html, body {
 }
 
 /* =======================
-   ETIKETT
+   ETIKETT (STANDARD = A5 QUER für Vorschau / PC-Print)
 ======================= */
 .etikett {
     width: 210mm;
@@ -80,6 +80,42 @@ html, body {
 .print-name { font-size: 32pt; margin-top: 4mm; }
 
 /* =======================
+   WARNBOX
+======================= */
+.warnbox {
+    margin: -10px auto 10px;
+    max-width: 280px;
+    background: #fff4f4;
+    border: 2px solid #c80000;
+    border-radius: 14px;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(200,0,0,0.2);
+    animation: warnPulse 0.9s ease-in-out infinite;
+}
+.warnbox span {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #7a0000;
+}
+
+@keyframes warnPulse {
+    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
+    100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+}
+
+/* Warnbox NICHT drucken */
+@media print {
+    .warnbox { display: none !important; }
+}
+
+/* =======================
    BUTTONS
 ======================= */
 .bottom-bar {
@@ -101,11 +137,11 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
+/* =======================
+   DRUCK – STABIL
+======================= */
 .print-only { display: none; }
 
-/* =======================
-   PRINT LOGIK
-======================= */
 @media print {
 
     html, body {
@@ -115,6 +151,7 @@ html, body {
     }
 
     .preview-wrapper,
+    .warnbox,
     .bottom-bar {
         display: none !important;
     }
@@ -123,9 +160,9 @@ html, body {
         display: block !important;
     }
 
-    /* =====================
-       💻 PC → A5 Quer
-    ====================== */
+    /* =========================
+       💻 PC → A5 landscape (wie vorher)
+    ========================== */
     body.pc-device {
         page: pc;
     }
@@ -135,9 +172,11 @@ html, body {
         margin: 0;
     }
 
-    /* =====================
-       📱 MOBILE → A6 Hoch
-    ====================== */
+    /* =========================
+       📱 MOBILE → A6 portrait
+       + Inhalt als Querformat drehen
+       + sauber zentrieren
+    ========================== */
     body:not(.pc-device) {
         page: mobile;
     }
@@ -147,15 +186,43 @@ html, body {
         margin: 0;
     }
 
-    /* 🔄 MOBILE INHALT DREHEN */
-    body:not(.pc-device) .print-only {
-        width: 148mm;      /* Quermaß */
+    /* A6-Seitenrahmen */
+    body:not(.pc-device) #printArea.print-only {
+        width: 105mm;
+        height: 148mm;
+        position: relative;
+        overflow: hidden;
+        background: white;
+    }
+
+    /* Das Etikett selbst wird A6-Quer (148x105) und zentriert rotiert */
+    body:not(.pc-device) #printArea.print-only .etikett {
+        width: 148mm;
         height: 105mm;
-        transform: rotate(90deg);
-        transform-origin: center center;
+
+        /* A6-angepasst: sonst sitzt alles zu weit außen */
+        padding: 7mm;
+
         position: absolute;
-        top: 0;
-        left: 0;
+        left: 50%;
+        top: 50%;
+
+        transform: translate(-50%, -50%) rotate(90deg);
+        transform-origin: center center;
+
+        box-shadow: none !important;
+    }
+
+    /* Innenbereich an A6-Padding anpassen */
+    body:not(.pc-device) #printArea.print-only .etikett-center {
+        inset: 7mm;
+    }
+
+    /* Logo-Position für A6 neu (sonst “zu weit weg”) */
+    body:not(.pc-device) #printArea.print-only .logo {
+        right: 7mm;
+        bottom: 7mm;
+        width: 30mm; /* optional: etwas kleiner für A6 */
     }
 }
 </style>
@@ -163,6 +230,7 @@ html, body {
 
 <body>
 
+<!-- ===== VORSCHAU ===== -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -172,6 +240,12 @@ html, body {
     </div>
 </div>
 
+<div class="warnbox">
+    ⚠️ Achtung!
+    <span>Papierformat <b>A5 quer</b> im Drucker auswählen</span>
+</div>
+
+<!-- ===== DRUCK ===== -->
 <div id="printArea" class="etikett print-only">
     <div class="etikett-center" id="printInner"></div>
     <img src="langen.png" class="logo">
@@ -200,9 +274,14 @@ window.onload = () => {
         : {};
 
     const beistell = data.beistell || "";
+    const type     = data.selectedType || "";
     const kunde    = data.kundename || "";
 
     let html = `<div class="print-beistell">${beistell}</div>`;
+
+    /* (dein Switch bleibt bei dir 1:1 – ich lasse ihn weg, weil du hier nur Demo drin hattest)
+       Wenn du ihn drin hast: einfach wieder einsetzen, der Druck/Rotate-Teil bleibt gleich.
+    */
 
     if (kunde) {
         html += `<div class="print-name">(${kunde})</div>`;
