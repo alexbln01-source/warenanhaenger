@@ -42,7 +42,7 @@ html, body {
 }
 
 /* =======================
-   ETIKETT STANDARD (PC QUER)
+   ETIKETT
 ======================= */
 .etikett {
     width: 210mm;
@@ -50,12 +50,6 @@ html, body {
     padding: 10mm;
     box-sizing: border-box;
     position: relative;
-}
-
-/* MOBILE HOCHFORMAT */
-body:not(.pc-device) .etikett {
-    width: 148mm;
-    height: 210mm;
 }
 
 .logo {
@@ -99,7 +93,6 @@ body:not(.pc-device) .etikett {
     font-weight: 900;
     color: #c80000;
     font-size: 16px;
-    box-shadow: 0 0 10px rgba(200,0,0,0.2);
 }
 
 @media print {
@@ -129,10 +122,12 @@ body:not(.pc-device) .etikett {
 .print-btn { background: #00963d; }
 
 /* =======================
-   DRUCK SETTINGS
+   DRUCK LOGIK
 ======================= */
+
 .print-only { display: none; }
 
+/* ========= PRINT ========= */
 @media print {
 
     html, body {
@@ -151,7 +146,7 @@ body:not(.pc-device) .etikett {
         display: block !important;
     }
 
-    /* ===== PC → A5 QUER ===== */
+    /* ===== PC → A5 Quer ===== */
     body.pc-device {
         page: pcLandscape;
     }
@@ -161,14 +156,25 @@ body:not(.pc-device) .etikett {
         margin: 0;
     }
 
-    /* ===== MOBILE → A5 HOCH ===== */
+    /* ===== MOBILE → A6 Hoch ===== */
     body:not(.pc-device) {
         page: mobilePortrait;
     }
 
     @page mobilePortrait {
-        size: A5 portrait;
+        size: A6 portrait;
         margin: 0;
+    }
+
+    /* 🔄 MOBILE INHALT DREHEN */
+    body:not(.pc-device) .print-only {
+        transform: rotate(90deg);
+        transform-origin: center center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 148mm;
+        height: 105mm;
     }
 }
 </style>
@@ -176,7 +182,6 @@ body:not(.pc-device) .etikett {
 
 <body>
 
-<!-- ===== VORSCHAU ===== -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -191,7 +196,6 @@ body:not(.pc-device) .etikett {
     <span>Papierformat automatisch je nach Gerät</span>
 </div>
 
-<!-- ===== DRUCK ===== -->
 <div id="printArea" class="etikett print-only">
     <div class="etikett-center" id="printInner"></div>
     <img src="langen.png" class="logo">
@@ -203,7 +207,7 @@ body:not(.pc-device) .etikett {
 </div>
 
 <script>
-/* ===== PC ERKENNUNG ===== */
+/* PC Klasse automatisch setzen */
 if (window.matchMedia("(pointer:fine)").matches) {
     document.body.classList.add("pc-device");
 }
@@ -220,13 +224,12 @@ window.onload = () => {
         : {};
 
     const beistell = data.beistell || "";
-    const type     = data.selectedType || "";
     const kunde    = data.kundename || "";
 
     let html = `<div class="print-beistell">${beistell}</div>`;
 
     if (kunde) {
-        html += `<div class="print-name">${kunde}</div>`;
+        html += `<div class="print-name">(${kunde})</div>`;
     }
 
     previewInner.innerHTML = html;
