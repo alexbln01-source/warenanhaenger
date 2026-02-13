@@ -5,6 +5,40 @@ const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
 
 let selectedCustomer = "";
 let selectedArt = "";
+// ================= PC INPUT FELD =================
+let pcInputWrapper = null;
+
+if (!isTouchDevice) {
+
+    pcInputWrapper = document.createElement("div");
+    pcInputWrapper.style.display = "none";
+    pcInputWrapper.style.position = "fixed";
+    pcInputWrapper.style.top = "50%";
+    pcInputWrapper.style.left = "50%";
+    pcInputWrapper.style.transform = "translate(-50%, -50%)";
+    pcInputWrapper.style.background = "#ffffff";
+    pcInputWrapper.style.padding = "30px";
+    pcInputWrapper.style.borderRadius = "14px";
+    pcInputWrapper.style.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
+    pcInputWrapper.style.zIndex = "9999";
+
+    pcInputWrapper.innerHTML = `
+        <input id="pcCustomerInput"
+               type="text"
+               placeholder="Kundenname eingeben"
+               style="
+                   width:300px;
+                   padding:14px;
+                   font-size:20px;
+                   border-radius:10px;
+                   border:2px solid #1976d2;
+                   outline:none;
+                   text-align:center;
+               ">
+    `;
+
+    document.body.appendChild(pcInputWrapper);
+}
 
 const popup         = document.getElementById("keyboardPopup");
 const keyboardInput = document.getElementById("keyboardInput");
