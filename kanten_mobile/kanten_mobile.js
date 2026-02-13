@@ -100,6 +100,8 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
             } else {
                 // 💻 PC / MAC → KEIN Popup
+                       keyboardInput.removeAttribute("readonly");
+
                 popup.style.display = "none";
 
                 setTimeout(() => {
