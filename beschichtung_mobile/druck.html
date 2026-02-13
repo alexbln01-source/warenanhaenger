@@ -15,9 +15,8 @@ html, body {
     overflow: hidden;
 }
 
-/* =======================
-   VORSCHAU
-======================= */
+/* ================= VORSCHAU ================= */
+
 .preview-wrapper {
     width: 100%;
     height: calc(100% - 220px);
@@ -34,16 +33,11 @@ html, body {
     transform-origin: center;
 }
 
-@media (max-width: 900px) {
-    .preview-area { transform: scale(0.36); }
-}
-@media (min-width: 901px) {
-    .preview-area { transform: scale(0.45); }
-}
+@media (max-width: 900px) { .preview-area { transform: scale(0.36); } }
+@media (min-width: 901px) { .preview-area { transform: scale(0.45); } }
 
-/* =======================
-   ETIKETT BASIS
-======================= */
+/* ================= ETIKETT BASIS ================= */
+
 .etikett {
     width: 210mm;
     height: 148mm;
@@ -59,9 +53,7 @@ html, body {
     width: 42mm;
 }
 
-.etikett * {
-    font-weight: bold !important;
-}
+.etikett * { font-weight: bold !important; }
 
 .etikett-center {
     position: absolute;
@@ -73,49 +65,11 @@ html, body {
     text-align: center;
 }
 
-/* TEXTE */
 .print-beistell { font-size: 60pt; margin-bottom: 6mm; }
 .print-name { font-size: 32pt; margin-top: 4mm; }
 
-/* WARNBOX */
-.warnbox {
-    margin: -10px auto 10px;
-    max-width: 280px;
-    background: #fff4f4;
-    border: 2px solid #c80000;
-    border-radius: 14px;
-    padding: 12px 16px;
-    text-align: center;
-    font-weight: 900;
-    color: #c80000;
-    font-size: 16px;
-}
+/* ================= DRUCKLOGIK ================= */
 
-@media print {
-    .warnbox { display: none !important; }
-}
-
-/* BUTTONS */
-.bottom-bar {
-    height: 60px;
-    display: flex;
-    gap: 16px;
-    padding: 0 20px;
-}
-
-.btn {
-    flex: 1;
-    border: none;
-    border-radius: 14px;
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-}
-
-.back-btn { background: #444; }
-.print-btn { background: #00963d; }
-
-/* DRUCKLOGIK */
 .print-only { display: none; }
 
 @media print {
@@ -127,14 +81,11 @@ html, body {
     }
 
     .preview-wrapper,
-    .warnbox,
     .bottom-bar {
         display: none !important;
     }
 
-    .print-only {
-        display: block !important;
-    }
+    .print-only { display: block !important; }
 
     /* PC */
     body.pc-device { page: pc; }
@@ -174,6 +125,28 @@ html, body {
         transform-origin: center center;
     }
 }
+
+/* ================= BUTTONS ================= */
+
+.bottom-bar {
+    height: 60px;
+    display: flex;
+    gap: 16px;
+    padding: 0 20px;
+}
+
+.btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+.back-btn { background: #444; }
+.print-btn { background: #00963d; }
+
 </style>
 </head>
 
@@ -186,11 +159,6 @@ html, body {
             <img src="langen.png" class="logo">
         </div>
     </div>
-</div>
-
-<div class="warnbox">
-    ⚠️ Achtung!
-    <span>Papierformat korrekt auswählen</span>
 </div>
 
 <div id="printArea" class="print-only">
@@ -232,52 +200,32 @@ window.onload = () => {
 
     switch(type) {
 
-        case "LP":
-            html += `<div style="font-size:80pt;">L&P</div>`;
-            break;
+        case "LP": html += `<div style="font-size:80pt;">L&P</div>`; break;
+        case "LPEILT": html += `<div style="font-size:80pt;">L&P</div><div style="font-size:70pt;">„EILT SEHR“</div>`; break;
 
-        case "LPEILT":
-            html += `<div style="font-size:80pt;">L&P</div>
-                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
-            break;
+        case "SCHUETTE": html += `<div style="font-size:80pt;">Schütte</div>`; break;
+        case "SCHUETTEEILT": html += `<div style="font-size:80pt;">Schütte</div><div style="font-size:70pt;">„EILT SEHR“</div>`; break;
 
-        case "SCHUETTE":
-            html += `<div style="font-size:80pt;">Schütte</div>`;
-            break;
+        case "KLEY": html += `<div style="font-size:80pt;">Kleymann</div>`; break;
+        case "KLEYEILT": html += `<div style="font-size:80pt;">Kleymann</div><div style="font-size:70pt;">„EILT SEHR“</div>`; break;
 
-        case "SCHUETTEEILT":
-            html += `<div style="font-size:80pt;">Schütte</div>
-                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
-            break;
+        case "KALEY": html += `<div style="font-size:80pt;">Kaley</div>`; break;
 
-        case "KLEY":
-            html += `<div style="font-size:80pt;">Kleymann</div>`;
-            break;
+        case "COMTEZN8": html += `<div style="font-size:80pt;">Comte</div><div style="font-size:48pt;">„Zn8“</div>`; break;
+        case "COMTEZNI8": html += `<div style="font-size:80pt;">Comte</div><div style="font-size:48pt;">„ZnI8“</div>`; break;
+        case "CHEMISCH": html += `<div style="font-size:80pt;">Comte</div><div style="font-size:48pt;">„Chemisch Vernickeln“</div>`; break;
+        case "DICK": html += `<div style="font-size:80pt;">Comte</div><div style="font-size:40pt;">„Dickschichtpassivierung“</div>`; break;
+        case "BLAU": html += `<div style="font-size:80pt;">Comte</div><div style="font-size:48pt;">„Blau“</div>`; break;
 
-        case "KLEYEILT":
-            html += `<div style="font-size:80pt;">Kleymann</div>
-                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
-            break;
+        case "PENTZ": html += `<div style="font-size:70pt;">Pentz & Gerdes</div><div style="font-size:48pt;">„ZN8“</div>`; break;
+        case "RCS": html += `<div style="font-size:80pt;">RCS</div><div style="font-size:48pt;">„Schweißen“</div>`; break;
+        case "COATINC": html += `<div style="font-size:80pt;">Coatinc 24</div><div style="font-size:48pt;">„Verzinken“</div>`; break;
 
-        case "WOB":
-            html += `<div style="font-size:80pt;">WOB</div>`;
-            break;
+        case "WOB": html += `<div style="font-size:80pt;">WOB</div>`; break;
+        case "WOBEILT": html += `<div style="font-size:80pt;">WOB</div><div style="font-size:70pt;">„EILT SEHR“</div>`; break;
 
-        case "WOBEILT":
-            html += `<div style="font-size:80pt;">WOB</div>
-                     <div style="font-size:70pt;">„EILT SEHR“</div>`;
-            break;
-
-        case "EKODEKOR":
-            html += `<div style="font-size:80pt;">EKO-Dekor</div>
-                     <div style="font-size:48pt;">„Eloxieren“</div>`;
-            break;
-
-        case "EKODEKOREILT":
-            html += `<div style="font-size:80pt;">EKO-Dekor</div>
-                     <div style="font-size:70pt;">„EILT SEHR“</div>
-                     <div style="font-size:48pt;">„Eloxieren“</div>`;
-            break;
+        case "EKODEKOR": html += `<div style="font-size:80pt;">EKO-Dekor</div><div style="font-size:48pt;">„Eloxieren“</div>`; break;
+        case "EKODEKOREILT": html += `<div style="font-size:80pt;">EKO-Dekor</div><div style="font-size:70pt;">„EILT SEHR“</div><div style="font-size:48pt;">„Eloxieren“</div>`; break;
     }
 
     const noNameTypes = ["LP","LPEILT","SCHUETTE","SCHUETTEEILT","KLEY","KLEYEILT","WOB","WOBEILT","EKODEKOR","EKODEKOREILT"];
