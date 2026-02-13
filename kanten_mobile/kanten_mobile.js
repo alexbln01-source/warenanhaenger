@@ -13,6 +13,34 @@ const kundenArea    = document.getElementById("kundenArea");
 popup.style.display = "none";
 kundenArea.classList.add("disabled");
 
+/* ================= PC INPUT FELD ERZEUGEN ================= */
+
+if (!isTouchDevice) {
+
+    const wrapper = document.createElement("div");
+    wrapper.id = "pcInputWrapper";
+    wrapper.style.display = "none";
+    wrapper.style.textAlign = "center";
+    wrapper.style.marginTop = "20px";
+
+    wrapper.innerHTML = `
+        <input id="pcCustomerInput"
+               type="text"
+               placeholder="Kundenname eingeben"
+               style="
+                   width:60%;
+                   padding:12px;
+                   font-size:18px;
+                   border-radius:10px;
+                   border:2px solid #1976d2;
+                   outline:none;
+                   text-align:center;
+               ">
+    `;
+
+    document.getElementById("card").appendChild(wrapper);
+}
+
 /* ================= HILFSFUNKTIONEN ================= */
 
 function clearArtSelection() {
@@ -43,7 +71,10 @@ btnEiltSehr.onclick = () => {
     clearCustomerSelection();
 
     popup.style.display = "none";
-    keyboardInput.value = "";
+
+    if (!isTouchDevice) {
+        document.getElementById("pcInputWrapper").style.display = "none";
+    }
 
     kundenArea.classList.add("disabled");
 };
@@ -81,51 +112,45 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
         const kunde = btn.dataset.kunde;
 
-      if (kunde === "SONSTIGE") {
+        if (kunde === "SONSTIGE") {
 
-    selectedCustomer = "SONSTIGE";
-    keyboardInput.value = "";
+            selectedCustomer = "SONSTIGE";
+            keyboardInput.value = "";
 
-    if (isTouchDevice) {
-        // 📱 TOUCH → Popup + Mini-Keyboard
-        keyboardInput.setAttribute("readonly", "readonly");
-        popup.style.display = "flex";
+            if (isTouchDevice) {
 
-        if (typeof renderKeyboard === "function") {
-            renderKeyboard();
-        }
+                // 📱 MOBILE → Popup Tastatur
+                popup.style.display = "flex";
 
-        setTimeout(() => {
-            keyboardInput.focus();
-            keyboardInput.select();
-        }, 150);
+                renderKeyboard();
 
-    } else {
-        // 💻 PC / MAC → Popup öffnen + normales Tippen erlauben
-        keyboardInput.removeAttribute("readonly");
-        popup.style.display = "flex";
+                setTimeout(() => {
+                    keyboardInput.focus();
+                }, 150);
 
-        // Mini-Keyboard ausblenden (nur PC-Tastatur)
-        keyboardGrid.style.display = "none";
+            } else {
 
-        setTimeout(() => {
-            keyboardInput.focus();
-            keyboardInput.select();
-        }, 50);
-    }
+                // 💻 PC → normales Eingabefeld anzeigen
+                popup.style.display = "none";
 
-} else {
-    selectedCustomer = kunde;
-    popup.style.display = "none";
+                const wrapper = document.getElementById("pcInputWrapper");
+                const input   = document.getElementById("pcCustomerInput");
 
-    // wichtig: wieder zurücksetzen
-    keyboardInput.setAttribute("readonly", "readonly");
-    keyboardGrid.style.display = "";
-}
+                wrapper.style.display = "block";
+
+                setTimeout(() => {
+                    input.focus();
+                }, 100);
+            }
 
         } else {
+
             selectedCustomer = kunde;
             popup.style.display = "none";
+
+            if (!isTouchDevice) {
+                document.getElementById("pcInputWrapper").style.display = "none";
+            }
         }
     };
 });
@@ -152,7 +177,13 @@ document.getElementById("btnDrucken").onclick = () => {
     let kundeName = selectedCustomer;
 
     if (kundeName === "SONSTIGE") {
-        kundeName = keyboardInput.value.trim();
+
+        if (isTouchDevice) {
+            kundeName = keyboardInput.value.trim();
+        } else {
+            kundeName = document.getElementById("pcCustomerInput").value.trim();
+        }
+
         if (!kundeName) {
             alert("Bitte Kundennamen eingeben.");
             return;
@@ -170,7 +201,7 @@ document.getElementById("btnBack").onclick = () => {
     window.location.replace("../index.html?reload=" + Date.now());
 };
 
-/* ================= TASTATUR ================= */
+/* ================= MOBILE TASTATUR ================= */
 
 const keyboardGrid = document.getElementById("keyboardGrid");
 
@@ -204,8 +235,6 @@ function renderKeyboard() {
 
         keyboardGrid.appendChild(row);
     });
-
-    // ===== UNTERE REIHE =====
 
     const bottomRow = document.createElement("div");
     bottomRow.className = "kbm-row bottom-row";
