@@ -62,6 +62,9 @@ function setCornerInfo() {
       isTC21 ? "Zebra TC21" :
       isZebra ? "Zebra" :
       isMobile ? "Mobil" : "PC";
+    deviceInfo.textContent = isPC
+  ? "Gerät: PC"
+  : "Gerät: " + deviceLabel;
 
     // oben links
     deviceInfo.style.left = "12px";
