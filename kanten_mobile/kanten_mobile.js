@@ -1,4 +1,13 @@
 // ============================================================
+// DEVICE DETECTION (ROBUST & EINFACH)
+// ============================================================
+
+const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
+const isPC = !isTouchDevice;
+
+let selectedCustomer = "";
+let selectedArt = "";
+// ============================================================
 // DEVICE INFO (oben links / unten rechts)
 // ============================================================
 
