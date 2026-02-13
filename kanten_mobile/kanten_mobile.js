@@ -65,15 +65,20 @@ function setCornerInfo() {
     isZebra ? "Zebra" :
     isMobile ? "Mobil" : "PC";
 
-  // ---- OBEN LINKS ----
   if (deviceInfo) {
     deviceInfo.textContent = "Gerät: " + deviceLabel;
-
-    deviceInfo.style.position = "fixed";
-    deviceInfo.style.left = "12px";
+    deviceInfo.classList.add("corner-fix");
     deviceInfo.style.top = "8px";
-    deviceInfo.style.zIndex = "9999";
+    deviceInfo.style.left = "12px";
   }
+
+  if (buildInfo) {
+    buildInfo.textContent = "Build " + buildStamp();
+    buildInfo.classList.add("corner-fix");
+    buildInfo.style.bottom = "8px";
+    buildInfo.style.right = "12px";
+  }
+}
 
   // ---- UNTEN RECHTS ----
   if (buildInfo) {
