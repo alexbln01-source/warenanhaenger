@@ -59,34 +59,35 @@ if (isTC22) document.body.classList.add("zebra-tc22");
 // ============================================================
 function setCornerInfo() {
 
-  let deviceLabel =
+  const deviceLabel =
     isTC22 ? "Zebra TC22" :
     isTC21 ? "Zebra TC21" :
     isZebra ? "Zebra" :
     isMobile ? "Mobil" : "PC";
 
+  // ---- OBEN LINKS ----
   if (deviceInfo) {
     deviceInfo.textContent = "Gerät: " + deviceLabel;
-    deviceInfo.classList.add("corner-fix");
+
+    deviceInfo.style.position = "fixed";
     deviceInfo.style.top = "8px";
     deviceInfo.style.left = "12px";
+    deviceInfo.style.right = "auto";
+    deviceInfo.style.bottom = "auto";
+    deviceInfo.style.transform = "none";
+    deviceInfo.style.zIndex = "9999";
   }
-
-  if (buildInfo) {
-    buildInfo.textContent = "Build " + buildStamp();
-    buildInfo.classList.add("corner-fix");
-    buildInfo.style.bottom = "8px";
-    buildInfo.style.right = "12px";
-  }
-
 
   // ---- UNTEN RECHTS ----
   if (buildInfo) {
     buildInfo.textContent = "Build " + buildStamp();
 
     buildInfo.style.position = "fixed";
-    buildInfo.style.right = "12px";
     buildInfo.style.bottom = "8px";
+    buildInfo.style.right = "12px";
+    buildInfo.style.left = "auto";
+    buildInfo.style.top = "auto";
+    buildInfo.style.transform = "none";
     buildInfo.style.zIndex = "9999";
   }
 }
