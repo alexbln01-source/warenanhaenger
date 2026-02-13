@@ -404,21 +404,24 @@ window.addEventListener("load", () => {
     previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
-    /* Click-Handler robust (Mobile) */
- printBtn.addEventListener("click", () => {
+ /* PRINT */
+printBtn.addEventListener("click", () => {
+
     window.print();
 
     // Nur auf Mobile zurückspringen
     if (!document.body.classList.contains("pc-device")) {
         setTimeout(() => {
             window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-        }, 800); // 800ms warten bis Druckdialog wirklich offen ist
+        }, 800);
     }
-
-    backBtn.addEventListener("click", () => {
-        window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
-    });
 });
+
+/* BACK */
+backBtn.addEventListener("click", () => {
+    window.location.replace("beschichtung_mobile.html?reload=" + Date.now());
+});
+
 </script>
 
 </body>
