@@ -1,9 +1,9 @@
 // ============================================================
-// KANTEN – kanten_mobile.js (STABILE VERSION)
+// KANTEN – STABILE VERSION
 // ============================================================
 
 // ============================================================
-// DEVICE DETECTION (wie PAUS)
+// DEVICE DETECTION
 // ============================================================
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = window.screen.width;
@@ -30,10 +30,10 @@ function buildStamp() {
 }
 
 // ============================================================
-// DOM ELEMENTE
+// DOM
 // ============================================================
-const deviceInfo   = document.getElementById("deviceInfo");
-const buildInfo    = document.getElementById("buildInfo");
+const deviceInfo = document.getElementById("deviceInfo");
+const buildInfo  = document.getElementById("buildInfo");
 
 const popup         = document.getElementById("keyboardPopup");
 const keyboardInput = document.getElementById("keyboardInput");
@@ -49,100 +49,28 @@ const btnBohrwerk   = document.getElementById("btnBohrwerk");
 const btnBack    = document.getElementById("btnBack");
 const btnDrucken = document.getElementById("btnDrucken");
 
-// ============================================================
-// STATE
-// ============================================================
 let selectedCustomer = "";
 let selectedArt = "";
 let sonstigeName = "";
 
 // ============================================================
-// DEVICE INFO + BUILD (ohne Layout zu zerstören)
+// INIT
 // ============================================================
-function setCornerInfo() {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const deviceLabel =
+    // Gerät anzeigen (kein Layout ändern!)
+    const label =
         isTC22 ? "Zebra TC22" :
         isTC21 ? "Zebra TC21" :
         isZebra ? "Zebra" :
         isMobile ? "Mobil" : "PC";
 
-    if (deviceInfo) {
-        deviceInfo.textContent = "Gerät: " + deviceLabel;
-    }
+    if (deviceInfo) deviceInfo.textContent = "Gerät: " + label;
+    if (buildInfo)  buildInfo.textContent  = "Build " + buildStamp();
 
-    if (buildInfo) {
-        buildInfo.textContent = "Build " + buildStamp();
-    }
-}
-
-// ============================================================
-// PC INPUT POPUP
-// ============================================================
-let pcInputWrapper = null;
-let pcCustomerInput = null;
-
-function createPcInput() {
-    if (!isPC) return;
-
-    pcInputWrapper = document.createElement("div");
-    pcInputWrapper.style.display = "none";
-    pcInputWrapper.style.position = "fixed";
-    pcInputWrapper.style.top = "50%";
-    pcInputWrapper.style.left = "50%";
-    pcInputWrapper.style.transform = "translate(-50%, -50%)";
-    pcInputWrapper.style.background = "#fff";
-    pcInputWrapper.style.padding = "22px";
-    pcInputWrapper.style.borderRadius = "14px";
-    pcInputWrapper.style.boxShadow = "0 10px 30px rgba(0,0,0,0.25)";
-    pcInputWrapper.style.zIndex = "9999";
-    pcInputWrapper.style.textAlign = "center";
-
-    pcInputWrapper.innerHTML = `
-        <div style="font-weight:800;margin-bottom:10px;color:#003a73;">
-            Kundenname eingeben
-        </div>
-        <input id="pcCustomerInput"
-               type="text"
-               placeholder="Kundenname"
-               style="
-                 width:300px;
-                 padding:14px;
-                 font-size:20px;
-                 border-radius:10px;
-                 border:2px solid #1976d2;
-                 text-align:center;
-               ">
-        <div style="margin-top:12px;">
-            <button id="pcCustomerOk"
-                style="padding:8px 18px;font-weight:800;">
-                OK
-            </button>
-        </div>
-    `;
-
-    document.body.appendChild(pcInputWrapper);
-    pcCustomerInput = pcInputWrapper.querySelector("#pcCustomerInput");
-
-    pcInputWrapper.querySelector("#pcCustomerOk").onclick = () => {
-
-        const name = pcCustomerInput.value.trim();
-        if (!name) return alert("Bitte Kundennamen eingeben.");
-
-        setSonstigeName(name);
-        pcInputWrapper.style.display = "none";
-    };
-}
-
-function openPcInput() {
-    if (!pcInputWrapper) return;
-    pcInputWrapper.style.display = "block";
-    setTimeout(() => pcCustomerInput.focus(), 50);
-}
-
-function hidePcInput() {
-    if (pcInputWrapper) pcInputWrapper.style.display = "none";
-}
+    if (popup) popup.style.display = "none";
+    if (kundenArea) kundenArea.classList.add("disabled");
+});
 
 // ============================================================
 // SONSTIGE BUTTON TEXT ÄNDERN
@@ -162,23 +90,7 @@ function resetSonstigeButton() {
 }
 
 // ============================================================
-// INIT
-// ============================================================
-document.addEventListener("DOMContentLoaded", () => {
-
-    setCornerInfo();
-    createPcInput();
-
-    if (popup) popup.style.display = "none";
-    if (kundenArea) kundenArea.classList.add("disabled");
-
-    if (!isPC && keyboardInput) {
-        keyboardInput.setAttribute("inputmode", "none");
-    }
-});
-
-// ============================================================
-// HILFSFUNKTIONEN
+// ART BUTTONS
 // ============================================================
 function clearArtSelection() {
     document.querySelectorAll(".artBtn")
@@ -190,9 +102,6 @@ function clearCustomerSelection() {
         .forEach(b => b.classList.remove("active"));
 }
 
-// ============================================================
-// ART BUTTONS
-// ============================================================
 btnEiltSehr.onclick = () => {
 
     selectedArt = "eilt_sehr";
@@ -203,9 +112,6 @@ btnEiltSehr.onclick = () => {
 
     clearCustomerSelection();
     resetSonstigeButton();
-
-    if (popup) popup.style.display = "none";
-    hidePcInput();
 
     kundenArea.classList.add("disabled");
 };
@@ -229,7 +135,7 @@ function setNormalArt(art, btn) {
 }
 
 // ============================================================
-// KUNDEN BUTTONS
+// KUNDEN
 // ============================================================
 document.querySelectorAll(".kundeBtn").forEach(btn => {
 
@@ -247,17 +153,25 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
         if (kunde === "SONSTIGE") {
 
+            selectedCustomer = "SONSTIGE";
+
             if (isPC) {
-                openPcInput();
+
+                const name = prompt("Kundenname eingeben:");
+                if (!name || !name.trim()) return;
+
+                setSonstigeName(name.trim());
+
             } else {
+
                 popup.style.display = "flex";
                 renderKeyboard();
                 setTimeout(() => keyboardInput.focus(), 50);
             }
 
         } else {
+
             selectedCustomer = kunde;
-            hidePcInput();
             if (popup) popup.style.display = "none";
         }
     };
@@ -297,25 +211,37 @@ btnBack.onclick = () => {
 };
 
 // ============================================================
-// MOBILE TASTATUR
+// MOBILE TASTATUR (DEIN ORIGINAL LAYOUT BLEIBT!)
 // ============================================================
 function renderKeyboard() {
 
     keyboardGrid.innerHTML = "";
 
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const rows = [
+        ["Q","W","E","R","T","Z","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L"],
+        ["Y","X","C","V","B","N","M"]
+    ];
 
-    letters.forEach(letter => {
+    rows.forEach(letters => {
 
-        const btn = document.createElement("button");
-        btn.className = "kbm-key";
-        btn.textContent = letter;
+        const row = document.createElement("div");
+        row.className = "kbm-row";
 
-        btn.onclick = () => {
-            keyboardInput.value += letter;
-        };
+        letters.forEach(letter => {
 
-        keyboardGrid.appendChild(btn);
+            const btn = document.createElement("button");
+            btn.className = "kbm-key";
+            btn.textContent = letter;
+
+            btn.onclick = () => {
+                keyboardInput.value += letter;
+            };
+
+            row.appendChild(btn);
+        });
+
+        keyboardGrid.appendChild(row);
     });
 
     const ok = document.createElement("button");
