@@ -174,13 +174,19 @@ document.getElementById("btnDrucken").onclick = () => {
 
     let kundeName = selectedCustomer;
 
-    if (kundeName === "SONSTIGE") {
+   if (kundeName === "SONSTIGE") {
+
+    if (isTouchDevice) {
         kundeName = keyboardInput.value.trim();
-        if (!kundeName) {
-            alert("Bitte Kundennamen eingeben.");
-            return;
-        }
+    } else {
+        kundeName = document.getElementById("pcCustomerInput").value.trim();
     }
+
+    if (!kundeName) {
+        alert("Bitte Kundennamen eingeben.");
+        return;
+    }
+}
 
     location.href =
         "druck_kanten.html?kunde=" + encodeURIComponent(kundeName) +
