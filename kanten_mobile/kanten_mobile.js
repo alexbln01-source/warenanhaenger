@@ -1,37 +1,31 @@
-// ================= GERÄTEERKENNUNG =================
-// true = Touchgerät (Zebra / Tablet / Handy)
-// false = PC / Mac mit echter Tastatur
+
+// ============================================================
+// DEVICE DETECTION (ROBUST & EINFACH)
+// ============================================================
+
 const isTouchDevice = window.matchMedia("(pointer:coarse)").matches;
-console.log("TouchDevice:", isTouchDevice);
+const isPC = !isTouchDevice;
+
 let selectedCustomer = "";
 let selectedArt = "";
+
 // ============================================================
 // DEVICE INFO ANZEIGE
 // ============================================================
 
 const buildInfo = document.getElementById("buildInfo");
 
-let deviceLabel = "";
-
-if (isPC) {
-    deviceLabel = "PC";
-} else if (isZebra) {
-    deviceLabel = "Zebra";
-} else if (isMobile) {
-    deviceLabel = "Mobile";
-} else {
-    deviceLabel = "Unbekannt";
+if (buildInfo) {
+    buildInfo.innerHTML = `
+        <div style="font-weight:700;">
+            Gerät: ${isPC ? "PC" : "Touch"}
+        </div>
+        <div style="font-size:12px; opacity:0.7;">
+            Build: KANTEN v1.0
+        </div>
+    `;
 }
-
-buildInfo.innerHTML = `
-    <div style="font-weight:700;">
-        Gerät: ${deviceLabel}
-    </div>
-    <div style="font-size:12px; opacity:0.7;">
-        Build: KANTEN v1.0
-    </div>
-`;
-// ================= PC INPUT FELD =================
+   // =============== PC INPUT FELD =================
 let pcInputWrapper = null;
 
 if (!isTouchDevice) {
