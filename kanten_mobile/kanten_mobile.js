@@ -142,10 +142,14 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
     }, 100);
 }
 
-        } else {
-            selectedCustomer = kunde;
-            popup.style.display = "none";
-        }
+       } else {
+    selectedCustomer = kunde;
+    popup.style.display = "none";
+
+    if (!isTouchDevice && pcInputWrapper) {
+        pcInputWrapper.style.display = "none";
+    }
+}
     };
 });
 
