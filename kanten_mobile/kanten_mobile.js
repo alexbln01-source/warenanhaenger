@@ -97,15 +97,16 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
                 setTimeout(() => {
                     keyboardInput.focus();
                 }, 150);
+} else {
+    // 💻 PC → normales Eingabefeld anzeigen
+    popup.style.display = "none";
 
-            } else {
-                // 💻 PC / MAC → KEIN Popup
-                popup.style.display = "none";
+    pcInputWrapper.style.display = "block";
 
-                setTimeout(() => {
-                    keyboardInput.focus();
-                }, 50);
-            }
+    setTimeout(() => {
+        document.getElementById("pcCustomerInput").focus();
+    }, 100);
+}
 
         } else {
             selectedCustomer = kunde;
