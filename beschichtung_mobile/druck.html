@@ -428,33 +428,26 @@ window.addEventListener("load", () => {
     previewInner.innerHTML = html;
     printInner.innerHTML   = html;
 
-   /* PRINT */
-printBtn.addEventListener("click", () => {
+/* >>> INHALT SETZEN <<< */
+previewInner.innerHTML = html;
+printInner.innerHTML   = html;
 
-    // Nur Mobile merkt sich dass wir drucken
-    if (!document.body.classList.contains("pc-device")) {
-        document.body.classList.add("mobile-printing");
-    }
-
+/* >>> DRUCKEN <<< */
+printBtn.onclick = () => {
     window.print();
-});
+};
 
-/* AFTER PRINT (nur Mobile zurück) */
-window.addEventListener("afterprint", () => {
-
-    if (document.body.classList.contains("mobile-printing")) {
-        window.location.replace(
-            "beschichtung_mobile.html?reload=" + Date.now()
-        );
+/* >>> NACH DRUCK ZURÜCK (nur Mobile) <<< */
+window.addEventListener("focus", () => {
+    if (!document.body.classList.contains("pc-device")) {
+        window.location.replace("beschichtung_mobile.html");
     }
-
 });
 
-/* BACK */
-backBtn.addEventListener("click", () => {
-    window.location.replace(
-        "beschichtung_mobile.html?reload=" + Date.now()
-    );
+/* >>> ZURÜCK BUTTON <<< */
+backBtn.onclick = () => {
+    window.location.replace("beschichtung_mobile.html");
+};
 });
 
 });
