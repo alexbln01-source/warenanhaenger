@@ -401,6 +401,10 @@ if (!isEiltSehr) {
 /* >>> DRUCKEN <<< */
 printBtn.onclick = () => {
     window.print();
+
+    setTimeout(() => {
+        window.location.replace("../index.html");
+    }, 800);
 };
 
 /* >>> NACH DRUCK ZUR INDEX <<< */
