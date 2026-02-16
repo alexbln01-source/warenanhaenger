@@ -287,17 +287,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener("load", () => {
 
-const previewInner = document.getElementById("previewInner");
-const printInner   = document.getElementById("printInner");
-const printBtn     = document.getElementById("printBtn");
-const backBtn      = document.getElementById("backBtn");
-
 const qs = new URLSearchParams(location.search);
-const kunde = qs.get("kunde") || "";
-const type = qs.get("type") || qs.get("art") || "";
-const beistell = qs.get("beistell") || "";
 
-let html = `<div class="print-beistell">${beistell}</div>`;
+let kunde = "",
+    type  = "",
+    beistell = "";
+
+// zuerst „data“ prüfen
+if (qs.has("data")) {
+    try {
+        const data = JSON.parse(decodeURIComponent(qs.get("data")));
+        beistell = data.beistell || "";
+        type      = data.selectedType || "";
+        kunde     = data.kundename || "";
+    } catch {}
+}
+
+// falls nix drin war, auf klassische Parameter zurückfallen
+if (!type)      type      = qs.get("type")      || "";
+if (!kunde)     kunde     = qs.get("kunde")     || "";
+if (!beistell)  beistell  = qs.get("beistell")  || "";
 
 /* ===== SWITCH MIT ALLEN KUNDEN ===== */
 
