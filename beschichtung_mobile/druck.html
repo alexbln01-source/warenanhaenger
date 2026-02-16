@@ -419,7 +419,9 @@ const beistell = qs.get("beistell") || "";
     if (kunde && !noNameTypes.includes(type)) {
         html += `<div class="print-name">(${kunde})</div>`;
     }
-
+previewInner.innerHTML = html;
+printInner.innerHTML   = html;
+    
    let didPrint = false;
 
 /* >>> DRUCKEN <<< */
