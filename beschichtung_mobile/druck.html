@@ -422,24 +422,15 @@ const beistell = qs.get("beistell") || "";
 previewInner.innerHTML = html;
 printInner.innerHTML   = html;
     
-   let didPrint = false;
-
-/* >>> DRUCKEN <<< */
-printBtn.onclick = () => {
-    didPrint = true;
+  printBtn.onclick = () => {
     window.print();
 };
 
-/* >>> NACH DRUCK ZUR INDEX <<< */
-window.addEventListener("focus", () => {
-    if (!didPrint) return;
-
-    didPrint = false;
-
+window.onafterprint = () => {
     setTimeout(() => {
         window.location.replace("../index.html");
     }, 300);
-});
+};
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
