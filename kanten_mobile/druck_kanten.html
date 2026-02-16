@@ -399,8 +399,14 @@ if (!isEiltSehr) {
 }
 
 printBtn.onclick = () => window.print();
+
 backBtn.onclick = () => {
     window.location.replace("kanten_mobile.html?reload=" + Date.now());
+};
+
+/* >>> NACH DRUCK AUTOMATISCH ZUR INDEX <<< */
+window.onafterprint = function () {
+    window.location.replace("../index.html");
 };
 </script>
 
