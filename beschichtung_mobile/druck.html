@@ -16,7 +16,7 @@ html, body {
 }
 
 /* =======================
-   VORSCHAU (NUR SCREEN)
+   VORSCHAU
 ======================= */
 .preview-wrapper {
     width: 100%;
@@ -42,7 +42,7 @@ html, body {
 }
 
 /* =======================
-   ETIKETT (BASIS A5 QUER)
+   ETIKETT
 ======================= */
 .etikett {
     width: 210mm;
@@ -74,68 +74,78 @@ html, body {
 }
 
 /* =======================
-   ===== KUNDEN =====
-   (1:1 WIE DEINE ALTE DATEI)
+   KUNDEN
 ======================= */
 
-/* L&P */
-.kunde-lp { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-lp-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-lp-eilt { font-size: 70pt; margin-bottom: 6mm; }
+.kunde-lp,
+.kunde-schuette,
+.kunde-kley,
+.kunde-kaley,
+.kunde-wob {
+    font-size: 80pt;
+    margin-bottom: 8mm;
+}
 
-/* SCHÜTTE */
-.kunde-schuette { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-schuette-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-schuette-eilt { font-size: 70pt; margin-bottom: 6mm; }
+.kunde-lp-eilt,
+.kunde-schuette-eilt,
+.kunde-kley-eilt,
+.kunde-wob-eilt {
+    font-size: 80pt;
+    margin-bottom: 8mm;
+}
 
-/* KLEY */
-.kunde-kley { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-kley-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-kley-eilt { font-size: 70pt; margin-bottom: 6mm; }
-
-/* KALEY */
-.kunde-kaley { font-size: 80pt; margin-bottom: 8mm; }
-
-/* WOB */
-.kunde-wob { font-size: 80pt; margin-bottom: 8mm; }
-.kunde-wob-eilt { font-size: 80pt; margin-bottom: 8mm; }
-.sub-wob-eilt { font-size: 70pt; margin-bottom: 6mm; }
+.sub-lp-eilt,
+.sub-schuette-eilt,
+.sub-kley-eilt,
+.sub-wob-eilt {
+    font-size: 70pt;
+    margin-bottom: 6mm;
+}
 
 /* COMTE */
-.kunde-comte-zn8 { font-size: 80pt; margin-bottom: 1mm; }
-.sub-comte-zn8 { font-size: 48pt; margin-bottom: 1mm; }
+.kunde-comte-zn8,
+.kunde-comte-zni8,
+.kunde-chemisch,
+.kunde-dick,
+.kunde-blau,
+.kunde-rcs,
+.kunde-coatinc,
+.kunde-ekodekor {
+    font-size: 80pt;
+    margin-bottom: 1mm;
+}
 
-.kunde-comte-zni8 { font-size: 80pt; margin-bottom: 1mm; }
-.sub-comte-zni8 { font-size: 48pt; margin-bottom: 1mm; }
+.sub-comte-zn8,
+.sub-comte-zni8,
+.sub-chemisch,
+.sub-blau,
+.sub-rcs,
+.sub-coatinc,
+.sub-ekodekor {
+    font-size: 48pt;
+}
 
-.kunde-chemisch { font-size: 80pt; margin-bottom: 1mm; }
-.sub-chemisch { font-size: 48pt; margin-bottom: 1mm; }
-
-.kunde-dick { font-size: 80pt; margin-bottom: 1mm; }
-.sub-dick { font-size: 40pt; margin-bottom: 1mm; }
-
-.kunde-blau { font-size: 80pt; margin-bottom: 1mm; }
-.sub-blau { font-size: 48pt; margin-bottom: 1mm; }
+.sub-dick {
+    font-size: 40pt;
+}
 
 /* SONSTIGE */
-.kunde-pentz { font-size: 70pt; margin-bottom: 1mm; }
-.sub-pentz { font-size: 48pt; margin-bottom: 1mm; }
+.kunde-pentz {
+    font-size: 70pt;
+}
+.sub-pentz {
+    font-size: 48pt;
+}
 
-.kunde-rcs { font-size: 80pt; margin-bottom: 1mm; }
-.sub-rcs { font-size: 48pt; margin-bottom: 1mm; }
+.print-beistell {
+    font-size: 60pt;
+    margin-bottom: 6mm;
+}
 
-.kunde-coatinc { font-size: 80pt; margin-bottom: 1mm; }
-.sub-coatinc { font-size: 48pt; margin-bottom: 1mm; }
-
-/* EKO-DEKOR */
-.kunde-ekodekor { font-size: 80pt; margin-bottom: 1mm; }
-.sub-ekodekor { font-size: 48pt; margin-bottom: 1mm; }
-
-/* =======================
-   TEXTE
-======================= */
-.print-beistell { font-size: 60pt; margin-bottom: 6mm; }
-.print-name { font-size: 32pt; margin-top: 4mm; }
+.print-name {
+    font-size: 32pt;
+    margin-top: 4mm;
+}
 
 /* =======================
    WARNBOX
@@ -151,21 +161,6 @@ html, body {
     font-weight: 900;
     color: #c80000;
     font-size: 16px;
-    box-shadow: 0 0 10px rgba(200,0,0,0.2);
-    animation: warnPulse 0.9s ease-in-out infinite;
-}
-.warnbox span {
-    display: block;
-    font-size: 14px;
-    font-weight: 700;
-    margin-top: 4px;
-    color: #7a0000;
-}
-
-@keyframes warnPulse {
-    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
-    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
-    100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
 }
 
 /* =======================
@@ -191,7 +186,7 @@ html, body {
 .print-btn { background: #00963d; }
 
 /* =======================
-   DRUCK – STABIL
+   PRINT
 ======================= */
 .print-only { display: none; }
 
@@ -213,7 +208,6 @@ html, body {
         display: block !important;
     }
 
-    /* ================= PC ================= */
     body.pc-device { page: pc; }
 
     @page pc {
@@ -224,13 +218,10 @@ html, body {
     body.pc-device .print-rotate {
         transform: none !important;
         position: static !important;
-        left: auto !important;
-        top: auto !important;
         width: 210mm !important;
         height: 148mm !important;
     }
 
-    /* ================= MOBILE ================= */
     body:not(.pc-device) { page: mobile; }
 
     @page mobile {
@@ -238,18 +229,13 @@ html, body {
         margin: 0;
     }
 
-    /* A6 HOCHFORMAT (Papier), Inhalt wird gedreht + skaliert,
-       so dass es nach dem Drehen wie QUER aussieht. */
     body:not(.pc-device) #printArea {
-        width: 105mm;   /* A6 portrait */
-        height: 148mm;  /* A6 portrait */
+        width: 105mm;
+        height: 148mm;
         position: relative;
         overflow: hidden;
     }
 
-    /* Original-Etikett ist A5 quer (210x148).
-       Nach rotate(90deg) wird daraus 148x210.
-       Mit scale(0.704) -> ca. 105x148 => passt perfekt auf A6 hoch. */
     body:not(.pc-device) .print-rotate {
         width: 210mm;
         height: 148mm;
@@ -265,7 +251,6 @@ html, body {
 
 <body>
 
-<!-- ===== VORSCHAU ===== -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
@@ -280,7 +265,6 @@ html, body {
     <span>Papierformat <b>A5 quer</b> (PC) / <b>A6 hoch</b> (Mobile) auswählen</span>
 </div>
 
-<!-- ===== DRUCK ===== -->
 <div id="printArea" class="print-only">
     <div class="etikett print-rotate">
         <div class="etikett-center" id="printInner"></div>
@@ -290,153 +274,150 @@ html, body {
 
 <div class="bottom-bar">
     <button class="btn back-btn" id="backBtn">◀ Zurück</button>
-    <button class="btn print-btn" id="printBtn" type="button">Drucken</button>
+    <button class="btn print-btn" id="printBtn">Drucken</button>
 </div>
 
 <script>
 
-/* PC automatisch erkennen */
 document.addEventListener("DOMContentLoaded", () => {
-    const isPC = window.matchMedia("(pointer:fine)").matches;
-    if (isPC) document.body.classList.add("pc-device");
+    if (window.matchMedia("(pointer:fine)").matches) {
+        document.body.classList.add("pc-device");
+    }
 });
 
 window.addEventListener("load", () => {
-    const previewInner = document.getElementById("previewInner");
-    const printInner   = document.getElementById("printInner");
-    const printBtn     = document.getElementById("printBtn");
-    const backBtn      = document.getElementById("backBtn");
 
-    const qs = new URLSearchParams(location.search);
+const previewInner = document.getElementById("previewInner");
+const printInner   = document.getElementById("printInner");
+const printBtn     = document.getElementById("printBtn");
+const backBtn      = document.getElementById("backBtn");
+
+const qs = new URLSearchParams(location.search);
 const kunde = qs.get("kunde") || "";
 const type  = qs.get("type")  || "";
 const beistell = qs.get("beistell") || "";
-    
-    let html = `<div class="print-beistell">${beistell}</div>`;
 
-    switch (type) {
+let html = `<div class="print-beistell">${beistell}</div>`;
 
-        case "LP":
-            html += `<div class="kunde-lp">L&P</div>`;
-            break;
+/* ===== SWITCH MIT ALLEN KUNDEN ===== */
 
-        case "LPEILT":
-            html += `<div class="kunde-lp-eilt">L&P</div>
-                     <div class="sub-lp-eilt">„EILT SEHR“</div>`;
-            break;
+switch (type) {
 
-        case "SCHUETTE":
-            html += `<div class="kunde-schuette">Schütte</div>`;
-            break;
+case "LP":
+html += `<div class="kunde-lp">L&P</div>`;
+break;
 
-        case "SCHUETTEEILT":
-            html += `<div class="kunde-schuette-eilt">Schütte</div>
-                     <div class="sub-schuette-eilt">„EILT SEHR“</div>`;
-            break;
+case "LPEILT":
+html += `<div class="kunde-lp-eilt">L&P</div>
+<div class="sub-lp-eilt">„EILT SEHR“</div>`;
+break;
 
-        case "KLEY":
-            html += `<div class="kunde-kley">Kleymann</div>`;
-            break;
+case "SCHUETTE":
+html += `<div class="kunde-schuette">Schütte</div>`;
+break;
 
-        case "KLEYEILT":
-            html += `<div class="kunde-kley-eilt">Kleymann</div>
-                     <div class="sub-kley-eilt">„EILT SEHR“</div>`;
-            break;
+case "SCHUETTEEILT":
+html += `<div class="kunde-schuette-eilt">Schütte</div>
+<div class="sub-schuette-eilt">„EILT SEHR“</div>`;
+break;
 
-        case "KALEY":
-            html += `<div class="kunde-kaley">Kaley</div>`;
-            break;
+case "KLEY":
+html += `<div class="kunde-kley">Kleymann</div>`;
+break;
 
-        case "COMTEZN8":
-            html += `<div class="kunde-comte-zn8">Comte</div>
-                     <div class="sub-comte-zn8">„Zn8“</div>`;
-            break;
+case "KLEYEILT":
+html += `<div class="kunde-kley-eilt">Kleymann</div>
+<div class="sub-kley-eilt">„EILT SEHR“</div>`;
+break;
 
-        case "COMTEZNI8":
-            html += `<div class="kunde-comte-zni8">Comte</div>
-                     <div class="sub-comte-zni8">„ZnI8“</div>`;
-            break;
+case "KALEY":
+html += `<div class="kunde-kaley">Kaley</div>`;
+break;
 
-        case "CHEMISCH":
-            html += `<div class="kunde-chemisch">Comte</div>
-                     <div class="sub-chemisch">„Chemisch Vernickeln“</div>`;
-            break;
+case "COMTEZN8":
+html += `<div class="kunde-comte-zn8">Comte</div>
+<div class="sub-comte-zn8">„Zn8“</div>`;
+break;
 
-        case "DICK":
-            html += `<div class="kunde-dick">Comte</div>
-                     <div class="sub-dick">„Dickschichtpassivierung“</div>`;
-            break;
+case "COMTEZNI8":
+html += `<div class="kunde-comte-zni8">Comte</div>
+<div class="sub-comte-zni8">„ZnI8“</div>`;
+break;
 
-        case "BLAU":
-            html += `<div class="kunde-blau">Comte</div>
-                     <div class="sub-blau">„Blau“</div>`;
-            break;
+case "CHEMISCH":
+html += `<div class="kunde-chemisch">Comte</div>
+<div class="sub-chemisch">„Chemisch Vernickeln“</div>`;
+break;
 
-        case "PENTZ":
-            html += `<div class="kunde-pentz">Pentz & Gerdes</div>
-                     <div class="sub-pentz">„ZN8“</div>`;
-            break;
+case "DICK":
+html += `<div class="kunde-dick">Comte</div>
+<div class="sub-dick">„Dickschichtpassivierung“</div>`;
+break;
 
-        case "RCS":
-            html += `<div class="kunde-rcs">RCS</div>
-                     <div class="sub-rcs">„Schweißen“</div>`;
-            break;
+case "BLAU":
+html += `<div class="kunde-blau">Comte</div>
+<div class="sub-blau">„Blau“</div>`;
+break;
 
-        case "COATINC":
-            html += `<div class="kunde-coatinc">Coatinc 24</div>
-                     <div class="sub-coatinc">„Verzinken“</div>`;
-            break;
+case "PENTZ":
+html += `<div class="kunde-pentz">Pentz & Gerdes</div>
+<div class="sub-pentz">„ZN8“</div>`;
+break;
 
-        case "WOB":
-            html += `<div class="kunde-wob">WOB</div>`;
-            break;
+case "RCS":
+html += `<div class="kunde-rcs">RCS</div>
+<div class="sub-rcs">„Schweißen“</div>`;
+break;
 
-        case "WOBEILT":
-            html += `<div class="kunde-wob-eilt">WOB</div>
-                     <div class="sub-wob-eilt">„EILT SEHR“</div>`;
-            break;
+case "COATINC":
+html += `<div class="kunde-coatinc">Coatinc 24</div>
+<div class="sub-coatinc">„Verzinken“</div>`;
+break;
 
-        case "EKODEKOR":
-            html += `<div class="kunde-ekodekor">EKO-Dekor</div>
-                     <div class="sub-ekodekor">„Eloxieren“</div>`;
-            break;
+case "WOB":
+html += `<div class="kunde-wob">WOB</div>`;
+break;
 
-        case "EKODEKOREILT":
-            html += `<div class="kunde-ekodekor">EKO-Dekor</div>
-                     <div class="sub-wob-eilt">„EILT SEHR“</div>
-                     <div class="sub-ekodekor">„Eloxieren“</div>`;
-            break;
-    }
+case "WOBEILT":
+html += `<div class="kunde-wob-eilt">WOB</div>
+<div class="sub-wob-eilt">„EILT SEHR“</div>`;
+break;
 
-    const noNameTypes = [
-        "LP","LPEILT",
-        "SCHUETTE","SCHUETTEEILT",
-        "KLEY","KLEYEILT",
-        "WOB","WOBEILT",
-        "EKODEKOR","EKODEKOREILT"
-    ];
+case "EKODEKOR":
+html += `<div class="kunde-ekodekor">EKO-Dekor</div>
+<div class="sub-ekodekor">„Eloxieren“</div>`;
+break;
 
-    if (kunde && !noNameTypes.includes(type)) {
-        html += `<div class="print-name">(${kunde})</div>`;
-    }
+case "EKODEKOREILT":
+html += `<div class="kunde-ekodekor">EKO-Dekor</div>
+<div class="sub-wob-eilt">„EILT SEHR“</div>
+<div class="sub-ekodekor">„Eloxieren“</div>`;
+break;
+}
+
 previewInner.innerHTML = html;
 printInner.innerHTML   = html;
-    
-  printBtn.onclick = () => {
-    window.print();
+
+let didPrint = false;
+
+printBtn.onclick = () => {
+didPrint = true;
+window.print();
 };
 
-window.onafterprint = () => {
-    setTimeout(() => {
-        window.location.replace("../index.html");
-    }, 500);
-};
+window.addEventListener("focus", () => {
+if (!didPrint) return;
+didPrint = false;
+setTimeout(() => {
+window.location.replace("../index.html");
+}, 300);
+});
 
-/* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
-    window.location.replace("kanten_mobile.html");
+window.location.replace("kanten_mobile.html");
 };
-}); 
+
+});
 </script>
 
 </body>
