@@ -416,7 +416,7 @@ break;
 }
 /* >>> OPTIONALER KUNDENNAME <<< */
 if (kunde) {
-    html += `<div class="print-name">${kunde}</div>`;
+    html += `<div class="print-name">(${kunde})</div>`;
 }/* ===== RENDER ===== */
 previewInner.innerHTML = html;
 printInner.innerHTML   = html;
