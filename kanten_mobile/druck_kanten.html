@@ -398,19 +398,24 @@ if (!isEiltSehr) {
     printContent.innerHTML   = html;
 }
 
+let didPrint = false;
+
 /* >>> DRUCKEN <<< */
 printBtn.onclick = () => {
+    didPrint = true;
     window.print();
-
-    setTimeout(() => {
-        window.location.replace("../index.html");
-    }, 800);
 };
 
 /* >>> NACH DRUCK ZUR INDEX <<< */
-window.onafterprint = function () {
-    window.location.replace("../index.html");
-};
+window.addEventListener("focus", () => {
+    if (!didPrint) return;
+
+    didPrint = false;
+
+    setTimeout(() => {
+        window.location.replace("../index.html");
+    }, 300);
+});
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
