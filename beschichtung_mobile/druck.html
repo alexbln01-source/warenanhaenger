@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isPC) document.body.classList.add("pc-device");
 });
 
-
+window.addEventListener("load", () => {
     const previewInner = document.getElementById("previewInner");
     const printInner   = document.getElementById("printInner");
     const printBtn     = document.getElementById("printBtn");
