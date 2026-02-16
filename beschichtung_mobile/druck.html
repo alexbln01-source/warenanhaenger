@@ -428,14 +428,14 @@ printBtn.onclick = () => {
     window.print();
 };
 
-/* >>> NACH DRUCK ZURÜCK (PC + Mobile) <<< */
-window.addEventListener("focus", () => {
+/* >>> NACH DRUCK ZUR INDEX <<< */
+window.onafterprint = function () {
     window.location.replace("../index.html");
-});
+};
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
-    window.location.replace("beschichtung_mobile.html");
+    window.location.replace("kanten_mobile.html");
 };
 });
 
