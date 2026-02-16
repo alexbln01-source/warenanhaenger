@@ -294,7 +294,7 @@ const backBtn      = document.getElementById("backBtn");
 
 const qs = new URLSearchParams(location.search);
 const kunde = qs.get("kunde") || "";
-const type  = qs.get("type")  || "";
+const type = qs.get("type") || qs.get("art") || "";
 const beistell = qs.get("beistell") || "";
 
 let html = `<div class="print-beistell">${beistell}</div>`;
