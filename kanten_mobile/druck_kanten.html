@@ -398,15 +398,19 @@ if (!isEiltSehr) {
     printContent.innerHTML   = html;
 }
 
-printBtn.onclick = () => window.print();
-
-backBtn.onclick = () => {
-    window.location.replace("kanten_mobile.html?reload=" + Date.now());
+/* >>> DRUCKEN <<< */
+printBtn.onclick = () => {
+    window.print();
 };
 
-/* >>> NACH DRUCK AUTOMATISCH ZUR INDEX <<< */
+/* >>> NACH DRUCK ZUR INDEX <<< */
 window.onafterprint = function () {
     window.location.replace("../index.html");
+};
+
+/* >>> ZURÜCK BUTTON <<< */
+backBtn.onclick = () => {
+    window.location.replace("kanten_mobile.html");
 };
 </script>
 
