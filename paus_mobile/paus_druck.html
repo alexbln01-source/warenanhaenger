@@ -287,23 +287,60 @@ const backBtn      = document.getElementById("backBtn");
     `;
 
     /* >>> INHALT SETZEN <<< */
-    previewInner.innerHTML = html;
-    printInner.innerHTML   = html;
+previewInner.innerHTML = html;
+printInner.innerHTML   = html;
 
-    /* >>> DRUCKEN <<< */
-    printBtn.onclick = () => {
-        window.print();
+/* ===== PRINT + RETURN ===== */
+
+let didPrint = false;
+
+const isMobileDevice =
+    /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
+/* >>> DRUCKEN <<< */
+printBtn.onclick = () => {
+    didPrint = true;
+    window.print();
+};
+
+/* =========================
+   DESKTOP (Windows / Mac)
+========================= */
+if (!isMobileDevice) {
+
+    window.onafterprint = () => {
+        if (!didPrint) return;
+
+        didPrint = false;
+
+        setTimeout(() => {
+            window.location.replace("paus_mobile.html");
+        }, 300);
     };
 
-    /* >>> NACH DRUCK ZURÜCK <<< */
+}
+
+/* =========================
+   MOBILE / ZEBRA
+========================= */
+if (isMobileDevice) {
+
     window.addEventListener("focus", () => {
-        window.location.replace("paus_mobile.html");
+        if (!didPrint) return;
+
+        didPrint = false;
+
+        setTimeout(() => {
+            window.location.replace("paus_mobile.html");
+        }, 300);
     });
 
-    /* >>> ZURÜCK BUTTON <<< */
-    backBtn.onclick = () => {
-        window.location.replace("paus_mobile.html");
-    };
+}
+
+/* >>> ZURÜCK BUTTON <<< */
+backBtn.onclick = () => {
+    window.location.replace("paus_mobile.html");
+};
 };
 </script>
 
