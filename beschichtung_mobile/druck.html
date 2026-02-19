@@ -434,38 +434,54 @@ printInner.innerHTML   = html;
 
 let didPrint = false;
 
+const isMobileDevice =
+    /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
 /* >>> DRUCKEN <<< */
 printBtn.onclick = () => {
     didPrint = true;
     window.print();
 };
 
-/* >>> WINDOWS / EDGE / CHROME <<< */
-window.onafterprint = () => {
-    if (!didPrint) return;
+/* =========================
+   DESKTOP (Windows / Mac)
+========================= */
+if (!isMobileDevice) {
 
-    didPrint = false;
+    window.onafterprint = () => {
+        if (!didPrint) return;
 
-    setTimeout(() => {
-        window.location.replace("../index.html");
-    }, 300);
-};
+        didPrint = false;
 
-/* >>> MOBILE / ZEBRA FALLBACK <<< */
-window.addEventListener("focus", () => {
-    if (!didPrint) return;
+        setTimeout(() => {
+            window.location.replace("../index.html");
+        }, 300);
+    };
 
-    didPrint = false;
+}
 
-    setTimeout(() => {
-        window.location.replace("../index.html");
-    }, 300);
-});
+/* =========================
+   MOBILE / ZEBRA
+========================= */
+if (isMobileDevice) {
+
+    window.addEventListener("focus", () => {
+        if (!didPrint) return;
+
+        didPrint = false;
+
+        setTimeout(() => {
+            window.location.replace("../index.html");
+        }, 300);
+    });
+
+}
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
     window.location.replace("beschichtung_mobile.html");
 };
+
     }); 
 </script>
 
