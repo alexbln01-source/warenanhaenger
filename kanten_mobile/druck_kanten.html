@@ -396,8 +396,13 @@ if (!isEiltSehr) {
     previewContent.innerHTML = html;
     printContent.innerHTML   = html;
 }
+/* ===== PRINT + RETURN ===== */
 
 let didPrint = false;
+
+const isMobileDevice =
+    /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
 
 /* >>> DRUCKEN <<< */
 printBtn.onclick = () => {
