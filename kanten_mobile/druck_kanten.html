@@ -153,15 +153,28 @@ html, body {
     }
 
     #printArea {
+        display: block !important;
+    }
+
+    .print-page {
         width: 105mm;
         height: 148mm;
         position: relative;
         overflow: hidden;
+        page-break-after: always;
+        break-after: page;
     }
 
-    #printArea.etikett {
+    .print-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    .print-page .etikett {
         width: 148mm;
         height: 105mm;
+        padding: 8mm;
+        box-sizing: border-box;
         position: absolute;
         top: 21.5mm;
         left: -21.5mm;
@@ -189,9 +202,7 @@ html, body {
 </div>
 
 <!-- ===== DRUCK ===== -->
-<div id="printArea" class="etikett print-only">
-    <div class="etikett-center" id="printContent"></div>
-</div>
+<div id="printArea" class="print-only"></div>
 
 <!-- ===== BUTTONS ===== -->
 <div class="bottom-bar">
@@ -206,10 +217,16 @@ const art   = qs.get("art")   || "kanten";
 
 /* ===== DOM REFERENZEN ===== */
 const previewContent = document.getElementById("previewContent");
-const printContent   = document.getElementById("printContent");
+const printArea      = document.getElementById("printArea");
 const printBtn       = document.getElementById("printBtn");
 const backBtn        = document.getElementById("backBtn");
 const isEiltSehr = (kunde === "EILT_SEHR");
+
+/* Bergmann M-H + Kanten: 50 Etikette mit Palettennummer 700–749 */
+const BERGMANN_KANTEN_PALETTE_START = 700;
+const BERGMANN_KANTEN_PALETTE_COUNT = 50;
+const isBergmannKantenBatch =
+    kunde === "Bergmann M-H" && art === "kanten";
 
 /* =================================================
    SONDERFALL: EILT SEHR
@@ -229,7 +246,12 @@ if (isEiltSehr) {
             EILT&nbsp;SEHR
         </div>`;
     previewContent.innerHTML = html;
-    printContent.innerHTML   = html;
+    printArea.innerHTML = `
+        <div class="print-page">
+            <div class="etikett">
+                <div class="etikett-center">${html}</div>
+            </div>
+        </div>`;
 }
 
 
@@ -251,7 +273,7 @@ const kantenLayouts = {
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
  { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
+ { text:"Palettennummer: <palette>", size:"22pt", marginTop:"22mm", align:"left" }
 ],
 "Bücker":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
@@ -378,13 +400,29 @@ const bohrwerkLayouts = {
 ]
 };
 
-function render(rows){
+function render(rows, paletteNum){
+    const paletteDisplay =
+        paletteNum != null ? String(paletteNum) : "_______________";
+
     return rows.map(r=>{
         if(r.circle){
             return `<div style="margin:${r.marginTop} auto 0;width:${BW_KREIS_SIZE};height:${BW_KREIS_SIZE};border:4px solid black;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${r.size};">${r.text}</div>`;
         }
-        return `<div style="font-size:${r.size};margin-top:${r.marginTop};text-align:${r.align};">${r.text.replace("<kunde>",kunde)}</div>`;
+        const text = r.text
+            .replace("<kunde>", kunde)
+            .replace("<palette>", paletteDisplay);
+        return `<div style="font-size:${r.size};margin-top:${r.marginTop};text-align:${r.align};">${text}</div>`;
     }).join("");
+}
+
+function buildPrintPages(rows, paletteNumbers){
+    printArea.innerHTML = paletteNumbers.map(num => `
+        <div class="print-page">
+            <div class="etikett">
+                <div class="etikett-center">${render(rows, num)}</div>
+            </div>
+        </div>
+    `).join("");
 }
 
 let layouts = kantenLayouts;
@@ -392,9 +430,26 @@ if(art==="schweissen") layouts = schweissenLayouts;
 if(art==="bohrwerk") layouts = bohrwerkLayouts;
 
 if (!isEiltSehr) {
-    const html = render(layouts[kunde] || layouts["Sonstige Kunden"]);
-    previewContent.innerHTML = html;
-    printContent.innerHTML   = html;
+    const rows = layouts[kunde] || layouts["Sonstige Kunden"];
+
+    if (isBergmannKantenBatch) {
+        const paletteEnd =
+            BERGMANN_KANTEN_PALETTE_START + BERGMANN_KANTEN_PALETTE_COUNT - 1;
+
+        previewContent.innerHTML = render(rows, BERGMANN_KANTEN_PALETTE_START);
+
+        const paletteNumbers = Array.from(
+            { length: BERGMANN_KANTEN_PALETTE_COUNT },
+            (_, i) => BERGMANN_KANTEN_PALETTE_START + i
+        );
+        buildPrintPages(rows, paletteNumbers);
+
+        printBtn.textContent =
+            `Drucken (${BERGMANN_KANTEN_PALETTE_COUNT}× ${BERGMANN_KANTEN_PALETTE_START}–${paletteEnd})`;
+    } else {
+        previewContent.innerHTML = render(rows);
+        buildPrintPages(rows, [null]);
+    }
 }
 /* ===== PRINT + RETURN ===== */
 
