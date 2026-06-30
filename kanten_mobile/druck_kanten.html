@@ -273,8 +273,7 @@ const kantenLayouts = {
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
  { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer:", size:"22pt", marginTop:"16mm", align:"center" },
- { text:"<palette>", size:"85pt", marginTop:"2mm", align:"center" }
+ { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"38pt", marginTop:"22mm", align:"left", inlinePalette:true }
 ],
 "Bücker":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
@@ -408,6 +407,10 @@ function render(rows, paletteNum){
     return rows.map(r=>{
         if(r.circle){
             return `<div style="margin:${r.marginTop} auto 0;width:${BW_KREIS_SIZE};height:${BW_KREIS_SIZE};border:4px solid black;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${r.size};">${r.text}</div>`;
+        }
+        if (r.inlinePalette) {
+            const num = paletteNum != null ? String(paletteNum) : "_______________";
+            return `<div style="font-size:${r.size};margin-top:${r.marginTop};text-align:${r.align};white-space:nowrap;">Palettennummer: <span style="font-size:${r.paletteSize};font-weight:900;">${num}</span></div>`;
         }
         if (r.text === "<palette>") {
             const num = paletteNum != null ? String(paletteNum) : "—";
