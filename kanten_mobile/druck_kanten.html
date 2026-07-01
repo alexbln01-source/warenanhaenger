@@ -107,6 +107,11 @@ html, body {
     font-weight: bold;
 }
 
+.etikett-center.bergmann-kanten {
+    justify-content: flex-start;
+    padding-top: 6mm;
+}
+
 /* =======================
    BUTTONS
 ======================= */
@@ -285,8 +290,8 @@ const kantenLayouts = {
 "Bergmann M-H":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"22mm", align:"left" },
- { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"14mm", align:"left", inlinePalette:true }
+ { text:"K-Termin: _____________________", size:"22pt", marginTop:"18mm", align:"left" },
+ { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"8mm", align:"left", inlinePalette:true }
 ],
 "Bücker":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
@@ -436,11 +441,11 @@ function render(rows, paletteNum){
     }).join("");
 }
 
-function buildPrintPages(rows, paletteNumbers){
+function buildPrintPages(rows, paletteNumbers, bergmannKanten){
     printArea.innerHTML = paletteNumbers.map(num => `
         <div class="print-page">
             <div class="etikett">
-                <div class="etikett-center">${render(rows, num)}</div>
+                <div class="etikett-center${bergmannKanten ? " bergmann-kanten" : ""}">${render(rows, num)}</div>
             </div>
         </div>
     `).join("");
@@ -483,13 +488,14 @@ const BATCH_PRINT_CSS = `
         align-items:center;
     }
     .etikett-center div { width:100%; font-weight:bold; }
+    .etikett-center.bergmann-kanten { justify-content:flex-start; padding-top:6mm; }
 `;
 
 function openBatchPrintWindow(rows, paletteNumbers){
     const pagesHtml = paletteNumbers.map(num => `
         <div class="print-page">
             <div class="etikett">
-                <div class="etikett-center">${render(rows, num)}</div>
+                <div class="etikett-center bergmann-kanten">${render(rows, num)}</div>
             </div>
         </div>
     `).join("");
@@ -543,21 +549,23 @@ if (!isEiltSehr) {
         const paletteEnd =
             BERGMANN_KANTEN_PALETTE_START + BERGMANN_KANTEN_PALETTE_COUNT - 1;
 
+        previewContent.className = "etikett-center bergmann-kanten";
         previewContent.innerHTML = render(rows, BERGMANN_KANTEN_PALETTE_START);
 
         const paletteNumbers = Array.from(
             { length: BERGMANN_KANTEN_PALETTE_COUNT },
             (_, i) => BERGMANN_KANTEN_PALETTE_START + i
         );
-        buildPrintPages(rows, paletteNumbers);
+        buildPrintPages(rows, paletteNumbers, true);
         bergmannPrintRows = rows;
         bergmannPaletteNumbers = paletteNumbers;
 
         printBtn.textContent =
             `Drucken (${BERGMANN_KANTEN_PALETTE_COUNT}× ${BERGMANN_KANTEN_PALETTE_START}–${paletteEnd})`;
     } else {
+        previewContent.className = "etikett-center";
         previewContent.innerHTML = render(rows);
-        buildPrintPages(rows, [null]);
+        buildPrintPages(rows, [null], false);
     }
 }
 /* ===== PRINT + RETURN ===== */
