@@ -114,10 +114,8 @@ backBtn.onclick = () => {
 
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
-//  Format für IT: [ARTIKEL]K[KOMMISSION]D[TTMM]
-//  Artikel + Kommission beliebig lang, Datum immer 4 Ziffern
-//  Beispiel: 70233514K2154808D2406
-//  Alternativ: 70233514--2154808--2406
+//  Hauptformat: [ARTIKEL]*[KOMMISSION]*[TTMM]
+//  Fallback:    [ARTIKEL]K[KOMMISSION]D[TTMM]  oder  [ARTIKEL]--[KOM]--[TTMM]
 // ============================================================
 let scanParseTimer = null;
 
