@@ -125,9 +125,6 @@ html, body {
     left: 5mm;
     bottom: 4mm;
     width: 40mm;
-}
-
-.logo.bw {
     filter: grayscale(100%);
 }
 
@@ -302,10 +299,6 @@ const backBtn      = document.getElementById("backBtn");
     /* >>> INHALT SETZEN <<< */
 previewInner.innerHTML = html;
 printInner.innerHTML   = html;
-
-if (farbe === "black") {
-    document.querySelectorAll(".logo").forEach(img => img.classList.add("bw"));
-}
 
 /* ===== PRINT + RETURN ===== */
 
