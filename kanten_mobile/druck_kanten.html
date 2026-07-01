@@ -241,7 +241,7 @@ html, body {
 
 <script>
 const qs    = new URLSearchParams(location.search);
-const kunde = qs.get("kunde") || "Sonstige Kunden";
+const kunde = qs.get("kunde") || "Sonstige";
 const art   = qs.get("art")   || "kanten";
 
 /* ===== DOM REFERENZEN ===== */
@@ -252,14 +252,21 @@ const backBtn        = document.getElementById("backBtn");
 const isEiltSehr = (kunde === "EILT_SEHR");
 
 const kundeAliases = {
-    "L.Bergmann": "L. Bergmann"
+    "L.Bergmann": "L. Bergmann",
+    "Sonstige Kunden": "Sonstige"
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
 /* Kanten-Sonderdruck: nummerierte Paletten-Batches */
 const kantenBatchConfigs = {
     "Backhus":      { start: 400, end: 450 },
-    "Bergmann M-H": { start: 700, end: 750 }
+    "Bergmann M-H": { start: 700, end: 750 },
+    "Bücker":       { start: 300, end: 350 },
+    "FVG":          { start: 1, end: 50, pad: 2 },
+    "Janzen":       { start: 900, end: 950 },
+    "Krone Spelle": { start: 100, end: 150 },
+    "L. Bergmann":  { start: 600, end: 650 },
+    "Sonstige":     { start: 1000, end: 1050 }
 };
 const kantenBatch = art === "kanten" ? kantenBatchConfigs[layoutKunde] : null;
 const isKantenBatch = !!kantenBatch;
@@ -298,55 +305,27 @@ const BW_TEXT_SIZE  = "25mm";
 const BW_ABSTAND    = "12mm";
 
 /* ================== KANTEN ================== */
+const kantenBatchLayout = [
+ { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
+ { text:"Kanten", size:"38pt", marginTop:"6mm", align:"center" },
+ { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
+ { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"14mm", align:"left", inlinePalette:true }
+];
+
 const kantenLayouts = {
-"Backhus":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"6mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"14mm", align:"left", inlinePalette:true }
-],
-"Bergmann M-H":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"6mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"14mm", align:"left", inlinePalette:true }
-],
-"Bücker":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"FVG":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
+"Backhus": kantenBatchLayout,
+"Bergmann M-H": kantenBatchLayout,
+"Bücker": kantenBatchLayout,
+"FVG": kantenBatchLayout,
 "Grimme":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
  { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
  { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
 ],
-"Janzen":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"Krone Spelle":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
-"L. Bergmann":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-],
+"Janzen": kantenBatchLayout,
+"Krone Spelle": kantenBatchLayout,
+"L. Bergmann": kantenBatchLayout,
 "PAUS":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
@@ -356,12 +335,7 @@ const kantenLayouts = {
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" }
 ],
-"Sonstige Kunden":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
-]
+"Sonstige": kantenBatchLayout
 };
 
 /* ================== SCHWEISSEN ================== */
@@ -421,7 +395,7 @@ const schweissenLayouts = {
  { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
  { text:"SW-Termin: ____________________", size:"22pt", marginTop:"16mm", align:"left" }
 ],
-"Sonstige Kunden":[
+"Sonstige":[
  { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
  { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
  { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
@@ -430,7 +404,7 @@ const schweissenLayouts = {
 
 /* ================== BOHRWERK ================== */
 const bohrwerkLayouts = {
-"Sonstige Kunden":[
+"Sonstige":[
  { text:"<kunde>", size:BW_KUNDE_SIZE, marginTop:"0mm", align:"center" },
  { text:"BW", size:BW_TEXT_SIZE, marginTop:BW_ABSTAND, align:"center", circle:true }
 ]
@@ -459,6 +433,22 @@ function render(rows, paletteNum){
     }).join("");
 }
 
+function formatPaletteNum(num, pad) {
+    return pad ? String(num).padStart(pad, "0") : num;
+}
+
+function buildPaletteNumbers(batch) {
+    const { start, end, pad } = batch;
+    const count = end - start + 1;
+    return Array.from({ length: count }, (_, i) => formatPaletteNum(start + i, pad));
+}
+
+function batchButtonLabel(batch) {
+    const start = formatPaletteNum(batch.start, batch.pad);
+    const end = formatPaletteNum(batch.end, batch.pad);
+    return `Drucken (${start}–${end})`;
+}
+
 function buildPrintPages(rows, paletteNumbers, batchKanten){
     printArea.innerHTML = paletteNumbers.map(num => `
         <div class="print-page">
@@ -474,20 +464,18 @@ if(art==="schweissen") layouts = schweissenLayouts;
 if(art==="bohrwerk") layouts = bohrwerkLayouts;
 
 if (!isEiltSehr) {
-    const rows = layouts[layoutKunde] || layouts["Sonstige Kunden"];
+    const rows = layouts[layoutKunde] || layouts["Sonstige"];
 
     if (isKantenBatch) {
-        const { start, end } = kantenBatch;
-        const count = end - start + 1;
+        const paletteNumbers = buildPaletteNumbers(kantenBatch);
 
         previewContent.className = "etikett-center batch-kanten";
-        previewContent.innerHTML = render(rows, start);
+        previewContent.innerHTML = render(rows, paletteNumbers[0]);
         previewContent.parentElement.classList.add("batch-etikett");
 
-        const paletteNumbers = Array.from({ length: count }, (_, i) => start + i);
         buildPrintPages(rows, paletteNumbers, true);
 
-        printBtn.textContent = `Drucken (${start}–${end})`;
+        printBtn.textContent = batchButtonLabel(kantenBatch);
     } else {
         previewContent.className = "etikett-center";
         previewContent.innerHTML = render(rows);
