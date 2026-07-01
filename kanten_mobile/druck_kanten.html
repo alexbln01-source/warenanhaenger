@@ -253,7 +253,8 @@ const isEiltSehr = (kunde === "EILT_SEHR");
 
 const kundeAliases = {
     "L.Bergmann": "L. Bergmann",
-    "Sonstige Kunden": "Sonstige"
+    "Sonstige Kunden": "Sonstige",
+    "TOS": "Böckmann"
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
@@ -267,7 +268,7 @@ const kantenBatchConfigs = {
     "Krone Spelle": { start: 100, end: 150 },
     "L. Bergmann":  { start: 600, end: 650 },
     "Sonstige":     { start: 1000, end: 1050 },
-    "TOS":          { start: 200, end: 250 }
+    "Böckmann":     { start: 200, end: 250 }
 };
 const kantenBatch = art === "kanten" ? kantenBatchConfigs[layoutKunde] : null;
 const isKantenBatch = !!kantenBatch;
@@ -332,10 +333,7 @@ const kantenLayouts = {
  { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
  { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" }
 ],
-"TOS":[
- { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" }
-],
+"Böckmann": kantenBatchLayout,
 "Sonstige": kantenBatchLayout
 };
 
@@ -391,7 +389,7 @@ const schweissenLayouts = {
  { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
  { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
 ],
-"TOS":[
+"Böckmann":[
  { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
  { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
  { text:"SW-Termin: ____________________", size:"22pt", marginTop:"16mm", align:"left" }
