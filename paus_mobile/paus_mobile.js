@@ -113,24 +113,31 @@ backBtn.onclick = () => {
 };
 
 // ============================================================
-//  SCAN (Strichcode + Return)
+//  SCAN (Strichcode + Return / Zebra)
 // ============================================================
+let scanParseTimer = null;
+
+function cleanScanText(raw) {
+    return String(raw).replace(/[\r\n\u0000-\u001F]+/g, "").trim();
+}
+
 function formatLieferdatum(raw) {
     let val = String(raw).replace(/\D/g, "");
     if (!val) return "";
     if (val.length === 3) val = "0" + val;
     if (val.length >= 4) return val.slice(0, 2) + "." + val.slice(2, 4);
-    return String(raw).trim();
+    return cleanScanText(raw);
 }
 
 function parseScanValue(raw) {
-    const text = String(raw).trim();
+    const text = cleanScanText(raw);
     if (!text) return null;
 
-    const parts = text.split(/[;,|/\t]/).map(p => p.trim()).filter(Boolean);
+    const parts = text.split(/[;,|/\t\s]+/).map(p => p.trim()).filter(Boolean);
     if (parts.length >= 2) {
+        const kom = parts[0].replace(/\D/g, "") || parts[0];
         return {
-            kommission: parts[0],
+            kommission: kom,
             lieferdatum: formatLieferdatum(parts[1])
         };
     }
@@ -158,33 +165,72 @@ function parseScanValue(raw) {
     return null;
 }
 
+function isScanTerminator(e) {
+    return (
+        e.key === "Enter" || e.key === "Tab" ||
+        e.keyCode === 13 || e.keyCode === 9 ||
+        e.which === 13 || e.which === 9
+    );
+}
+
 function applyScan(input) {
     const parsed = parseScanValue(input.value);
     if (!parsed) {
         if (input === kommission && kommission.value.trim()) lieferdatum.focus();
-        return;
+        return false;
     }
 
     if (parsed.kommission) kommission.value = parsed.kommission;
     if (parsed.lieferdatum) lieferdatum.value = parsed.lieferdatum;
 
     if (parsed.kommission && parsed.lieferdatum) {
-        lieferdatum.focus();
-        return;
+        setTimeout(() => lieferdatum.focus(), 0);
+        return true;
     }
 
     if (parsed.kommission) lieferdatum.focus();
     if (parsed.lieferdatum) druckenBtn.focus();
+    return true;
+}
+
+function shouldAutoParse(text) {
+    const cleaned = cleanScanText(text);
+    if (/[;,|/\t]/.test(cleaned)) return true;
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return true;
+    return cleaned.replace(/\D/g, "").length >= 11;
+}
+
+function scheduleScanParse(input) {
+    clearTimeout(scanParseTimer);
+    scanParseTimer = setTimeout(() => {
+        if (!shouldAutoParse(input.value)) return;
+        applyScan(input);
+    }, 40);
 }
 
 function setupScanHandlers() {
     [kommission, lieferdatum].forEach(input => {
-        input.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter") return;
-            e.preventDefault();
-            applyScan(input);
+        input.addEventListener("input", () => scheduleScanParse(input));
+        input.addEventListener("change", () => applyScan(input));
+
+        ["keydown", "keyup"].forEach(type => {
+            input.addEventListener(type, (e) => {
+                if (!isScanTerminator(e)) return;
+                e.preventDefault();
+                setTimeout(() => applyScan(input), 0);
+            });
         });
     });
+
+    // Zebra/Android: Enter/Tab manchmal nur auf Document-Ebene
+    document.addEventListener("keydown", (e) => {
+        if (!isScanTerminator(e)) return;
+        const input = document.activeElement;
+        if (input !== kommission && input !== lieferdatum) return;
+        e.preventDefault();
+        setTimeout(() => applyScan(input), 0);
+    }, true);
 }
 
 // ============================================================
