@@ -501,45 +501,13 @@ document.querySelectorAll(".color-btn").forEach(btn => {
 });
 
 // ============================================================
-//  POPUP TASTATUR (groß für Zebra)
-//  Alte Version: paus_keyboard_legacy.css + NUM_KEYS 5-Spalten-Grid
+//  POPUP TASTATUR (festes HTML, Tabelle – Zebra-tauglich)
 // ============================================================
-const NUM_LAYOUT = [
-    "1", "2", "3",
-    "4", "5", "6",
-    "7", "8", "9",
-    "",  "0", ""
-];
-
-function appendKeyboardDigit(digit) {
-    keyboardInput.value += digit;
-}
-
-function createKeyButton(label) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "kb-key";
-    btn.textContent = label;
-    btn.onclick = () => appendKeyboardDigit(label);
-    return btn;
-}
-
-function renderKeyboard() {
-    keyboardKeys.innerHTML = "";
-
-    NUM_LAYOUT.forEach(label => {
-        if (!label) {
-            const spacer = document.createElement("div");
-            spacer.className = "kb-spacer";
-            spacer.setAttribute("aria-hidden", "true");
-            keyboardKeys.appendChild(spacer);
-            return;
-        }
-        keyboardKeys.appendChild(createKeyButton(label));
-    });
-}
-
-renderKeyboard();
+keyboardKeys.addEventListener("click", (e) => {
+    const btn = e.target.closest(".kb-key");
+    if (!btn) return;
+    keyboardInput.value += btn.dataset.key;
+});
 
 openKeyboardBtn.onclick = () => openKeyboard("kommission");
 
