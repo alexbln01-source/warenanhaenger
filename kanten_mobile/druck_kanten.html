@@ -257,19 +257,19 @@ const kundeAliases = {
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
-/* Kanten-Sonderdruck: 50 Etikette pro Kunde (laut Palettennummer-Listen) */
-const KANTEN_BATCH_COUNT = 50;
+/* Kanten-Sonderdruck: Start bis Start+50 = 51 Etikette */
+const KANTEN_BATCH_OFFSET = 50;
 
 const kantenBatchConfigs = {
-    "Backhus":      { start: 400, count: KANTEN_BATCH_COUNT },  // Eggersmann 400–449
-    "Bergmann M-H": { start: 700, count: KANTEN_BATCH_COUNT },  // Meppen 700–749
-    "Bücker":       { start: 300, count: KANTEN_BATCH_COUNT },  // 300–349
-    "FVG":          { start: 1, count: KANTEN_BATCH_COUNT, pad: 3 },  // 001–050
-    "Janzen":       { start: 900, count: KANTEN_BATCH_COUNT },  // 900–949
-    "Krone Spelle": { start: 100, count: KANTEN_BATCH_COUNT },  // 100–149
-    "L. Bergmann":  { start: 601, count: KANTEN_BATCH_COUNT },  // Lathen 601–650
-    "Sonstige":     { start: 1000, count: KANTEN_BATCH_COUNT }, // 1000–1049
-    "Böckmann":     { start: 200, count: KANTEN_BATCH_COUNT }   // 200–249
+    "Backhus":      { start: 400 },  // 400–450
+    "Bergmann M-H": { start: 700 },  // 700–750 (Meppen)
+    "Bücker":       { start: 300 },  // 300–350
+    "FVG":          { start: 1, end: 50, pad: 3 },  // 50 Etikette: 001–050
+    "Janzen":       { start: 900 },  // 900–950
+    "Krone Spelle": { start: 100 },  // 100–150
+    "L. Bergmann":  { start: 600 },  // 600–650 (Lathen)
+    "Sonstige":     { start: 1000 }, // 1000–1050
+    "Böckmann":     { start: 200 }   // 200–250
 };
 const kantenBatch = art === "kanten" ? kantenBatchConfigs[layoutKunde] : null;
 const isKantenBatch = !!kantenBatch;
@@ -437,16 +437,24 @@ function formatPaletteNum(num, pad) {
     return pad ? String(num).padStart(pad, "0") : num;
 }
 
+function batchEnd(batch) {
+    if (batch.end != null) return batch.end;
+    return batch.start + (batch.offset ?? KANTEN_BATCH_OFFSET);
+}
+
 function buildPaletteNumbers(batch) {
-    const { start, end, pad } = batch;
-    const count = end - start + 1;
-    return Array.from({ length: count }, (_, i) => formatPaletteNum(start + i, pad));
+    const end = batchEnd(batch);
+    const count = end - batch.start + 1;
+    return Array.from({ length: count }, (_, i) =>
+        formatPaletteNum(batch.start + i, batch.pad)
+    );
 }
 
 function batchButtonLabel(batch) {
+    const end = batchEnd(batch);
     const start = formatPaletteNum(batch.start, batch.pad);
-    const end = formatPaletteNum(batch.end, batch.pad);
-    return `Drucken (${start}–${end})`;
+    const endLabel = formatPaletteNum(end, batch.pad);
+    return `Drucken (${start}–${endLabel})`;
 }
 
 function buildPrintPages(rows, paletteNumbers, batchKanten){
