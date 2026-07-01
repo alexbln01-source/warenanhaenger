@@ -127,6 +127,10 @@ html, body {
     width: 40mm;
 }
 
+.logo.bw {
+    filter: grayscale(100%);
+}
+
 /* Text */
 .line { width: 100%; font-weight: bold; }
 .line-title { font-size: 40pt; }
@@ -298,6 +302,10 @@ const backBtn      = document.getElementById("backBtn");
     /* >>> INHALT SETZEN <<< */
 previewInner.innerHTML = html;
 printInner.innerHTML   = html;
+
+if (farbe === "black") {
+    document.querySelectorAll(".logo").forEach(img => img.classList.add("bw"));
+}
 
 /* ===== PRINT + RETURN ===== */
 
