@@ -114,7 +114,8 @@ backBtn.onclick = () => {
 
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
-//  Format: [ARTIKEL]*[KOMMISSION]*[TTMM]  (Artikel wird ignoriert)
+//  Format: [ARTIKEL]*[KOMMISSION]*[DATUM]  (Artikel wird ignoriert)
+//  Datum: TT.MM.JJJJ, TTMMJJJJ, TT.MM oder TTMM
 // ============================================================
 let scanParseTimer = null;
 let scanRawBuffer = "";
@@ -142,11 +143,68 @@ function starCount(text) {
 }
 
 function formatLieferdatum(raw) {
-    let val = String(raw).replace(/\D/g, "");
-    if (!val) return "";
-    if (val.length === 3) val = "0" + val;
-    if (val.length >= 4) return val.slice(0, 2) + "." + val.slice(2, 4);
-    return cleanScanText(raw);
+    const text = cleanScanText(raw);
+    const digits = text.replace(/\D/g, "");
+
+    if (text.includes(".")) {
+        const parts = text.split(".").map(p => p.replace(/\D/g, "")).filter(Boolean);
+        if (parts.length >= 3) {
+            const d = parts[0].padStart(2, "0");
+            const m = parts[1].padStart(2, "0");
+            let y = parts[2];
+            if (y.length === 2) y = "20" + y;
+            if (y.length === 4 && isPlausibleDateDigits(d + m) && isPlausibleYear(y)) {
+                return `${d}.${m}.${y}`;
+            }
+        }
+        if (parts.length === 2) {
+            const d = parts[0].padStart(2, "0");
+            const m = parts[1].padStart(2, "0");
+            if (isPlausibleDateDigits(d + m)) return `${d}.${m}`;
+        }
+    }
+
+    if (digits.length >= 8) {
+        const d = digits.slice(0, 2);
+        const m = digits.slice(2, 4);
+        const y = digits.slice(4, 8);
+        if (isPlausibleDateDigits(d + m) && isPlausibleYear(y)) {
+            return `${d}.${m}.${y}`;
+        }
+    }
+
+    if (digits.length === 6) {
+        const d = digits.slice(0, 2);
+        const m = digits.slice(2, 4);
+        const y = "20" + digits.slice(4, 6);
+        if (isPlausibleDateDigits(d + m) && isPlausibleYear(y)) {
+            return `${d}.${m}.${y}`;
+        }
+    }
+
+    if (digits.length >= 4) {
+        const d = digits.slice(0, 2);
+        const m = digits.slice(2, 4);
+        if (isPlausibleDateDigits(d + m)) return `${d}.${m}`;
+    }
+
+    return text;
+}
+
+function isPlausibleYear(y) {
+    const year = parseInt(y, 10);
+    return year >= 2000 && year <= 2099;
+}
+
+function isPlausibleLieferdatum(formatted) {
+    if (!formatted) return false;
+    const parts = formatted.split(".");
+    if (parts.length < 2) return false;
+    const d = parts[0].padStart(2, "0");
+    const m = parts[1].padStart(2, "0");
+    if (!isPlausibleDateDigits(d + m)) return false;
+    if (parts.length >= 3) return isPlausibleYear(parts[2]);
+    return true;
 }
 
 function isPlausibleDateDigits(d4) {
@@ -165,27 +223,26 @@ function parseStarScan(text) {
 
     const komPart = parts[parts.length - 2];
     const datePart = parts[parts.length - 1];
-    const dateDigits = scanDigits(datePart);
-    if (dateDigits.length < 4) return null;
-
-    const date4 = dateDigits.slice(-4);
-    if (!isPlausibleDateDigits(date4)) return null;
+    const lieferdatum = formatLieferdatum(datePart);
+    if (!isPlausibleLieferdatum(lieferdatum)) return null;
 
     return {
         kommission: scanDigits(komPart) || komPart,
-        lieferdatum: formatLieferdatum(date4)
+        lieferdatum
     };
 }
 
 function parseKDScan(text) {
     const t = normalizeScanText(text);
-    const match = t.match(/^(.+?)K([0-9]+)D(\d{4})$/i);
+    const match = t.match(/^(.+?)K([0-9]+)D([\d.]+)$/i);
     if (!match) return null;
-    if (!isPlausibleDateDigits(match[3])) return null;
+
+    const lieferdatum = formatLieferdatum(match[3]);
+    if (!isPlausibleLieferdatum(lieferdatum)) return null;
 
     return {
         kommission: match[2],
-        lieferdatum: formatLieferdatum(match[3])
+        lieferdatum
     };
 }
 
@@ -195,25 +252,46 @@ function parseDoubleDashScan(text) {
 
     const parts = t.split("--").map(p => p.trim()).filter(Boolean);
     if (parts.length !== 3) return null;
-    if (!isPlausibleDateDigits(scanDigits(parts[2]).slice(-4))) return null;
+
+    const lieferdatum = formatLieferdatum(parts[2]);
+    if (!isPlausibleLieferdatum(lieferdatum)) return null;
 
     return {
         kommission: scanDigits(parts[1]) || parts[1],
-        lieferdatum: formatLieferdatum(parts[2])
+        lieferdatum
     };
 }
 
 function parseKommissionUndDatum(digits) {
-    if (digits.length < 5 || digits.length > 12) return null;
+    if (digits.length < 5) return null;
 
-    const dateDigits = digits.slice(-4);
-    const kom = digits.slice(0, -4);
-    if (!kom || !isPlausibleDateDigits(dateDigits)) return null;
+    if (digits.length >= 9 && digits.length <= 18) {
+        const date8 = digits.slice(-8);
+        const kom = digits.slice(0, -8);
+        const lieferdatum = formatLieferdatum(date8);
+        if (kom && isPlausibleLieferdatum(lieferdatum) && lieferdatum.split(".").length >= 3) {
+            return { kommission: kom, lieferdatum };
+        }
+    }
 
-    return {
-        kommission: kom,
-        lieferdatum: formatLieferdatum(dateDigits)
-    };
+    if (digits.length >= 7 && digits.length <= 16) {
+        const date6 = digits.slice(-6);
+        const kom = digits.slice(0, -6);
+        const lieferdatum = formatLieferdatum(date6);
+        if (kom && isPlausibleLieferdatum(lieferdatum) && lieferdatum.split(".").length >= 3) {
+            return { kommission: kom, lieferdatum };
+        }
+    }
+
+    if (digits.length >= 5 && digits.length <= 12) {
+        const date4 = digits.slice(-4);
+        const kom = digits.slice(0, -4);
+        if (kom && isPlausibleDateDigits(date4)) {
+            return { kommission: kom, lieferdatum: formatLieferdatum(date4) };
+        }
+    }
+
+    return null;
 }
 
 function parseScanValue(raw) {
@@ -457,9 +535,15 @@ keyboardOK.onclick = () => {
     let val = keyboardInput.value;
 
     if (activeInput.id === "lieferdatum") {
-        val = val.replace(/\D/g, "");
-        if (val.length === 3) val = "0" + val;
-        if (val.length >= 4) val = val.slice(0,2) + "." + val.slice(2,4);
+        val = val.replace(/[^\d.]/g, "");
+        if (!val.includes(".")) {
+            const digits = val.replace(/\D/g, "");
+            if (digits.length === 3) val = "0" + digits;
+            else if (digits.length >= 8) val = digits.slice(0, 2) + "." + digits.slice(2, 4) + "." + digits.slice(4, 8);
+            else if (digits.length >= 6) val = digits.slice(0, 2) + "." + digits.slice(2, 4) + ".20" + digits.slice(4, 6);
+            else if (digits.length >= 4) val = digits.slice(0, 2) + "." + digits.slice(2, 4);
+        }
+        val = formatLieferdatum(val);
         keyboardPopup.style.display = "none";
     } else {
         activeInput.value = val;

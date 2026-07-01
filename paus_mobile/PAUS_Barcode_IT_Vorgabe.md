@@ -12,7 +12,7 @@ Beim Scannen eines Code-128-Barcodes sollen in der App **PAUS Lieferung** automa
 | Feld in der App | Quelle im Barcode |
 |-----------------|-------------------|
 | **Kommissionsnummer** | Mittlerer Teil (nur Ziffern, variable Länge) |
-| **Lieferdatum** | Letzter Teil (4 Ziffern TTMM → Anzeige TT.MM) |
+| **Lieferdatum** | Letzter Teil → Anzeige **TT.MM.JJJJ** (oder TT.MM) |
 | *(Artikelnummer)* | *Erster Teil – wird von der App **nicht** angezeigt und **ignoriert*** |
 
 ---

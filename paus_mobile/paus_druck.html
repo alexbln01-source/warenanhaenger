@@ -260,19 +260,30 @@ const backBtn      = document.getElementById("backBtn");
     let finalDate = dat;
 
     if (dat) {
-        let clean = dat.replace(/\s/g,"");
-        let d = clean.slice(0,2);
-        let m = clean.slice(2,4);
-        if (clean.includes(".")) [d,m] = clean.split(".");
+        let clean = dat.replace(/\s/g, "");
+        let d, m, y;
+        if (clean.includes(".")) {
+            const parts = clean.split(".").map(p => p.replace(/\D/g, ""));
+            d = parts[0];
+            m = parts[1];
+            y = parts[2];
+        } else {
+            d = clean.slice(0, 2);
+            m = clean.slice(2, 4);
+            y = clean.length >= 8 ? clean.slice(4, 8) : "";
+        }
         const now = new Date();
-        const target = new Date(now.getFullYear(), parseInt(m)-1, parseInt(d));
+        const year = y && y.length >= 2 ? (y.length === 2 ? 2000 + parseInt(y, 10) : parseInt(y, 10)) : now.getFullYear();
+        const target = new Date(year, parseInt(m, 10) - 1, parseInt(d, 10));
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const diff =
-            (today.getFullYear()-target.getFullYear())*12 +
-            (today.getMonth()-target.getMonth());
+            (today.getFullYear() - target.getFullYear()) * 12 +
+            (today.getMonth() - target.getMonth());
 
         if (target < today && diff < 2) isPast = true;
-        finalDate = `${d.padStart(2,"0")}.${m.padStart(2,"0")}`;
+        finalDate = y
+            ? `${d.padStart(2, "0")}.${m.padStart(2, "0")}.${String(year).padStart(4, "0")}`
+            : `${d.padStart(2, "0")}.${m.padStart(2, "0")}`;
     }
 
     const html = `
