@@ -281,9 +281,7 @@ const backBtn      = document.getElementById("backBtn");
             (today.getMonth() - target.getMonth());
 
         if (target < today && diff < 2) isPast = true;
-        finalDate = y
-            ? `${d.padStart(2, "0")}.${m.padStart(2, "0")}.${String(year).padStart(4, "0")}`
-            : `${d.padStart(2, "0")}.${m.padStart(2, "0")}`;
+        finalDate = `${d.padStart(2, "0")}.${m.padStart(2, "0")}`;
     }
 
     const html = `

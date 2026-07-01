@@ -12,7 +12,7 @@ Beim Scannen eines Code-128-Barcodes sollen in der App **PAUS Lieferung** automa
 | Feld in der App | Quelle im Barcode |
 |-----------------|-------------------|
 | **Kommissionsnummer** | Mittlerer Teil (nur Ziffern, variable Länge) |
-| **Lieferdatum** | Letzter Teil → Anzeige **TT.MM.JJJJ** (oder TT.MM) |
+| **Lieferdatum** | Letzter Teil im Barcode (mit Jahr möglich) → Anzeige/Etikett nur **TT.MM** |
 | *(Artikelnummer)* | *Erster Teil – wird von der App **nicht** angezeigt und **ignoriert*** |
 
 ---
@@ -37,22 +37,23 @@ Beim Scannen eines Code-128-Barcodes sollen in der App **PAUS Lieferung** automa
 | **Trennzeichen** | Stern `*` (ASCII 42) | `*` |
 | **Kommission** | Nur Ziffern, beliebig lang | `2154808`, `12345` |
 | **Trennzeichen** | Stern `*` | `*` |
-| **Datum** | Genau **4 Ziffern** TTMM | `2406` → Anzeige **24.06.** |
+| **Datum** | **TT.MM.JJJJ** (empfohlen) oder TTMMJJJJ / TT.MM / TTMM | `24.06.2026` → Etikett **24.06** |
 
 ### Beispiele (vollständiger Barcode-Inhalt)
 
 ```
+70233514*2154808*24.06.2026
 70233514*2154808*2406
-12569*12345*2406
-1258764899*2154808*2406
-31-027-1940-502*2154808*2406
+12569*12345*24.06.2026
+1258764899*2154808*24062026
+31-027-1940-502*2154808*24.06.2026
 ```
 
 ### Ergebnis in der App (Beispiel 1)
 
 | Scanfeld (roh) | Kommission | Lieferdatum |
 |----------------|------------|-------------|
-| `70233514*2154808*2406` | `2154808` | `24.06` |
+| `70233514*2154808*24.06.2026` | `2154808` | `24.06` |
 
 ---
 
@@ -112,7 +113,7 @@ Nach dem Scan sollte im Feld **Kommissionsnummer** z. B. stehen:
 Danach füllt die App automatisch:
 
 - Kommission: `2154808`
-- Lieferdatum: `24.06`
+- Lieferdatum: `24.06` (Jahr nur im Barcode, nicht auf dem Etikett)
 
 ---
 
@@ -122,7 +123,7 @@ Danach füllt die App automatisch:
 - [ ] Format: `Artikel*Kommission*Datum` (Stern als Trenner)  
 - [ ] Artikelnummer: variable Länge, Ziffern (Bindestriche optional)  
 - [ ] Kommission: nur Ziffern, variable Länge  
-- [ ] Datum: immer 4 Ziffern TTMM (z. B. `2406` für 24. Juni)  
+- [ ] Datum: **TT.MM.JJJJ** empfohlen (z. B. `24.06.2026`), alternativ `24062026` oder `2406`
 - [ ] Kein Leerzeichen im Barcode-Inhalt  
 - [ ] Druckgröße: 40 mm × 10 mm bei 100 %  
 - [ ] Scanner: Enter/Return nach Scan aktiv  
@@ -153,9 +154,9 @@ start.html?bereich=paus
 ## 8. Kurztext zum Weiterleiten (Copy & Paste)
 
 > **PAUS Barcode Code128 – Vorgabe Langen CNC**  
-> Inhalt: `[Artikelnummer]*[Kommissionsnummer]*[TTMM]`  
-> Beispiel: `70233514*2154808*2406`  
-> Artikel beliebig lang (wird in der App ignoriert), Kommission nur Ziffern, Datum 4 Ziffern.  
+> Inhalt: `[Artikelnummer]*[Kommissionsnummer]*[TT.MM.JJJJ]`  
+> Beispiel: `70233514*2154808*24.06.2026`  
+> Artikel beliebig lang (wird in der App ignoriert), Kommission nur Ziffern, Datum mit Jahr.  
 > Druck: 40 × 10 mm, 100 %. Scanner: Enter nach Scan.  
 > Fallback ohne Stern: `70233514K2154808D2406`
 

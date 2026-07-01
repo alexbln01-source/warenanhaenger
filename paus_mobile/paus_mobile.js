@@ -115,7 +115,7 @@ backBtn.onclick = () => {
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
 //  Format: [ARTIKEL]*[KOMMISSION]*[DATUM]  (Artikel wird ignoriert)
-//  Datum: TT.MM.JJJJ, TTMMJJJJ, TT.MM oder TTMM
+//  Datum im Scan: TT.MM.JJJJ möglich – Anzeige/Etikett nur TT.MM
 // ============================================================
 let scanParseTimer = null;
 let scanRawBuffer = "";
@@ -189,6 +189,13 @@ function formatLieferdatum(raw) {
     }
 
     return text;
+}
+
+function lieferdatumAnzeige(formatted) {
+    if (!formatted) return "";
+    const parts = formatted.split(".").map(p => p.replace(/\D/g, "")).filter(Boolean);
+    if (parts.length < 2) return formatted;
+    return `${parts[0].padStart(2, "0")}.${parts[1].padStart(2, "0")}`;
 }
 
 function isPlausibleYear(y) {
@@ -329,7 +336,7 @@ function applyParsedScan(parsed) {
     if (!parsed) return false;
 
     if (parsed.kommission) kommission.value = parsed.kommission;
-    if (parsed.lieferdatum) lieferdatum.value = parsed.lieferdatum;
+    if (parsed.lieferdatum) lieferdatum.value = lieferdatumAnzeige(parsed.lieferdatum);
 
     if (parsed.kommission && parsed.lieferdatum) {
         setTimeout(() => lieferdatum.focus(), 0);
@@ -539,11 +546,9 @@ keyboardOK.onclick = () => {
         if (!val.includes(".")) {
             const digits = val.replace(/\D/g, "");
             if (digits.length === 3) val = "0" + digits;
-            else if (digits.length >= 8) val = digits.slice(0, 2) + "." + digits.slice(2, 4) + "." + digits.slice(4, 8);
-            else if (digits.length >= 6) val = digits.slice(0, 2) + "." + digits.slice(2, 4) + ".20" + digits.slice(4, 6);
             else if (digits.length >= 4) val = digits.slice(0, 2) + "." + digits.slice(2, 4);
         }
-        val = formatLieferdatum(val);
+        val = lieferdatumAnzeige(formatLieferdatum(val));
         keyboardPopup.style.display = "none";
     } else {
         activeInput.value = val;
