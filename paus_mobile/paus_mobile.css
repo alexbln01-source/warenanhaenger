@@ -325,7 +325,7 @@ body.keyboard-open {
     }
 
     .kb-key.key-ok {
-        font-size: clamp(20px, 4vh, 26px);
+        font-size: clamp(30px, 5vh, 36px);
     }
 
     .keyboard-close-x {
