@@ -257,17 +257,19 @@ const kundeAliases = {
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
-/* Kanten-Sonderdruck: nummerierte Paletten-Batches */
+/* Kanten-Sonderdruck: 50 Etikette pro Kunde (laut Palettennummer-Listen) */
+const KANTEN_BATCH_COUNT = 50;
+
 const kantenBatchConfigs = {
-    "Backhus":      { start: 400, end: 450 },
-    "Bergmann M-H": { start: 700, end: 750 },
-    "Bücker":       { start: 300, end: 350 },
-    "FVG":          { start: 1, end: 50, pad: 3 },
-    "Janzen":       { start: 900, end: 950 },
-    "Krone Spelle": { start: 100, end: 150 },
-    "L. Bergmann":  { start: 600, end: 650 },
-    "Sonstige":     { start: 1000, end: 1050 },
-    "Böckmann":     { start: 200, end: 250 }
+    "Backhus":      { start: 400, count: KANTEN_BATCH_COUNT },  // Eggersmann 400–449
+    "Bergmann M-H": { start: 700, count: KANTEN_BATCH_COUNT },  // Meppen 700–749
+    "Bücker":       { start: 300, count: KANTEN_BATCH_COUNT },  // 300–349
+    "FVG":          { start: 1, count: KANTEN_BATCH_COUNT, pad: 3 },  // 001–050
+    "Janzen":       { start: 900, count: KANTEN_BATCH_COUNT },  // 900–949
+    "Krone Spelle": { start: 100, count: KANTEN_BATCH_COUNT },  // 100–149
+    "L. Bergmann":  { start: 601, count: KANTEN_BATCH_COUNT },  // Lathen 601–650
+    "Sonstige":     { start: 1000, count: KANTEN_BATCH_COUNT }, // 1000–1049
+    "Böckmann":     { start: 200, count: KANTEN_BATCH_COUNT }   // 200–249
 };
 const kantenBatch = art === "kanten" ? kantenBatchConfigs[layoutKunde] : null;
 const isKantenBatch = !!kantenBatch;
