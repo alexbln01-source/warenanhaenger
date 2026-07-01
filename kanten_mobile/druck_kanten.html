@@ -513,17 +513,21 @@ function openBatchPrintWindow(rows, paletteNumbers){
         return false;
     }
 
+    batchPrintWindow = win;
+
     win.document.open();
     win.document.write(printHtml);
     win.document.close();
 
+    const finishBatchPrint = () => {
+        win.onafterprint = null;
+        finishPrintAndGoHome();
+    };
+
     const startPrint = () => {
         win.focus();
         win.print();
-        win.onafterprint = () => {
-            win.close();
-            setTimeout(() => window.location.replace("../index.html"), 300);
-        };
+        win.onafterprint = finishBatchPrint;
     };
 
     if (win.document.readyState === "complete") {
@@ -570,58 +574,85 @@ if (!isEiltSehr) {
 }
 /* ===== PRINT + RETURN ===== */
 
+const ua  = navigator.userAgent.toLowerCase();
+const sw  = window.screen.width;
+const sh  = window.screen.height;
+const dpr = window.devicePixelRatio;
+const isTC22  = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
+const isTC21  = ua.includes("android") && sw === 360 && sh === 640;
+const isZebra = isTC22 || isTC21 || ua.includes("zebra");
+const isMobileDevice = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
+/* Pop-up-Druck nur am PC/Edge – Zebra/Android drucken direkt von der Seite */
+const useBatchPrintWindow =
+    isBergmannKantenBatch && !isZebra && !isMobileDevice;
+
 let didPrint = false;
+let returnFallback = null;
+let batchPrintWindow = null;
+let printStartedAt = 0;
 
-const isMobileDevice =
-    /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+function goHome() {
+    clearTimeout(returnFallback);
+    returnFallback = null;
+    try {
+        if (batchPrintWindow && !batchPrintWindow.closed) {
+            batchPrintWindow.close();
+        }
+    } catch (e) {}
+    batchPrintWindow = null;
+    window.location.replace("../index.html");
+}
 
+function finishPrintAndGoHome() {
+    if (!didPrint) return;
+    if (Date.now() - printStartedAt < 800) return;
+    didPrint = false;
+    goHome();
+}
+
+function armReturnFallback(ms) {
+    clearTimeout(returnFallback);
+    returnFallback = setTimeout(finishPrintAndGoHome, ms);
+}
+
+function setupPrintReturnHandlers() {
+    window.onafterprint = finishPrintAndGoHome;
+
+    window.addEventListener("focus", () => {
+        if (!didPrint) return;
+        if (Date.now() - printStartedAt < 800) return;
+        setTimeout(finishPrintAndGoHome, 400);
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (!didPrint || document.visibilityState !== "visible") return;
+        if (Date.now() - printStartedAt < 800) return;
+        setTimeout(finishPrintAndGoHome, 400);
+    });
+
+    window.addEventListener("pageshow", (e) => {
+        if (e.persisted && didPrint) setTimeout(finishPrintAndGoHome, 400);
+    });
+}
+
+setupPrintReturnHandlers();
 
 /* >>> DRUCKEN <<< */
 printBtn.onclick = () => {
     didPrint = true;
+    printStartedAt = Date.now();
 
-    if (isBergmannKantenBatch && bergmannPrintRows && bergmannPaletteNumbers) {
+    if (useBatchPrintWindow && bergmannPrintRows && bergmannPaletteNumbers) {
         if (openBatchPrintWindow(bergmannPrintRows, bergmannPaletteNumbers)) {
+            armReturnFallback(10000);
             return;
         }
     }
 
     window.print();
+    armReturnFallback(isZebra || isMobileDevice ? 5000 : 10000);
 };
-
-/* =========================
-   DESKTOP (Windows / Mac)
-========================= */
-if (!isMobileDevice) {
-
-    window.onafterprint = () => {
-        if (!didPrint) return;
-
-        didPrint = false;
-
-        setTimeout(() => {
-            window.location.replace("../index.html");
-        }, 300);
-    };
-
-}
-
-/* =========================
-   MOBILE / ZEBRA
-========================= */
-if (isMobileDevice) {
-
-    window.addEventListener("focus", () => {
-        if (!didPrint) return;
-
-        didPrint = false;
-
-        setTimeout(() => {
-            window.location.replace("../index.html");
-        }, 300);
-    });
-
-}
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
