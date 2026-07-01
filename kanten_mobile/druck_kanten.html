@@ -109,7 +109,12 @@ html, body {
 
 .etikett-center.bergmann-kanten {
     justify-content: flex-start;
-    padding-top: 6mm;
+    padding-top: 2mm;
+    padding-bottom: 5mm;
+}
+
+.etikett.bergmann-etikett {
+    padding: 5mm 8mm 7mm 8mm;
 }
 
 /* =======================
@@ -224,6 +229,11 @@ html, body {
         transform: rotate(-90deg);
         transform-origin: center;
     }
+
+    .print-page .etikett.bergmann-etikett {
+        top: 16mm;
+        padding: 4mm 8mm 8mm 8mm;
+    }
 }
 </style>
 </head>
@@ -320,9 +330,9 @@ const kantenLayouts = {
 ],
 "Bergmann M-H":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
- { text:"K-Termin: _____________________", size:"22pt", marginTop:"18mm", align:"left" },
- { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"8mm", align:"left", inlinePalette:true }
+ { text:"Kanten", size:"38pt", marginTop:"6mm", align:"center" },
+ { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
+ { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"6mm", align:"left", inlinePalette:true }
 ],
 "Bücker":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
@@ -459,7 +469,7 @@ function render(rows, paletteNum){
         }
         if (r.inlinePalette) {
             const num = paletteNum != null ? String(paletteNum) : "_______________";
-            return `<div style="font-size:${r.size};margin-top:${r.marginTop};text-align:${r.align};white-space:nowrap;">Palettennummer:&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size:${r.paletteSize};font-weight:900;">${num}</span></div>`;
+            return `<div style="font-size:${r.size};margin-top:${r.marginTop};text-align:${r.align};white-space:nowrap;line-height:1.1;">Palettennummer:&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size:${r.paletteSize};font-weight:900;line-height:1;">${num}</span></div>`;
         }
         if (r.text === "<palette>") {
             const num = paletteNum != null ? String(paletteNum) : "—";
@@ -475,7 +485,7 @@ function render(rows, paletteNum){
 function buildPrintPages(rows, paletteNumbers, bergmannKanten){
     printArea.innerHTML = paletteNumbers.map(num => `
         <div class="print-page">
-            <div class="etikett">
+            <div class="etikett${bergmannKanten ? " bergmann-etikett" : ""}">
                 <div class="etikett-center${bergmannKanten ? " bergmann-kanten" : ""}">${render(rows, num)}</div>
             </div>
         </div>
@@ -495,6 +505,7 @@ if (!isEiltSehr) {
 
         previewContent.className = "etikett-center bergmann-kanten";
         previewContent.innerHTML = render(rows, BERGMANN_KANTEN_PALETTE_START);
+        previewContent.parentElement.classList.add("bergmann-etikett");
 
         const paletteNumbers = Array.from(
             { length: BERGMANN_KANTEN_PALETTE_COUNT },
