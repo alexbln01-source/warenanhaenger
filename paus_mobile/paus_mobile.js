@@ -114,17 +114,31 @@ backBtn.onclick = () => {
 
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
-//  Hauptformat: [ARTIKEL]*[KOMMISSION]*[TTMM]
-//  Fallback:    [ARTIKEL]K[KOMMISSION]D[TTMM]  oder  [ARTIKEL]--[KOM]--[TTMM]
+//  Format: [ARTIKEL]*[KOMMISSION]*[TTMM]  (Artikel wird ignoriert)
 // ============================================================
 let scanParseTimer = null;
+let scanRawBuffer = "";
+let scanLastCharAt = 0;
 
 function cleanScanText(raw) {
     return String(raw).replace(/[\r\n\u0000-\u001F]+/g, "").trim();
 }
 
+function normalizeScanText(raw) {
+    return cleanScanText(raw).replace(/[＊∗✱⁎·•]/g, "*");
+}
+
 function scanDigits(text) {
-    return cleanScanText(text).replace(/\D/g, "");
+    return normalizeScanText(text).replace(/\D/g, "");
+}
+
+function hasScanDelimiter(text) {
+    const t = normalizeScanText(text);
+    return t.includes("*") || /--/.test(t) || /K[0-9]+D\d{4}$/i.test(t);
+}
+
+function starCount(text) {
+    return (normalizeScanText(text).match(/\*/g) || []).length;
 }
 
 function formatLieferdatum(raw) {
@@ -142,8 +156,29 @@ function isPlausibleDateDigits(d4) {
     return day >= 1 && day <= 31 && month >= 1 && month <= 12;
 }
 
+function parseStarScan(text) {
+    const t = normalizeScanText(text);
+    if (!t.includes("*")) return null;
+
+    const parts = t.split(/\*+/).map(p => p.trim()).filter(Boolean);
+    if (parts.length < 3) return null;
+
+    const komPart = parts[parts.length - 2];
+    const datePart = parts[parts.length - 1];
+    const dateDigits = scanDigits(datePart);
+    if (dateDigits.length < 4) return null;
+
+    const date4 = dateDigits.slice(-4);
+    if (!isPlausibleDateDigits(date4)) return null;
+
+    return {
+        kommission: scanDigits(komPart) || komPart,
+        lieferdatum: formatLieferdatum(date4)
+    };
+}
+
 function parseKDScan(text) {
-    const t = cleanScanText(text);
+    const t = normalizeScanText(text);
     const match = t.match(/^(.+?)K([0-9]+)D(\d{4})$/i);
     if (!match) return null;
     if (!isPlausibleDateDigits(match[3])) return null;
@@ -155,7 +190,7 @@ function parseKDScan(text) {
 }
 
 function parseDoubleDashScan(text) {
-    const t = cleanScanText(text);
+    const t = normalizeScanText(text);
     if (!t.includes("--")) return null;
 
     const parts = t.split("--").map(p => p.trim()).filter(Boolean);
@@ -163,13 +198,13 @@ function parseDoubleDashScan(text) {
     if (!isPlausibleDateDigits(scanDigits(parts[2]).slice(-4))) return null;
 
     return {
-        kommission: parts[1],
+        kommission: scanDigits(parts[1]) || parts[1],
         lieferdatum: formatLieferdatum(parts[2])
     };
 }
 
 function parseKommissionUndDatum(digits) {
-    if (digits.length < 5) return null;
+    if (digits.length < 5 || digits.length > 12) return null;
 
     const dateDigits = digits.slice(-4);
     const kom = digits.slice(0, -4);
@@ -181,19 +216,12 @@ function parseKommissionUndDatum(digits) {
     };
 }
 
-function looksLikeKDScan(text) {
-    return /^.+K[0-9]+D\d{4}$/i.test(cleanScanText(text));
-}
-
-function looksLikeDoubleDashScan(text) {
-    if (!cleanScanText(text).includes("--")) return false;
-    const parts = cleanScanText(text).split("--").map(p => p.trim()).filter(Boolean);
-    return parts.length === 3 && isPlausibleDateDigits(scanDigits(parts[2]).slice(-4));
-}
-
 function parseScanValue(raw) {
-    const text = cleanScanText(raw);
+    const text = normalizeScanText(raw);
     if (!text) return null;
+
+    const star = parseStarScan(text);
+    if (star) return star;
 
     const kd = parseKDScan(text);
     if (kd) return kd;
@@ -201,35 +229,26 @@ function parseScanValue(raw) {
     const dashed = parseDoubleDashScan(text);
     if (dashed) return dashed;
 
-    const digits = scanDigits(text);
-    const combo = parseKommissionUndDatum(digits);
-    if (combo) return combo;
+    // Nur ohne Trennzeichen: kurzer 2-teiliger Scan (Kommission + Datum, ohne Artikel)
+    if (!hasScanDelimiter(text)) {
+        const digits = scanDigits(text);
+        const combo = parseKommissionUndDatum(digits);
+        if (combo) return combo;
 
-    if (digits.length >= 1 && digits.length <= 20) {
-        return { kommission: digits, lieferdatum: null };
-    }
+        if (digits.length >= 1 && digits.length <= 10) {
+            return { kommission: digits, lieferdatum: null };
+        }
 
-    if (digits.length > 0 && digits.length <= 4) {
-        return { kommission: null, lieferdatum: formatLieferdatum(digits) };
+        if (digits.length > 0 && digits.length <= 4) {
+            return { kommission: null, lieferdatum: formatLieferdatum(digits) };
+        }
     }
 
     return null;
 }
 
-function isScanTerminator(e) {
-    return (
-        e.key === "Enter" || e.key === "Tab" ||
-        e.keyCode === 13 || e.keyCode === 9 ||
-        e.which === 13 || e.which === 9
-    );
-}
-
-function applyScan(input) {
-    const parsed = parseScanValue(input.value);
-    if (!parsed) {
-        if (input === kommission && kommission.value.trim()) lieferdatum.focus();
-        return false;
-    }
+function applyParsedScan(parsed) {
+    if (!parsed) return false;
 
     if (parsed.kommission) kommission.value = parsed.kommission;
     if (parsed.lieferdatum) lieferdatum.value = parsed.lieferdatum;
@@ -244,42 +263,130 @@ function applyScan(input) {
     return true;
 }
 
-function shouldAutoParse(text) {
-    if (looksLikeKDScan(text) || looksLikeDoubleDashScan(text)) return true;
+function resetScanBuffer() {
+    scanRawBuffer = "";
+    scanLastCharAt = 0;
+}
 
-    const digits = scanDigits(text);
-    return digits.length >= 5 && isPlausibleDateDigits(digits.slice(-4));
+function appendScanChunk(chunk) {
+    const text = String(chunk || "");
+    if (!text) return;
+
+    const now = Date.now();
+    if (scanLastCharAt && now - scanLastCharAt > 250) {
+        scanRawBuffer = "";
+    }
+    scanLastCharAt = now;
+    scanRawBuffer += text;
+}
+
+function bestScanRaw(fallbackValue) {
+    const fromField = normalizeScanText(fallbackValue || "");
+    const fromBuffer = normalizeScanText(scanRawBuffer);
+
+    if (starCount(fromBuffer) >= starCount(fromField)) return fromBuffer || fromField;
+    return fromField || fromBuffer;
+}
+
+function tryParseScanSource(raw) {
+    const text = bestScanRaw(raw);
+    if (!text) return false;
+
+    const parsed = parseScanValue(text);
+    if (parsed && parsed.kommission && parsed.lieferdatum) {
+        applyParsedScan(parsed);
+        resetScanBuffer();
+        return true;
+    }
+    return false;
+}
+
+function finishScan(input) {
+    const el = input || document.activeElement;
+    const ok = tryParseScanSource(el && el.value);
+    if (!ok) resetScanBuffer();
+    return ok;
+}
+
+function isScanTerminator(e) {
+    return (
+        e.key === "Enter" || e.key === "Tab" ||
+        e.keyCode === 13 || e.keyCode === 9 ||
+        e.which === 13 || e.which === 9
+    );
+}
+
+function isScanField(el) {
+    return el === kommission || el === lieferdatum;
+}
+
+function isScanFieldFocused() {
+    return isScanField(document.activeElement);
 }
 
 function scheduleScanParse(input) {
     clearTimeout(scanParseTimer);
-    scanParseTimer = setTimeout(() => {
-        if (!shouldAutoParse(input.value)) return;
-        applyScan(input);
-    }, 120);
+    scanParseTimer = setTimeout(() => finishScan(input), 100);
+}
+
+function handleScanInput(input) {
+    const val = normalizeScanText(input.value);
+    if (val.length >= scanRawBuffer.length || starCount(val) > starCount(scanRawBuffer)) {
+        scanRawBuffer = val;
+    }
+
+    if (starCount(val) >= 2) {
+        if (tryParseScanSource(val)) return;
+    }
+
+    scheduleScanParse(input);
+}
+
+function bindScanField(input) {
+    input.addEventListener("beforeinput", (e) => {
+        if (e.inputType === "insertText" && e.data) {
+            appendScanChunk(e.data);
+        }
+        if (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph") {
+            e.preventDefault();
+            setTimeout(() => finishScan(input), 0);
+        }
+    });
+
+    input.addEventListener("input", () => handleScanInput(input));
+    input.addEventListener("change", () => finishScan(input));
+
+    ["keydown", "keyup"].forEach(type => {
+        input.addEventListener(type, (e) => {
+            if (!isScanTerminator(e)) return;
+            e.preventDefault();
+            setTimeout(() => finishScan(input), 0);
+        }, true);
+    });
 }
 
 function setupScanHandlers() {
-    [kommission, lieferdatum].forEach(input => {
-        input.addEventListener("input", () => scheduleScanParse(input));
-        input.addEventListener("change", () => applyScan(input));
+    [kommission, lieferdatum].forEach(bindScanField);
 
-        ["keydown", "keyup"].forEach(type => {
-            input.addEventListener(type, (e) => {
-                if (!isScanTerminator(e)) return;
-                e.preventDefault();
-                setTimeout(() => applyScan(input), 0);
-            });
-        });
-    });
-
-    // Zebra/Android: Enter/Tab manchmal nur auf Document-Ebene
+    // Zebra Keyboard-Wedge: Zeichen + Enter auf Document-Ebene (Fallback)
     document.addEventListener("keydown", (e) => {
-        if (!isScanTerminator(e)) return;
-        const input = document.activeElement;
-        if (input !== kommission && input !== lieferdatum) return;
+        if (!isScanFieldFocused()) return;
+
+        if (isScanTerminator(e)) {
+            e.preventDefault();
+            setTimeout(() => finishScan(document.activeElement), 0);
+            return;
+        }
+
+        if (e.key && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            appendScanChunk(e.key);
+        }
+    }, true);
+
+    document.addEventListener("keyup", (e) => {
+        if (!isScanFieldFocused() || !isScanTerminator(e)) return;
         e.preventDefault();
-        setTimeout(() => applyScan(input), 0);
+        setTimeout(() => finishScan(document.activeElement), 0);
     }, true);
 }
 
