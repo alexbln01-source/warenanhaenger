@@ -114,47 +114,27 @@ backBtn.onclick = () => {
 
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
+//  Format: 31-027-1940-502;KOMMISSION;DATUM
+//  Trennzeichen ; oder | – Kommission beliebig lang
 // ============================================================
 let scanParseTimer = null;
 
-const SCAN_PREFIX_RE = /31[\s\-]*027[\s\-]*1940[\s\-]*502/i;
-const SCAN_PREFIX_DIGITS = "310271940502";
-const SCAN_KOM_DIGITS = 7;
-const SCAN_DATE_DIGITS = 4;
-const SCAN_PAYLOAD_DIGITS = SCAN_KOM_DIGITS + SCAN_DATE_DIGITS;
+const SCAN_PREFIX_RE = /^31[\s\-]*027[\s\-]*1940[\s\-]*502$/i;
+const SCAN_DELIMITER_RE = /[;|]/;
 
 function cleanScanText(raw) {
     return String(raw).replace(/[\r\n\u0000-\u001F]+/g, "").trim();
 }
 
-function scanDigits(text) {
-    return cleanScanText(text).replace(/\D/g, "");
+function getScanParts(text) {
+    return cleanScanText(text)
+        .split(SCAN_DELIMITER_RE)
+        .map(p => p.trim())
+        .filter(Boolean);
 }
 
-function hasScanPrefix(text) {
-    const cleaned = cleanScanText(text);
-    return SCAN_PREFIX_RE.test(cleaned) || scanDigits(cleaned).startsWith(SCAN_PREFIX_DIGITS);
-}
-
-function stripScanPrefix(text) {
-    return cleanScanText(text).replace(SCAN_PREFIX_RE, "").trim();
-}
-
-function stripPrefixDigits(digits) {
-    if (digits.startsWith(SCAN_PREFIX_DIGITS)) {
-        return digits.slice(SCAN_PREFIX_DIGITS.length);
-    }
-    return digits;
-}
-
-function parsePayloadDigits(payloadDigits) {
-    if (payloadDigits.length < SCAN_PAYLOAD_DIGITS) return null;
-
-    const data = payloadDigits.slice(0, SCAN_PAYLOAD_DIGITS);
-    return {
-        kommission: data.slice(0, SCAN_KOM_DIGITS),
-        lieferdatum: formatLieferdatum(data.slice(SCAN_KOM_DIGITS))
-    };
+function isPrefixPart(part) {
+    return SCAN_PREFIX_RE.test(part.trim());
 }
 
 function formatLieferdatum(raw) {
@@ -165,37 +145,56 @@ function formatLieferdatum(raw) {
     return cleanScanText(raw);
 }
 
+function dateLooksComplete(raw) {
+    const val = String(raw).replace(/\D/g, "");
+    return val.length >= 3;
+}
+
+function parseDelimitedScan(text) {
+    if (!SCAN_DELIMITER_RE.test(text)) return null;
+
+    const parts = getScanParts(text);
+    if (parts.length < 2) return null;
+
+    if (parts.length >= 3 && isPrefixPart(parts[0])) {
+        if (!dateLooksComplete(parts[2])) return null;
+        return {
+            kommission: parts[1],
+            lieferdatum: formatLieferdatum(parts[2])
+        };
+    }
+
+    if (!isPrefixPart(parts[0])) {
+        if (!dateLooksComplete(parts[1])) return null;
+        return {
+            kommission: parts[0],
+            lieferdatum: formatLieferdatum(parts[1])
+        };
+    }
+
+    // Prefix + nur Kommission (zweiter Scan folgt)
+    if (parts.length === 2 && isPrefixPart(parts[0])) {
+        return { kommission: parts[1], lieferdatum: null };
+    }
+
+    return null;
+}
+
 function parseScanValue(raw) {
     const text = cleanScanText(raw);
     if (!text) return null;
 
-    const digits = scanDigits(text);
+    const delimited = parseDelimitedScan(text);
+    if (delimited) return delimited;
 
-    // Voller Scan mit Prefix: erst wenn Prefix + 11 Ziffern komplett
-    if (digits.startsWith(SCAN_PREFIX_DIGITS)) {
-        const payload = stripPrefixDigits(digits);
-        const parsed = parsePayloadDigits(payload);
-        if (parsed) return parsed;
-    }
+    const digits = text.replace(/\D/g, "");
 
-    // Prefix per Text entfernt (z. B. mit Bindestrichen gescannt)
-    const withoutPrefix = stripScanPrefix(text);
-    if (withoutPrefix !== text) {
-        const parsed = parsePayloadDigits(scanDigits(withoutPrefix));
-        if (parsed) return parsed;
-    }
-
-    // Ohne Prefix: nur 21548082406 (11 Ziffern)
-    if (digits.length === SCAN_PAYLOAD_DIGITS) {
-        return parsePayloadDigits(digits);
-    }
-
-    // Nur Kommission (z. B. 2154808)
-    if (digits.length >= 5 && digits.length <= 10) {
+    // Nur Kommission
+    if (digits.length >= 1 && digits.length <= 20 && !SCAN_DELIMITER_RE.test(text)) {
         return { kommission: digits, lieferdatum: null };
     }
 
-    // Nur Datum (z. B. 2406)
+    // Nur Datum
     if (digits.length > 0 && digits.length <= 4) {
         return { kommission: null, lieferdatum: formatLieferdatum(digits) };
     }
@@ -232,12 +231,16 @@ function applyScan(input) {
 }
 
 function shouldAutoParse(text) {
-    const cleaned = cleanScanText(text);
-    if (hasScanPrefix(cleaned)) return true;
-    if (/[;,|/\t]/.test(cleaned)) return true;
-    const parts = cleaned.split(/\s+/).filter(Boolean);
-    if (parts.length >= 2) return true;
-    return cleaned.replace(/\D/g, "").length >= 11;
+    if (!SCAN_DELIMITER_RE.test(text)) return false;
+
+    const parts = getScanParts(text);
+    if (parts.length >= 3 && isPrefixPart(parts[0])) {
+        return parts[1].length > 0 && dateLooksComplete(parts[2]);
+    }
+    if (parts.length >= 2 && !isPrefixPart(parts[0])) {
+        return parts[0].length > 0 && dateLooksComplete(parts[1]);
+    }
+    return false;
 }
 
 function scheduleScanParse(input) {
@@ -245,7 +248,7 @@ function scheduleScanParse(input) {
     scanParseTimer = setTimeout(() => {
         if (!shouldAutoParse(input.value)) return;
         applyScan(input);
-    }, 40);
+    }, 100);
 }
 
 function setupScanHandlers() {
