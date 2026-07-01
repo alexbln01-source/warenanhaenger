@@ -114,13 +114,13 @@ backBtn.onclick = () => {
 
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
-//  Format: 31-027-1940-502;KOMMISSION;DATUM
-//  Trennzeichen ; oder | – Kommission beliebig lang
+//  Format: 31-027-1940-502*KOMMISSION*DATUM
+//  Trennzeichen * (sichtbar, Scanner-tauglich) – auch ; und |
 // ============================================================
 let scanParseTimer = null;
 
 const SCAN_PREFIX_RE = /^31[\s\-]*027[\s\-]*1940[\s\-]*502$/i;
-const SCAN_DELIMITER_RE = /[;|]/;
+const SCAN_DELIMITER_RE = /[*;|#]/;
 
 function cleanScanText(raw) {
     return String(raw).replace(/[\r\n\u0000-\u001F]+/g, "").trim();
