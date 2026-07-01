@@ -182,14 +182,14 @@ body.keyboard-open {
     gap: 10px;
 }
 
-.keyboard-row-zero {
-    grid-template-columns: 1fr;
-    max-width: calc(33.333% - 7px);
-    margin: 0 auto;
+.kb-spacer {
+    display: block;
 }
 
 .kb-key {
+    width: 100%;
     min-height: 68px;
+    aspect-ratio: 1.15;
     padding: 0;
     font-size: 32px;
     font-weight: 700;

@@ -534,8 +534,11 @@ function renderKeyboard() {
     });
 
     const zeroRow = document.createElement("div");
-    zeroRow.className = "keyboard-row keyboard-row-zero";
-    zeroRow.appendChild(createKeyButton("0"));
+    zeroRow.className = "keyboard-row";
+    zeroRow.appendChild(document.createElement("span")).className = "kb-spacer";
+    const zeroBtn = createKeyButton("0");
+    zeroRow.appendChild(zeroBtn);
+    zeroRow.appendChild(document.createElement("span")).className = "kb-spacer";
     keyboardKeys.appendChild(zeroRow);
 }
 
