@@ -107,13 +107,13 @@ html, body {
     font-weight: bold;
 }
 
-.etikett-center.bergmann-kanten {
+.etikett-center.batch-kanten {
     justify-content: flex-start;
     padding-top: 2mm;
     padding-bottom: 5mm;
 }
 
-.etikett.bergmann-etikett {
+.etikett.batch-etikett {
     padding: 5mm 8mm 7mm 8mm;
 }
 
@@ -206,7 +206,7 @@ html, body {
         transform-origin: center;
     }
 
-    .print-page .etikett.bergmann-etikett {
+    .print-page .etikett.batch-etikett {
         top: 16mm;
         padding: 4mm 8mm 8mm 8mm;
     }
@@ -256,13 +256,13 @@ const kundeAliases = {
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
-/* Bergmann M-H + Kanten: Etikette mit Palettennummer 700–750 */
-const BERGMANN_KANTEN_PALETTE_START = 700;
-const BERGMANN_KANTEN_PALETTE_END = 750;
-const BERGMANN_KANTEN_PALETTE_COUNT =
-    BERGMANN_KANTEN_PALETTE_END - BERGMANN_KANTEN_PALETTE_START + 1;
-const isBergmannKantenBatch =
-    kunde === "Bergmann M-H" && art === "kanten";
+/* Kanten-Sonderdruck: nummerierte Paletten-Batches */
+const kantenBatchConfigs = {
+    "Backhus":      { start: 400, end: 450 },
+    "Bergmann M-H": { start: 700, end: 750 }
+};
+const kantenBatch = art === "kanten" ? kantenBatchConfigs[layoutKunde] : null;
+const isKantenBatch = !!kantenBatch;
 
 /* =================================================
    SONDERFALL: EILT SEHR
@@ -301,9 +301,9 @@ const BW_ABSTAND    = "12mm";
 const kantenLayouts = {
 "Backhus":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
- { text:"Kanten", size:"38pt", marginTop:"8mm", align:"center" },
+ { text:"Kanten", size:"38pt", marginTop:"6mm", align:"center" },
  { text:"K-Termin: _____________________", size:"22pt", marginTop:"14mm", align:"left" },
- { text:"Palettennummer: _______________", size:"22pt", marginTop:"22mm", align:"left" }
+ { text:"Palettennummer: <palette>", size:"22pt", paletteSize:"52pt", marginTop:"14mm", align:"left", inlinePalette:true }
 ],
 "Bergmann M-H":[
  { text:"<kunde>", size:"38pt", marginTop:"0mm", align:"center" },
@@ -459,11 +459,11 @@ function render(rows, paletteNum){
     }).join("");
 }
 
-function buildPrintPages(rows, paletteNumbers, bergmannKanten){
+function buildPrintPages(rows, paletteNumbers, batchKanten){
     printArea.innerHTML = paletteNumbers.map(num => `
         <div class="print-page">
-            <div class="etikett${bergmannKanten ? " bergmann-etikett" : ""}">
-                <div class="etikett-center${bergmannKanten ? " bergmann-kanten" : ""}">${render(rows, num)}</div>
+            <div class="etikett${batchKanten ? " batch-etikett" : ""}">
+                <div class="etikett-center${batchKanten ? " batch-kanten" : ""}">${render(rows, num)}</div>
             </div>
         </div>
     `).join("");
@@ -476,19 +476,18 @@ if(art==="bohrwerk") layouts = bohrwerkLayouts;
 if (!isEiltSehr) {
     const rows = layouts[layoutKunde] || layouts["Sonstige Kunden"];
 
-    if (isBergmannKantenBatch) {
-        previewContent.className = "etikett-center bergmann-kanten";
-        previewContent.innerHTML = render(rows, BERGMANN_KANTEN_PALETTE_START);
-        previewContent.parentElement.classList.add("bergmann-etikett");
+    if (isKantenBatch) {
+        const { start, end } = kantenBatch;
+        const count = end - start + 1;
 
-        const paletteNumbers = Array.from(
-            { length: BERGMANN_KANTEN_PALETTE_COUNT },
-            (_, i) => BERGMANN_KANTEN_PALETTE_START + i
-        );
+        previewContent.className = "etikett-center batch-kanten";
+        previewContent.innerHTML = render(rows, start);
+        previewContent.parentElement.classList.add("batch-etikett");
+
+        const paletteNumbers = Array.from({ length: count }, (_, i) => start + i);
         buildPrintPages(rows, paletteNumbers, true);
 
-        printBtn.textContent =
-            `Drucken (${BERGMANN_KANTEN_PALETTE_START}–${BERGMANN_KANTEN_PALETTE_END})`;
+        printBtn.textContent = `Drucken (${start}–${end})`;
     } else {
         previewContent.className = "etikett-center";
         previewContent.innerHTML = render(rows);
@@ -513,8 +512,8 @@ let returnFallback = null;
 let goHomeTimer = null;
 let printStartedAt = 0;
 
-const printCloseDelayMs = isBergmannKantenBatch ? 800 : 500;
-const fallbackDelayMs = isBergmannKantenBatch
+const printCloseDelayMs = isKantenBatch ? 800 : 500;
+const fallbackDelayMs = isKantenBatch
     ? (isZebra ? 30000 : (isMobileDevice || isEdge ? 20000 : 12000))
     : (isZebra || isMobileDevice || isEdge ? 8000 : 10000);
 
