@@ -134,7 +134,9 @@ function getScanParts(text) {
 }
 
 function isPrefixPart(part) {
-    return SCAN_PREFIX_RE.test(part.trim());
+    const p = part.trim();
+    if (SCAN_PREFIX_RE.test(p)) return true;
+    return p.replace(/\D/g, "") === "310271940502";
 }
 
 function formatLieferdatum(raw) {
