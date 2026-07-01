@@ -114,16 +114,12 @@ backBtn.onclick = () => {
 
 // ============================================================
 //  SCAN (Strichcode + Return / Zebra)
-//  Zebra liefert 26 Zeichen OHNE Sonderzeichen:
-//  31-027-1940-502 + KOMMISSION + TTMM (Datum = letzte 4 Ziffern)
-//  Beispiel: 31-027-1940-50221548082406
+//  Format für IT: [ARTIKEL]K[KOMMISSION]D[TTMM]
+//  Artikel + Kommission beliebig lang, Datum immer 4 Ziffern
+//  Beispiel: 70233514K2154808D2406
+//  Alternativ: 70233514--2154808--2406
 // ============================================================
 let scanParseTimer = null;
-
-const SCAN_PREFIX_TEXT = "31-027-1940-502";
-const SCAN_PREFIX_RE = /^31[\s\-]*027[\s\-]*1940[\s\-]*502/i;
-const SCAN_PREFIX_DIGITS = "310271940502";
-const SCAN_DELIMITER_RE = /[*;|#]/;
 
 function cleanScanText(raw) {
     return String(raw).replace(/[\r\n\u0000-\u001F]+/g, "").trim();
@@ -131,19 +127,6 @@ function cleanScanText(raw) {
 
 function scanDigits(text) {
     return cleanScanText(text).replace(/\D/g, "");
-}
-
-function hasScanPrefix(text) {
-    const t = cleanScanText(text);
-    return (
-        SCAN_PREFIX_RE.test(t) ||
-        t.toLowerCase().startsWith(SCAN_PREFIX_TEXT.toLowerCase()) ||
-        scanDigits(t).startsWith(SCAN_PREFIX_DIGITS)
-    );
-}
-
-function stripScanPrefixText(text) {
-    return cleanScanText(text).replace(SCAN_PREFIX_RE, "").trim();
 }
 
 function formatLieferdatum(raw) {
@@ -161,6 +144,32 @@ function isPlausibleDateDigits(d4) {
     return day >= 1 && day <= 31 && month >= 1 && month <= 12;
 }
 
+function parseKDScan(text) {
+    const t = cleanScanText(text);
+    const match = t.match(/^(.+?)K([0-9]+)D(\d{4})$/i);
+    if (!match) return null;
+    if (!isPlausibleDateDigits(match[3])) return null;
+
+    return {
+        kommission: match[2],
+        lieferdatum: formatLieferdatum(match[3])
+    };
+}
+
+function parseDoubleDashScan(text) {
+    const t = cleanScanText(text);
+    if (!t.includes("--")) return null;
+
+    const parts = t.split("--").map(p => p.trim()).filter(Boolean);
+    if (parts.length !== 3) return null;
+    if (!isPlausibleDateDigits(scanDigits(parts[2]).slice(-4))) return null;
+
+    return {
+        kommission: parts[1],
+        lieferdatum: formatLieferdatum(parts[2])
+    };
+}
+
 function parseKommissionUndDatum(digits) {
     if (digits.length < 5) return null;
 
@@ -174,77 +183,34 @@ function parseKommissionUndDatum(digits) {
     };
 }
 
-function getScanParts(text) {
-    return cleanScanText(text)
-        .split(SCAN_DELIMITER_RE)
-        .map(p => p.trim())
-        .filter(Boolean);
+function looksLikeKDScan(text) {
+    return /^.+K[0-9]+D\d{4}$/i.test(cleanScanText(text));
 }
 
-function isPrefixPart(part) {
-    const p = part.trim();
-    if (SCAN_PREFIX_RE.test(p)) return true;
-    return p.replace(/\D/g, "") === SCAN_PREFIX_DIGITS;
-}
-
-function parseDelimitedScan(text) {
-    if (!SCAN_DELIMITER_RE.test(text)) return null;
-
-    const parts = getScanParts(text);
-    if (parts.length < 2) return null;
-
-    if (parts.length >= 3 && isPrefixPart(parts[0])) {
-        return {
-            kommission: parts[1],
-            lieferdatum: formatLieferdatum(parts[2])
-        };
-    }
-
-    if (!isPrefixPart(parts[0]) && parts.length >= 2) {
-        return {
-            kommission: parts[0],
-            lieferdatum: formatLieferdatum(parts[1])
-        };
-    }
-
-    if (parts.length === 2 && isPrefixPart(parts[0])) {
-        return { kommission: parts[1], lieferdatum: null };
-    }
-
-    return null;
-}
-
-function parsePrefixScan(text) {
-    if (!hasScanPrefix(text)) return null;
-
-    const remainderDigits = scanDigits(stripScanPrefixText(text));
-    return parseKommissionUndDatum(remainderDigits);
+function looksLikeDoubleDashScan(text) {
+    if (!cleanScanText(text).includes("--")) return false;
+    const parts = cleanScanText(text).split("--").map(p => p.trim()).filter(Boolean);
+    return parts.length === 3 && isPlausibleDateDigits(scanDigits(parts[2]).slice(-4));
 }
 
 function parseScanValue(raw) {
     const text = cleanScanText(raw);
     if (!text) return null;
 
-    const delimited = parseDelimitedScan(text);
-    if (delimited) return delimited;
+    const kd = parseKDScan(text);
+    if (kd) return kd;
 
-    const prefixParsed = parsePrefixScan(text);
-    if (prefixParsed) return prefixParsed;
+    const dashed = parseDoubleDashScan(text);
+    if (dashed) return dashed;
 
     const digits = scanDigits(text);
+    const combo = parseKommissionUndDatum(digits);
+    if (combo) return combo;
 
-    // Ohne Prefix: KOMMISSION + TTMM (z. B. 21548082406)
-    if (!hasScanPrefix(text)) {
-        const combo = parseKommissionUndDatum(digits);
-        if (combo) return combo;
-    }
-
-    // Nur Kommission
     if (digits.length >= 1 && digits.length <= 20) {
         return { kommission: digits, lieferdatum: null };
     }
 
-    // Nur Datum
     if (digits.length > 0 && digits.length <= 4) {
         return { kommission: null, lieferdatum: formatLieferdatum(digits) };
     }
@@ -281,24 +247,7 @@ function applyScan(input) {
 }
 
 function shouldAutoParse(text) {
-    if (SCAN_DELIMITER_RE.test(text)) {
-        const parts = getScanParts(text);
-        if (parts.length >= 3 && isPrefixPart(parts[0])) {
-            return parts[1].length > 0 && isPlausibleDateDigits(
-                String(parts[2]).replace(/\D/g, "").slice(-4).padStart(4, "0").slice(-4)
-            );
-        }
-        if (parts.length >= 2 && !isPrefixPart(parts[0])) {
-            const d = String(parts[1]).replace(/\D/g, "");
-            return parts[0].length > 0 && isPlausibleDateDigits(d.slice(-4).padStart(4, "0").slice(-4));
-        }
-        return false;
-    }
-
-    if (hasScanPrefix(text)) {
-        const digits = scanDigits(stripScanPrefixText(text));
-        return digits.length >= 5 && isPlausibleDateDigits(digits.slice(-4));
-    }
+    if (looksLikeKDScan(text) || looksLikeDoubleDashScan(text)) return true;
 
     const digits = scanDigits(text);
     return digits.length >= 5 && isPlausibleDateDigits(digits.slice(-4));
