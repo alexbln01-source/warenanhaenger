@@ -139,29 +139,6 @@ html, body {
 .back-btn  { background:#444; }
 .print-btn { background:#15803d; }
 
-.post-print-bar {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 100000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.post-print-bar.show {
-    display: flex;
-}
-
-.home-btn {
-    width: auto;
-    min-width: 280px;
-    padding: 18px 28px;
-    background: #15803d;
-    font-size: 22px;
-}
-
 /* =======================
    PRINT (A6 HOCH – INHALT GEDREHT)
 ======================= */
@@ -179,8 +156,7 @@ html, body {
 
     .preview-wrapper,
     .bottom-bar,
-    .warnbox,
-    .post-print-bar {
+    .warnbox {
         display: none !important;
     }
 
@@ -263,10 +239,6 @@ html, body {
     <button class="btn print-btn" id="printBtn">Drucken</button>
 </div>
 
-<div id="postPrintBar" class="post-print-bar">
-    <button id="homeBtn" class="btn home-btn">✓ Zur Startseite</button>
-</div>
-
 <script>
 const qs    = new URLSearchParams(location.search);
 const kunde = qs.get("kunde") || "Sonstige Kunden";
@@ -277,9 +249,12 @@ const previewContent = document.getElementById("previewContent");
 const printArea      = document.getElementById("printArea");
 const printBtn       = document.getElementById("printBtn");
 const backBtn        = document.getElementById("backBtn");
-const postPrintBar   = document.getElementById("postPrintBar");
-const homeBtn        = document.getElementById("homeBtn");
 const isEiltSehr = (kunde === "EILT_SEHR");
+
+const kundeAliases = {
+    "L.Bergmann": "L. Bergmann"
+};
+const layoutKunde = kundeAliases[kunde] || kunde;
 
 /* Bergmann M-H + Kanten: 50 Etikette mit Palettennummer 700–749 */
 const BERGMANN_KANTEN_PALETTE_START = 700;
@@ -497,7 +472,7 @@ if(art==="schweissen") layouts = schweissenLayouts;
 if(art==="bohrwerk") layouts = bohrwerkLayouts;
 
 if (!isEiltSehr) {
-    const rows = layouts[kunde] || layouts["Sonstige Kunden"];
+    const rows = layouts[layoutKunde] || layouts["Sonstige Kunden"];
 
     if (isBergmannKantenBatch) {
         const paletteEnd =
@@ -530,41 +505,51 @@ const dpr = window.devicePixelRatio;
 const isTC22  = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
 const isTC21  = ua.includes("android") && sw === 360 && sh === 640;
 const isZebra = isTC22 || isTC21 || ua.includes("zebra");
+const isEdge  = ua.includes("edg/") || ua.includes("edge/");
 const isMobileDevice = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 
 let didPrint = false;
+let goingHome = false;
 let returnFallback = null;
+let goHomeTimer = null;
 let printStartedAt = 0;
 
+const printCloseDelayMs = isBergmannKantenBatch ? 800 : 500;
+const fallbackDelayMs = isBergmannKantenBatch
+    ? (isZebra ? 30000 : (isMobileDevice || isEdge ? 20000 : 12000))
+    : (isZebra || isMobileDevice || isEdge ? 8000 : 10000);
+
 function goHome() {
-    clearTimeout(returnFallback);
-    returnFallback = null;
-    postPrintBar.classList.remove("show");
-    window.location.replace("../index.html");
-}
-
-function finishPrintAndGoHome() {
-    if (!didPrint) return;
+    if (goingHome) return;
+    goingHome = true;
     didPrint = false;
-    goHome();
+
+    clearTimeout(returnFallback);
+    clearTimeout(goHomeTimer);
+    returnFallback = null;
+    goHomeTimer = null;
+
+    window.location.replace("../start.html?bereich=home");
 }
 
-function showPostPrintUi() {
-    if (!didPrint) return;
-    postPrintBar.classList.add("show");
-    clearTimeout(returnFallback);
-    returnFallback = setTimeout(finishPrintAndGoHome, 2500);
+function scheduleGoHome() {
+    if (!didPrint || goingHome) return;
+    clearTimeout(goHomeTimer);
+    goHomeTimer = setTimeout(goHome, 300);
 }
 
 function onPrintDialogClosed() {
-    if (!didPrint) return;
-    if (Date.now() - printStartedAt < 500) return;
-    showPostPrintUi();
+    if (!didPrint || goingHome) return;
+    if (Date.now() - printStartedAt < printCloseDelayMs) return;
+
+    clearTimeout(returnFallback);
+    returnFallback = null;
+    scheduleGoHome();
 }
 
 function armReturnFallback(ms) {
     clearTimeout(returnFallback);
-    returnFallback = setTimeout(showPostPrintUi, ms);
+    returnFallback = setTimeout(onPrintDialogClosed, ms);
 }
 
 function setupPrintReturnHandlers() {
@@ -572,7 +557,7 @@ function setupPrintReturnHandlers() {
 
     const printMq = window.matchMedia("print");
     const onPrintMediaChange = (e) => {
-        if (!e.matches && didPrint && Date.now() - printStartedAt > 500) {
+        if (!e.matches && didPrint && Date.now() - printStartedAt > printCloseDelayMs) {
             onPrintDialogClosed();
         }
     };
@@ -580,29 +565,27 @@ function setupPrintReturnHandlers() {
     else if (printMq.addListener) printMq.addListener(onPrintMediaChange);
 
     document.addEventListener("visibilitychange", () => {
-        if (!didPrint || document.visibilityState !== "visible") return;
-        if (Date.now() - printStartedAt < 500) return;
+        if (!didPrint || goingHome || document.visibilityState !== "visible") return;
+        if (Date.now() - printStartedAt < printCloseDelayMs) return;
         onPrintDialogClosed();
     });
 
     window.addEventListener("focus", () => {
-        if (!didPrint || Date.now() - printStartedAt < 500) return;
+        if (!didPrint || goingHome || Date.now() - printStartedAt < printCloseDelayMs) return;
         setTimeout(onPrintDialogClosed, 300);
     });
-
-    homeBtn.onclick = finishPrintAndGoHome;
 }
 
 setupPrintReturnHandlers();
 
 /* >>> DRUCKEN <<< */
 printBtn.onclick = () => {
+    goingHome = false;
     didPrint = true;
     printStartedAt = Date.now();
-    postPrintBar.classList.remove("show");
 
     window.print();
-    armReturnFallback(isZebra || isMobileDevice ? 4000 : 6000);
+    armReturnFallback(fallbackDelayMs);
 };
 
 /* >>> ZURÜCK BUTTON <<< */
