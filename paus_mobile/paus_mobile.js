@@ -117,8 +117,18 @@ backBtn.onclick = () => {
 // ============================================================
 let scanParseTimer = null;
 
+const SCAN_PREFIX_RE = /31[\s\-]*027[\s\-]*1940[\s\-]*502/i;
+
 function cleanScanText(raw) {
     return String(raw).replace(/[\r\n\u0000-\u001F]+/g, "").trim();
+}
+
+function hasScanPrefix(text) {
+    return SCAN_PREFIX_RE.test(cleanScanText(text));
+}
+
+function stripScanPrefix(text) {
+    return cleanScanText(text).replace(SCAN_PREFIX_RE, "").trim();
 }
 
 function formatLieferdatum(raw) {
@@ -133,7 +143,10 @@ function parseScanValue(raw) {
     const text = cleanScanText(raw);
     if (!text) return null;
 
-    const parts = text.split(/[;,|/\t\s]+/).map(p => p.trim()).filter(Boolean);
+    const withoutPrefix = stripScanPrefix(text);
+    const parseText = withoutPrefix || text;
+
+    const parts = parseText.split(/[;,|/\t\s]+/).map(p => p.trim()).filter(Boolean);
     if (parts.length >= 2) {
         const kom = parts[0].replace(/\D/g, "") || parts[0];
         return {
@@ -144,22 +157,23 @@ function parseScanValue(raw) {
 
     const digits = text.replace(/\D/g, "");
 
-    // Kombi-Scan: Kommission + TTMM (z. B. 21548082406)
+    // Prefix + Kommission + TTMM: letzte 11 Ziffern = 7 Kommission + 4 Datum
     if (digits.length >= 11) {
         return {
-            kommission: digits.slice(0, -4),
+            kommission: digits.slice(-11, -4),
             lieferdatum: formatLieferdatum(digits.slice(-4))
         };
     }
 
     // Nur Kommission (z. B. 2154808)
-    if (digits.length >= 5 && digits.length <= 10) {
-        return { kommission: digits, lieferdatum: null };
+    const komDigits = parseText.replace(/\D/g, "");
+    if (komDigits.length >= 5 && komDigits.length <= 10) {
+        return { kommission: komDigits, lieferdatum: null };
     }
 
     // Nur Datum (z. B. 2406 oder 24.06)
-    if (digits.length > 0 && digits.length <= 4) {
-        return { kommission: null, lieferdatum: formatLieferdatum(digits) };
+    if (komDigits.length > 0 && komDigits.length <= 4) {
+        return { kommission: null, lieferdatum: formatLieferdatum(komDigits) };
     }
 
     return null;
@@ -195,6 +209,7 @@ function applyScan(input) {
 
 function shouldAutoParse(text) {
     const cleaned = cleanScanText(text);
+    if (hasScanPrefix(cleaned)) return true;
     if (/[;,|/\t]/.test(cleaned)) return true;
     const parts = cleaned.split(/\s+/).filter(Boolean);
     if (parts.length >= 2) return true;
