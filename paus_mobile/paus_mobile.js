@@ -113,6 +113,81 @@ backBtn.onclick = () => {
 };
 
 // ============================================================
+//  SCAN (Strichcode + Return)
+// ============================================================
+function formatLieferdatum(raw) {
+    let val = String(raw).replace(/\D/g, "");
+    if (!val) return "";
+    if (val.length === 3) val = "0" + val;
+    if (val.length >= 4) return val.slice(0, 2) + "." + val.slice(2, 4);
+    return String(raw).trim();
+}
+
+function parseScanValue(raw) {
+    const text = String(raw).trim();
+    if (!text) return null;
+
+    const parts = text.split(/[;,|/\t]/).map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+        return {
+            kommission: parts[0],
+            lieferdatum: formatLieferdatum(parts[1])
+        };
+    }
+
+    const digits = text.replace(/\D/g, "");
+
+    // Kombi-Scan: Kommission + TTMM (z. B. 21548082406)
+    if (digits.length >= 11) {
+        return {
+            kommission: digits.slice(0, -4),
+            lieferdatum: formatLieferdatum(digits.slice(-4))
+        };
+    }
+
+    // Nur Kommission (z. B. 2154808)
+    if (digits.length >= 5 && digits.length <= 10) {
+        return { kommission: digits, lieferdatum: null };
+    }
+
+    // Nur Datum (z. B. 2406 oder 24.06)
+    if (digits.length > 0 && digits.length <= 4) {
+        return { kommission: null, lieferdatum: formatLieferdatum(digits) };
+    }
+
+    return null;
+}
+
+function applyScan(input) {
+    const parsed = parseScanValue(input.value);
+    if (!parsed) {
+        if (input === kommission && kommission.value.trim()) lieferdatum.focus();
+        return;
+    }
+
+    if (parsed.kommission) kommission.value = parsed.kommission;
+    if (parsed.lieferdatum) lieferdatum.value = parsed.lieferdatum;
+
+    if (parsed.kommission && parsed.lieferdatum) {
+        lieferdatum.focus();
+        return;
+    }
+
+    if (parsed.kommission) lieferdatum.focus();
+    if (parsed.lieferdatum) druckenBtn.focus();
+}
+
+function setupScanHandlers() {
+    [kommission, lieferdatum].forEach(input => {
+        input.addEventListener("keydown", (e) => {
+            if (e.key !== "Enter") return;
+            e.preventDefault();
+            applyScan(input);
+        });
+    });
+}
+
+// ============================================================
 //  BUILD INFO
 // ============================================================
 function buildNumber() {
