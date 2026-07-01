@@ -1,0 +1,61 @@
+/* ============================================================
+   PAUS – ALTE TASTATUR (Backup zum Zurückbauen)
+   Stand: vor großer Touch-Tastatur
+   
+   Zurückbauen:
+   1. In paus_mobile.css den Block "POPUP TASTATUR" durch diesen Inhalt ersetzen
+   2. In paus_mobile.js renderKeyboard() auf NUM_KEYS 5-Spalten-Grid zurücksetzen
+      (siehe Kommentar unten in paus_mobile.js)
+============================================================ */
+
+.keyboard-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.keyboard-content {
+    width: 90%;
+    max-width: 360px;
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.keyboard-input {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    border: 1px solid #777;
+    border-radius: 12px;
+}
+
+.keyboard-keys {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.keyboard-keys button {
+    padding: 12px 0;
+    font-size: 18px;
+    border-radius: 10px;
+    border: 1px solid #aaa;
+    background: #f2f2f2;
+}
+
+.keyboard-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.key-delete { flex: 1; background: #c62828; color: white; padding: 10px; border-radius: 10px; border: none; }
+.key-ok     { flex: 1; background: #00963d; color: white; padding: 10px; border-radius: 10px; border: none; }
+.key-close  { flex: 1; background: #555;    color: white; padding: 10px; border-radius: 10px; border: none; }

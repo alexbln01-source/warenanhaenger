@@ -501,19 +501,44 @@ document.querySelectorAll(".color-btn").forEach(btn => {
 });
 
 // ============================================================
-//  POPUP TASTATUR
+//  POPUP TASTATUR (groß für Zebra)
+//  Alte Version: paus_keyboard_legacy.css + NUM_KEYS 5-Spalten-Grid
 // ============================================================
-const NUM_KEYS = ["1","2","3","4","5","6","7","8","9","0"];
+const NUM_ROWS = [
+    ["1", "2", "3"],
+    ["4", "5", "6"],
+    ["7", "8", "9"]
+];
+
+function appendKeyboardDigit(digit) {
+    keyboardInput.value += digit;
+}
+
+function createKeyButton(label) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "kb-key";
+    btn.textContent = label;
+    btn.onclick = () => appendKeyboardDigit(label);
+    return btn;
+}
 
 function renderKeyboard() {
     keyboardKeys.innerHTML = "";
-    NUM_KEYS.forEach(k => {
-        const b = document.createElement("button");
-        b.textContent = k;
-        b.onclick = () => keyboardInput.value += k;
-        keyboardKeys.appendChild(b);
+
+    NUM_ROWS.forEach(row => {
+        const rowEl = document.createElement("div");
+        rowEl.className = "keyboard-row";
+        row.forEach(label => rowEl.appendChild(createKeyButton(label)));
+        keyboardKeys.appendChild(rowEl);
     });
+
+    const zeroRow = document.createElement("div");
+    zeroRow.className = "keyboard-row keyboard-row-zero";
+    zeroRow.appendChild(createKeyButton("0"));
+    keyboardKeys.appendChild(zeroRow);
 }
+
 renderKeyboard();
 
 openKeyboardBtn.onclick = () => openKeyboard("kommission");
@@ -523,17 +548,22 @@ function openKeyboard(id) {
     activeInput = document.getElementById(id);
     keyboardInput.value = activeInput.value;
 
-    // Titel je nach Feld setzen
     if (id === "kommission") {
         document.getElementById("keyboardTitle").textContent = "Kommissionsnummer";
-    } 
+    }
     else if (id === "lieferdatum") {
-        document.getElementById("keyboardTitle").textContent = "Lieferdatum";
+        document.getElementById("keyboardTitle").textContent = "Lieferdatum (TT.MM)";
     }
 
     keyboardPopup.style.display = "flex";
+    document.body.classList.add("keyboard-open");
 
     setTimeout(() => keyboardInput.focus(), 20);
+}
+
+function closeKeyboard() {
+    keyboardPopup.style.display = "none";
+    document.body.classList.remove("keyboard-open");
 }
 
 keyboardOK.onclick = () => {
@@ -549,7 +579,7 @@ keyboardOK.onclick = () => {
             else if (digits.length >= 4) val = digits.slice(0, 2) + "." + digits.slice(2, 4);
         }
         val = lieferdatumAnzeige(formatLieferdatum(val));
-        keyboardPopup.style.display = "none";
+        closeKeyboard();
     } else {
         activeInput.value = val;
         openKeyboard("lieferdatum");
@@ -560,7 +590,6 @@ keyboardOK.onclick = () => {
 };
 
 keyboardDelete.onclick = () =>
-    keyboardInput.value = keyboardInput.value.slice(0,-1);
+    keyboardInput.value = keyboardInput.value.slice(0, -1);
 
-keyboardClose.onclick = () =>
-    keyboardPopup.style.display = "none";
+keyboardClose.onclick = () => closeKeyboard();
