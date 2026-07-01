@@ -505,7 +505,7 @@ document.querySelectorAll(".color-btn").forEach(btn => {
 // ============================================================
 keyboardKeys.addEventListener("click", (e) => {
     const btn = e.target.closest(".kb-key");
-    if (!btn) return;
+    if (!btn || !btn.dataset.key) return;
     keyboardInput.value += btn.dataset.key;
 });
 

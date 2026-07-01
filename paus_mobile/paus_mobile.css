@@ -145,17 +145,52 @@ body.keyboard-open {
     width: 100%;
     max-width: 600px;
     background: #f7f8fa;
-    padding: 18px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+    padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
     border-radius: 20px 20px 0 0;
     text-align: center;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.22);
+    position: relative;
+}
+
+.keyboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 48px;
+    margin-bottom: 10px;
+    padding-right: 52px;
 }
 
 #keyboardTitle {
-    margin: 0 0 12px 0;
+    margin: 0;
     font-size: 22px;
     font-weight: 900;
     color: #003a73;
+}
+
+.keyboard-close-x {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: #c62828;
+    color: white;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0;
+    box-shadow: 0 3px 0 #8e0000;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.keyboard-close-x:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #8e0000;
 }
 
 .keyboard-input {
@@ -168,12 +203,6 @@ body.keyboard-open {
     border-radius: 14px;
     text-align: center;
     background: white;
-}
-
-.keyboard-body {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
 }
 
 .keyboard-keys-wrap {
@@ -194,12 +223,6 @@ body.keyboard-open {
     height: 72px;
     padding: 0;
     vertical-align: middle;
-}
-
-.keyboard-grid td.kb-empty {
-    height: 72px;
-    border: none;
-    background: transparent;
 }
 
 .kb-key {
@@ -225,49 +248,47 @@ body.keyboard-open {
     background: #e8edf3;
 }
 
-.keyboard-actions {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr 1fr;
-    gap: 10px;
-    margin-top: 0;
-}
-
-.keyboard-actions button {
-    min-height: 58px;
+.kb-key.key-delete,
+.kb-key.key-ok {
     font-size: 20px;
-    font-weight: bold;
-    border-radius: 14px;
-    border: none;
-    touch-action: manipulation;
+    font-weight: 800;
+    box-shadow: none;
 }
 
-.key-delete { background: #c62828; color: white; }
-.key-ok     { background: #00963d; color: white; font-size: 22px; }
-.key-close  { background: #555; color: white; }
+.kb-key.key-delete {
+    background: #c62828;
+    color: white;
+}
+
+.kb-key.key-delete:active {
+    background: #a31f1f;
+    box-shadow: none;
+}
+
+.kb-key.key-ok {
+    background: #00963d;
+    color: white;
+    font-size: 26px;
+}
+
+.kb-key.key-ok:active {
+    background: #007a31;
+    box-shadow: none;
+}
 
 @media (orientation: landscape), (max-height: 500px) {
     .keyboard-content {
         max-width: none;
         border-radius: 16px 16px 0 0;
-        padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
-    }
-
-    .keyboard-body {
-        flex-direction: row;
-        align-items: stretch;
-        justify-content: center;
-        gap: 14px;
+        padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
     }
 
     .keyboard-keys-wrap {
-        width: min(58vw, 320px);
+        width: min(70vw, 360px);
         max-width: none;
-        margin: 0;
-        flex: 0 0 auto;
     }
 
-    .keyboard-grid td,
-    .keyboard-grid td.kb-empty {
+    .keyboard-grid td {
         height: 58px;
     }
 
@@ -276,20 +297,20 @@ body.keyboard-open {
         font-size: 28px;
     }
 
-    .keyboard-actions {
-        flex: 0 0 118px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .keyboard-actions button {
-        flex: 1;
-        min-height: 0;
+    .kb-key.key-delete,
+    .kb-key.key-ok {
         font-size: 18px;
     }
 
-    .key-ok { font-size: 20px; }
+    .kb-key.key-ok {
+        font-size: 22px;
+    }
+
+    .keyboard-close-x {
+        width: 44px;
+        height: 44px;
+        font-size: 26px;
+    }
 }
 
 /* PC: alte kompakte Mitte (falls je sichtbar) */
@@ -313,11 +334,6 @@ body.pc-device .keyboard-input {
 body.pc-device .kb-key {
     height: 48px;
     font-size: 22px;
-}
-
-body.pc-device .keyboard-actions button {
-    min-height: 44px;
-    font-size: 16px;
 }
 
 /* ===== BUTTONS ===== */

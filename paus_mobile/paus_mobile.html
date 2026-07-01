@@ -5,8 +5,8 @@
 <title>PAUS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="paus_mobile.css?v=kb4">
-<script defer src="paus_mobile.js?v=kb4"></script>
+<link rel="stylesheet" href="paus_mobile.css?v=kb5">
+<script defer src="paus_mobile.js?v=kb5"></script>
 
 </head>
 
@@ -33,7 +33,10 @@
 
     <div id="keyboardPopup" class="keyboard-popup">
         <div class="keyboard-content">
-            <h3 id="keyboardTitle">Eingabe</h3>
+            <div class="keyboard-header">
+                <h3 id="keyboardTitle">Eingabe</h3>
+                <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
+            </div>
 
             <input id="keyboardInput"
                    class="keyboard-input"
@@ -43,39 +46,31 @@
                    autocapitalize="off"
                    spellcheck="false">
 
-            <div class="keyboard-body">
-                <div id="keyboardKeys" class="keyboard-keys-wrap">
-                    <table class="keyboard-grid" role="presentation">
-                        <tbody>
-                            <tr>
-                                <td><button type="button" class="kb-key" data-key="1">1</button></td>
-                                <td><button type="button" class="kb-key" data-key="2">2</button></td>
-                                <td><button type="button" class="kb-key" data-key="3">3</button></td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" class="kb-key" data-key="4">4</button></td>
-                                <td><button type="button" class="kb-key" data-key="5">5</button></td>
-                                <td><button type="button" class="kb-key" data-key="6">6</button></td>
-                            </tr>
-                            <tr>
-                                <td><button type="button" class="kb-key" data-key="7">7</button></td>
-                                <td><button type="button" class="kb-key" data-key="8">8</button></td>
-                                <td><button type="button" class="kb-key" data-key="9">9</button></td>
-                            </tr>
-                            <tr>
-                                <td class="kb-empty" aria-hidden="true"></td>
-                                <td><button type="button" class="kb-key" data-key="0">0</button></td>
-                                <td class="kb-empty" aria-hidden="true"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="keyboard-actions">
-                    <button id="keyboardDelete" class="key-delete">Löschen</button>
-                    <button id="keyboardOK" class="key-ok">OK</button>
-                    <button id="keyboardClose" class="key-close">Schließen</button>
-                </div>
+            <div id="keyboardKeys" class="keyboard-keys-wrap">
+                <table class="keyboard-grid" role="presentation">
+                    <tbody>
+                        <tr>
+                            <td><button type="button" class="kb-key" data-key="1">1</button></td>
+                            <td><button type="button" class="kb-key" data-key="2">2</button></td>
+                            <td><button type="button" class="kb-key" data-key="3">3</button></td>
+                        </tr>
+                        <tr>
+                            <td><button type="button" class="kb-key" data-key="4">4</button></td>
+                            <td><button type="button" class="kb-key" data-key="5">5</button></td>
+                            <td><button type="button" class="kb-key" data-key="6">6</button></td>
+                        </tr>
+                        <tr>
+                            <td><button type="button" class="kb-key" data-key="7">7</button></td>
+                            <td><button type="button" class="kb-key" data-key="8">8</button></td>
+                            <td><button type="button" class="kb-key" data-key="9">9</button></td>
+                        </tr>
+                        <tr>
+                            <td><button type="button" id="keyboardDelete" class="kb-key key-delete">Löschen</button></td>
+                            <td><button type="button" class="kb-key" data-key="0">0</button></td>
+                            <td><button type="button" id="keyboardOK" class="kb-key key-ok">OK</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
