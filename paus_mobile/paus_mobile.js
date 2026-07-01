@@ -73,6 +73,8 @@ window.onload = () => {
 
     if (isZebra) kommission.focus();
 
+    setupScanHandlers();
+
 backBtn.onclick = () => {
     const base = location.pathname.split("/").slice(0, -2).join("/");
     window.location.href = base + "/index.html";
