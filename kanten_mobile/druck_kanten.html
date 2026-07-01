@@ -256,9 +256,11 @@ const kundeAliases = {
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
-/* Bergmann M-H + Kanten: 50 Etikette mit Palettennummer 700–749 */
+/* Bergmann M-H + Kanten: Etikette mit Palettennummer 700–750 */
 const BERGMANN_KANTEN_PALETTE_START = 700;
-const BERGMANN_KANTEN_PALETTE_COUNT = 50;
+const BERGMANN_KANTEN_PALETTE_END = 750;
+const BERGMANN_KANTEN_PALETTE_COUNT =
+    BERGMANN_KANTEN_PALETTE_END - BERGMANN_KANTEN_PALETTE_START + 1;
 const isBergmannKantenBatch =
     kunde === "Bergmann M-H" && art === "kanten";
 
@@ -475,9 +477,6 @@ if (!isEiltSehr) {
     const rows = layouts[layoutKunde] || layouts["Sonstige Kunden"];
 
     if (isBergmannKantenBatch) {
-        const paletteEnd =
-            BERGMANN_KANTEN_PALETTE_START + BERGMANN_KANTEN_PALETTE_COUNT - 1;
-
         previewContent.className = "etikett-center bergmann-kanten";
         previewContent.innerHTML = render(rows, BERGMANN_KANTEN_PALETTE_START);
         previewContent.parentElement.classList.add("bergmann-etikett");
@@ -489,7 +488,7 @@ if (!isEiltSehr) {
         buildPrintPages(rows, paletteNumbers, true);
 
         printBtn.textContent =
-            `Drucken (${BERGMANN_KANTEN_PALETTE_COUNT}× ${BERGMANN_KANTEN_PALETTE_START}–${paletteEnd})`;
+            `Drucken (${BERGMANN_KANTEN_PALETTE_START}–${BERGMANN_KANTEN_PALETTE_END})`;
     } else {
         previewContent.className = "etikett-center";
         previewContent.innerHTML = render(rows);
