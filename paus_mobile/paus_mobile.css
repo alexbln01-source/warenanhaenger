@@ -275,6 +275,8 @@ body.keyboard-open {
 .kb-key.key-delete {
     background: #c62828;
     color: white;
+    font-size: 34px;
+    line-height: 1;
 }
 
 .kb-key.key-delete:active {
@@ -285,7 +287,8 @@ body.keyboard-open {
 .kb-key.key-ok {
     background: #00963d;
     color: white;
-    font-size: 26px;
+    font-size: 36px;
+    line-height: 1;
 }
 
 .kb-key.key-ok:active {
@@ -317,9 +320,8 @@ body.keyboard-open {
         font-size: clamp(24px, 4.5vh, 32px);
     }
 
-    .kb-key.key-delete,
-    .kb-key.key-ok {
-        font-size: clamp(16px, 3.2vh, 20px);
+    .kb-key.key-delete {
+        font-size: clamp(28px, 5vh, 34px);
     }
 
     .kb-key.key-ok {
@@ -330,6 +332,8 @@ body.keyboard-open {
         width: 48px;
         height: 48px;
         font-size: 28px;
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        right: calc(20px + env(safe-area-inset-right, 0px));
     }
 }
 
