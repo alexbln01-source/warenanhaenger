@@ -129,27 +129,38 @@ body.keyboard-open {
     overflow: hidden;
 }
 
-/* ===== POPUP TASTATUR (groß, Zebra-tauglich) ===== */
+/* ===== POPUP TASTATUR (Vollbild, Zebra-tauglich) ===== */
 .keyboard-popup {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: flex-end;
-    z-index: 999;
+    width: 100%;
+    height: 100%;
+    background: #f7f8fa;
+    z-index: 9999;
+    flex-direction: column;
     padding: 0;
 }
 
 .keyboard-content {
+    flex: 1;
     width: 100%;
-    max-width: 600px;
-    background: #f7f8fa;
-    padding: 14px 14px calc(18px + env(safe-area-inset-bottom, 0px));
-    border-radius: 20px 20px 0 0;
+    max-width: none;
+    height: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding:
+        calc(12px + env(safe-area-inset-top, 0px))
+        calc(16px + env(safe-area-inset-right, 0px))
+        calc(12px + env(safe-area-inset-bottom, 0px))
+        calc(16px + env(safe-area-inset-left, 0px));
+    border-radius: 0;
     text-align: center;
-    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.22);
-    position: relative;
+    box-shadow: none;
+    box-sizing: border-box;
 }
 
 .keyboard-header {
@@ -157,9 +168,12 @@ body.keyboard-open {
     align-items: center;
     justify-content: center;
     position: relative;
-    min-height: 48px;
-    margin-bottom: 10px;
-    padding-right: 52px;
+    width: 100%;
+    max-width: 520px;
+    min-height: 52px;
+    margin-bottom: 12px;
+    padding: 0 56px;
+    flex-shrink: 0;
 }
 
 #keyboardTitle {
@@ -195,20 +209,23 @@ body.keyboard-open {
 
 .keyboard-input {
     width: 100%;
+    max-width: 520px;
     padding: 18px 14px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     font-size: 32px;
     font-weight: bold;
     border: 2px solid #003a73;
     border-radius: 14px;
     text-align: center;
     background: white;
+    flex-shrink: 0;
 }
 
 .keyboard-keys-wrap {
     width: 100%;
-    max-width: 360px;
+    max-width: 520px;
     margin: 0 auto;
+    flex-shrink: 0;
 }
 
 .keyboard-grid {
@@ -278,52 +295,66 @@ body.keyboard-open {
 
 @media (orientation: landscape), (max-height: 500px) {
     .keyboard-content {
-        max-width: none;
-        border-radius: 16px 16px 0 0;
-        padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+        padding:
+            calc(8px + env(safe-area-inset-top, 0px))
+            calc(20px + env(safe-area-inset-right, 0px))
+            calc(8px + env(safe-area-inset-bottom, 0px))
+            calc(20px + env(safe-area-inset-left, 0px));
     }
 
+    .keyboard-header,
+    .keyboard-input,
     .keyboard-keys-wrap {
-        width: min(70vw, 360px);
-        max-width: none;
+        max-width: min(88vw, 640px);
     }
 
     .keyboard-grid td {
-        height: 58px;
+        height: min(18vh, 68px);
     }
 
     .kb-key {
-        height: 58px;
-        font-size: 28px;
+        height: min(18vh, 68px);
+        font-size: clamp(24px, 4.5vh, 32px);
     }
 
     .kb-key.key-delete,
     .kb-key.key-ok {
-        font-size: 18px;
+        font-size: clamp(16px, 3.2vh, 20px);
     }
 
     .kb-key.key-ok {
-        font-size: 22px;
+        font-size: clamp(20px, 4vh, 26px);
     }
 
     .keyboard-close-x {
-        width: 44px;
-        height: 44px;
-        font-size: 26px;
+        width: 48px;
+        height: 48px;
+        font-size: 28px;
     }
 }
 
-/* PC: alte kompakte Mitte (falls je sichtbar) */
+body.keyboard-open .device-info,
+body.keyboard-open .build-info {
+    display: none;
+}
+
+/* PC: kompaktes Fenster (Tastatur dort meist aus) */
 body.pc-device .keyboard-popup {
+    background: rgba(0, 0, 0, 0.45);
+    justify-content: center;
     align-items: center;
     padding: 16px;
 }
 
 body.pc-device .keyboard-content {
+    flex: 0 0 auto;
     width: 90%;
     max-width: 360px;
+    height: auto;
+    min-height: 0;
     border-radius: 14px;
     padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
 }
 
 body.pc-device .keyboard-input {
