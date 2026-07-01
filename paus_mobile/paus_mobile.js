@@ -504,10 +504,11 @@ document.querySelectorAll(".color-btn").forEach(btn => {
 //  POPUP TASTATUR (groß für Zebra)
 //  Alte Version: paus_keyboard_legacy.css + NUM_KEYS 5-Spalten-Grid
 // ============================================================
-const NUM_ROWS = [
-    ["1", "2", "3"],
-    ["4", "5", "6"],
-    ["7", "8", "9"]
+const NUM_LAYOUT = [
+    "1", "2", "3",
+    "4", "5", "6",
+    "7", "8", "9",
+    "",  "0", ""
 ];
 
 function appendKeyboardDigit(digit) {
@@ -526,20 +527,16 @@ function createKeyButton(label) {
 function renderKeyboard() {
     keyboardKeys.innerHTML = "";
 
-    NUM_ROWS.forEach(row => {
-        const rowEl = document.createElement("div");
-        rowEl.className = "keyboard-row";
-        row.forEach(label => rowEl.appendChild(createKeyButton(label)));
-        keyboardKeys.appendChild(rowEl);
+    NUM_LAYOUT.forEach(label => {
+        if (!label) {
+            const spacer = document.createElement("div");
+            spacer.className = "kb-spacer";
+            spacer.setAttribute("aria-hidden", "true");
+            keyboardKeys.appendChild(spacer);
+            return;
+        }
+        keyboardKeys.appendChild(createKeyButton(label));
     });
-
-    const zeroRow = document.createElement("div");
-    zeroRow.className = "keyboard-row";
-    zeroRow.appendChild(document.createElement("span")).className = "kb-spacer";
-    const zeroBtn = createKeyButton("0");
-    zeroRow.appendChild(zeroBtn);
-    zeroRow.appendChild(document.createElement("span")).className = "kb-spacer";
-    keyboardKeys.appendChild(zeroRow);
 }
 
 renderKeyboard();

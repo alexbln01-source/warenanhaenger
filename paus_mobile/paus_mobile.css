@@ -170,26 +170,30 @@ body.keyboard-open {
     background: white;
 }
 
-.keyboard-keys {
+.keyboard-body {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
 }
 
-.keyboard-row {
+.keyboard-keys {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(64px, 1fr));
     gap: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
 }
 
 .kb-spacer {
-    display: block;
+    pointer-events: none;
 }
 
 .kb-key {
     width: 100%;
-    min-height: 68px;
-    aspect-ratio: 1.15;
+    height: 100%;
+    min-height: 64px;
     padding: 0;
     font-size: 32px;
     font-weight: 700;
@@ -212,7 +216,7 @@ body.keyboard-open {
     display: grid;
     grid-template-columns: 1fr 1.2fr 1fr;
     gap: 10px;
-    margin-top: 14px;
+    margin-top: 0;
 }
 
 .keyboard-actions button {
@@ -227,6 +231,45 @@ body.keyboard-open {
 .key-delete { background: #c62828; color: white; }
 .key-ok     { background: #00963d; color: white; font-size: 22px; }
 .key-close  { background: #555; color: white; }
+
+/* Querformat / Zebra: Numpad links, Buttons rechts – Reihen bleiben untereinander */
+@media (orientation: landscape), (max-height: 500px) {
+    .keyboard-content {
+        max-width: none;
+        border-radius: 16px 16px 0 0;
+        padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .keyboard-body {
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: center;
+        gap: 14px;
+    }
+
+    .keyboard-keys {
+        width: min(58vw, 320px);
+        max-width: none;
+        margin: 0;
+        flex: 0 0 auto;
+        grid-template-rows: repeat(4, minmax(56px, 1fr));
+    }
+
+    .keyboard-actions {
+        flex: 0 0 118px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .keyboard-actions button {
+        flex: 1;
+        min-height: 0;
+        font-size: 18px;
+    }
+
+    .key-ok { font-size: 20px; }
+}
 
 /* PC: alte kompakte Mitte (falls je sichtbar) */
 body.pc-device .keyboard-popup {
