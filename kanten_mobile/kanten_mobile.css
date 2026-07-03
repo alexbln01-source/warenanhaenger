@@ -1,6 +1,4 @@
-/* =====================================================
-   KANTEN – Handy-Design (gleicher Viewport / Zebra TC)
-===================================================== */
+/* KANTEN – flaches Listen-Design (Handy / Zebra) */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -12,364 +10,265 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 45%, #c3cad4 100%);
-    font-family: "Segoe UI", Arial, sans-serif;
-    color: #003a73;
+    background: #dfe4ea;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    color: #1a2b3c;
 }
 
-/* Handy + Zebra: App mittig wie auf dem Telefon */
-body.phone-layout {
+body.phone-layout,
+body.pc-device {
     display: flex;
     justify-content: center;
     align-items: stretch;
 }
 
-/* =====================================================
-   HAUPTCONTAINER – volle Höhe, kein Scroll außen
-===================================================== */
 #card {
     width: 100%;
-    max-width: 360px;
+    max-width: 400px;
     height: 100vh;
     height: 100dvh;
     margin: 0 auto;
-    padding: 34px 10px 8px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    background: #f4f6f8;
 }
 
-body.phone-layout #card {
-    box-shadow: 0 0 0 1px rgba(0, 58, 115, 0.06);
+/* ===== KOPFLEISTE ===== */
+.app-bar {
+    flex-shrink: 0;
+    background: #003a73;
+    color: #fff;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 14px 12px;
 }
 
-.phone-scroll {
+.app-back {
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 4px 0 8px;
+    margin: 0;
+}
+
+.app-back:active {
+    opacity: 0.7;
+}
+
+.app-bar-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.app-bar-sub {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.75;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ===== INHALT ===== */
+.app-main {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
-}
-
-/* =====================================================
-   KOPFZEILE
-===================================================== */
-.page-head {
-    text-align: center;
-    flex-shrink: 0;
-    margin-bottom: 2px;
-}
-
-.page-badge {
-    display: inline-block;
-    padding: 5px 14px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #005ea6 0%, #003a73 100%);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(0, 58, 115, 0.35);
-}
-
-.page-title {
-    margin: 8px 0 0;
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 0.2px;
-}
-
-.step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #00963d;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 900;
-    margin-right: 4px;
-    flex-shrink: 0;
-}
-
-/* =====================================================
-   SCHRITT-BLÖCKE
-===================================================== */
-.step-block {
-    background: rgba(255, 255, 255, 0.92);
-    border-radius: 16px;
-    padding: 10px 10px 12px;
-    margin-bottom: 8px;
-    box-shadow: 0 4px 14px rgba(0, 58, 115, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-}
-
-.grid-label {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 800;
-    text-align: center;
-    margin: 0 0 8px;
-    color: #003a73;
-    letter-spacing: 0.45px;
-    text-transform: uppercase;
-}
-
-.grid-label::before {
-    content: "";
-    width: 18px;
-    height: 2px;
-    border-radius: 2px;
-    background: #00963d;
-}
-
-.grid-label::after {
-    content: "";
-    width: 18px;
-    height: 2px;
-    border-radius: 2px;
-    background: #00963d;
-}
-
-.spacer-top {
-    margin-top: 0;
-}
-
-/* =====================================================
-   ART BUTTONS – große Kacheln
-===================================================== */
-.art-btn-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: column;
+    padding: 10px 10px 0;
     gap: 8px;
 }
 
+.panel {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #cdd5df;
+    overflow: hidden;
+}
+
+.panel-grow {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-label {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #5a6a7a;
+    background: #f8fafb;
+    border-bottom: 1px solid #e4e9ef;
+}
+
+/* ===== BEREICH (4 Zeilen) ===== */
+.art-list {
+    display: flex;
+    flex-direction: column;
+}
+
 .artBtn {
-    min-height: 52px;
-    border-radius: 14px;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
     border: none;
-    font-size: 17px;
-    font-weight: 800;
+    border-bottom: 1px solid #e8edf2;
     background: #fff;
     color: #003a73;
-    box-shadow: 0 3px 0 #c5cdd8, 0 2px 8px rgba(0, 0, 0, 0.06);
+    font-size: 16px;
+    font-weight: 700;
     touch-action: manipulation;
-    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.art-list .artBtn:last-child {
+    border-bottom: none;
 }
 
 .artBtn:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #c5cdd8;
+    background: #eef2f6;
 }
 
 .artBtn.active {
-    background: linear-gradient(180deg, #00a844 0%, #00963d 100%);
-    color: #fff;
-    box-shadow: 0 3px 0 #006e2d, 0 4px 12px rgba(0, 150, 61, 0.35);
+    background: #e8f2fc;
+    color: #003a73;
+    box-shadow: inset 4px 0 0 #003a73;
 }
 
-.artBtn.eilt-art {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    line-height: 1.1;
-    background: linear-gradient(180deg, #fff5f5 0%, #ffe8e8 100%);
+.artBtn.art-eilt {
     color: #b71c1c;
-    box-shadow: 0 3px 0 #e8b4b4;
 }
 
-.artBtn.eilt-art.active {
-    background: linear-gradient(180deg, #e53935 0%, #c62828 100%);
-    color: #fff;
-    box-shadow: 0 3px 0 #8e0000;
+.artBtn.art-eilt.active {
+    background: #fdecea;
+    box-shadow: inset 4px 0 0 #c62828;
+    color: #b71c1c;
 }
 
-.art-title {
-    font-size: 16px;
-    font-weight: 800;
+/* ===== KUNDENLISTE ===== */
+.kunden-liste {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: opacity 0.15s ease;
 }
 
-.art-sub {
-    font-size: 12px;
-    font-weight: 700;
-    opacity: 0.9;
-}
-
-/* =====================================================
-   KUNDENAUSWAHL
-===================================================== */
-.section {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    background: transparent;
-    border: none;
-}
-
-#kundenArea {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 7px;
-    transition: opacity 0.2s ease, filter 0.2s ease;
-}
-
-#kundenArea.disabled {
-    opacity: 0.38;
-    filter: grayscale(0.4);
+.kunden-liste.disabled {
+    opacity: 0.35;
     pointer-events: none;
 }
 
 .kundeBtn {
-    min-height: 46px;
-    padding: 6px 4px;
-    border-radius: 12px;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 16px;
     border: none;
+    border-bottom: 1px solid #eef1f4;
     background: #fff;
-    color: #003a73;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.15;
-    box-shadow: 0 2px 0 #d0d6de, 0 1px 4px rgba(0, 0, 0, 0.05);
+    color: #1a2b3c;
+    font-size: 15px;
+    font-weight: 600;
     touch-action: manipulation;
-    word-break: break-word;
-    hyphens: auto;
+}
+
+.kundeBtn:last-child {
+    border-bottom: none;
 }
 
 .kundeBtn:active {
-    transform: translateY(1px);
-    box-shadow: 0 1px 0 #d0d6de;
+    background: #f0f4f8;
 }
 
 .kundeBtn.active {
-    background: linear-gradient(180deg, #0078d7 0%, #005ea6 100%);
-    color: #fff;
-    box-shadow: 0 2px 0 #004578, 0 3px 10px rgba(0, 94, 166, 0.3);
+    background: #e6f6ec;
+    box-shadow: inset 4px 0 0 #00963d;
+    color: #004d20;
 }
 
-/* =====================================================
-   AKTIONSBUTTONS – fest unten (Handy-Leiste)
-===================================================== */
-#actionButtons {
+/* ===== FUSS ===== */
+.app-footer {
     flex-shrink: 0;
-    display: grid;
-    grid-template-columns: 1fr 1.15fr;
-    gap: 8px;
-    padding: 8px 0 calc(6px + env(safe-area-inset-bottom, 0px));
-    margin-top: 0;
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: #f4f6f8;
+    border-top: 1px solid #d5dce4;
 }
 
-#btnBack,
-#btnDrucken {
+.btn-print {
+    width: 100%;
     min-height: 50px;
-    padding: 0;
-    border-radius: 14px;
     border: none;
-    font-size: 16px;
-    font-weight: 800;
+    border-radius: 8px;
+    background: #00963d;
     color: #fff;
+    font-size: 17px;
+    font-weight: 800;
     touch-action: manipulation;
-    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
 }
 
-#btnBack:active,
-#btnDrucken:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+.btn-print:disabled {
+    background: #a8b4be;
+    color: #eef1f4;
 }
 
-#btnBack  { background: linear-gradient(180deg, #555 0%, #333 100%); }
-#btnDrucken {
-    background: linear-gradient(180deg, #00a844 0%, #00963d 100%);
-    box-shadow: 0 3px 0 #006e2d;
+.btn-print:not(:disabled):active {
+    background: #007a31;
 }
 
-/* =====================================================
-   DEVICE INFO (JS setzt Position)
-===================================================== */
+/* ===== INFO ===== */
 .device-info {
     position: fixed;
     top: 6px;
-    left: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #003a73;
-    opacity: 0.85;
-    z-index: 9999;
+    right: 10px;
+    left: auto;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    z-index: 10;
+    pointer-events: none;
 }
 
 .build-info {
     position: fixed;
-    bottom: 6px;
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
     right: 10px;
-    font-size: 10px;
-    color: #003a73;
-    opacity: 0.7;
-    z-index: 9999;
+    font-size: 9px;
+    color: #8a96a3;
+    z-index: 10;
+    pointer-events: none;
 }
 
-/* =====================================================
-   FOKUS (Zebra / Touch)
-===================================================== */
 button:focus,
 button:focus-visible {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
+    outline: 2px solid #ff9800;
+    outline-offset: -2px;
 }
 
-/* =====================================================
-   PC – Handy-Rahmen in der Mitte
-===================================================== */
+/* PC: schmaler Phone-Rahmen */
 body.pc-device {
-    display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 16px;
+    padding: 12px;
+    background: #2a2a2a;
 }
 
 body.pc-device #card {
-    max-width: 360px;
-    height: min(720px, 92vh);
-    border-radius: 22px;
-    box-shadow:
-        0 0 0 10px #1a1a1a,
-        0 0 0 12px #333,
-        0 20px 50px rgba(0, 0, 0, 0.35);
+    max-width: 390px;
+    height: min(780px, 94vh);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     overflow: hidden;
-    padding-top: 36px;
 }
 
-body.pc-device .phone-scroll {
-    overflow-y: auto;
-}
-
-/* Kleine Handys (schmal) */
-@media (max-width: 360px) {
-    #card { padding-left: 8px; padding-right: 8px; }
-    .kundeBtn { font-size: 10px; min-height: 44px; }
-    .artBtn { font-size: 16px; min-height: 50px; }
-}
-
-/* Querformat Zebra / Handy */
 @media (orientation: landscape) and (max-height: 420px) {
-    #card { padding-top: 28px; gap: 4px; }
-    .page-title { font-size: 17px; }
-    .artBtn { min-height: 44px; font-size: 15px; }
-    .kundeBtn { min-height: 40px; font-size: 10px; }
-    #btnBack, #btnDrucken { min-height: 44px; font-size: 14px; }
+    .artBtn { padding: 10px 14px; font-size: 14px; }
+    .kundeBtn { padding: 10px 14px; font-size: 14px; }
+    .app-bar-title { font-size: 17px; }
 }
 
-@media (min-width: 601px) {
-    .artBtn { min-height: 58px; font-size: 18px; }
-    .kundeBtn { min-height: 50px; font-size: 12px; }
-}
-
-/* Keyboard legacy (falls wieder eingebaut) */
 #keyboardPopup { display: none; }

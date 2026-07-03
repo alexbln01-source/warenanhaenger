@@ -68,11 +68,11 @@ function setCornerInfo() {
     isMobile ? "Mobil" : "PC";
 
   if (deviceInfo) {
-    deviceInfo.textContent = "Gerät: " + deviceLabel;
+    deviceInfo.textContent = deviceLabel;
     deviceInfo.style.position  = "fixed";
     deviceInfo.style.top       = "8px";
-    deviceInfo.style.left      = "12px";
-    deviceInfo.style.right     = "auto";
+    deviceInfo.style.right     = "12px";
+    deviceInfo.style.left      = "auto";
     deviceInfo.style.bottom    = "auto";
     deviceInfo.style.transform = "none";
     deviceInfo.style.margin    = "0";
@@ -109,18 +109,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   setCornerInfo();
+  updatePrintButton();
 });
 
 
 // ============================================================
 //  HILFSFUNKTIONEN
 // ============================================================
+function updatePrintButton() {
+  if (!btnDrucken) return;
+  const ready = selectedArt === "eilt_sehr" || (selectedArt && selectedCustomer);
+  btnDrucken.disabled = !ready;
+}
+
 function clearArtSelection() {
   document.querySelectorAll(".artBtn").forEach(b => b.classList.remove("active"));
+  updatePrintButton();
 }
 
 function clearCustomerSelection() {
   document.querySelectorAll(".kundeBtn").forEach(b => b.classList.remove("active"));
+  updatePrintButton();
 }
 
 
@@ -136,6 +145,7 @@ btnEiltSehr.onclick = () => {
   clearCustomerSelection();
 
   if (kundenArea) kundenArea.classList.add("disabled");
+  updatePrintButton();
 };
 
 btnKanten.onclick     = () => setNormalArt("kanten", btnKanten);
@@ -152,6 +162,7 @@ function setNormalArt(art, btn) {
   clearCustomerSelection();
 
   if (kundenArea) kundenArea.classList.remove("disabled");
+  updatePrintButton();
 }
 
 
@@ -168,6 +179,7 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
     clearCustomerSelection();
     btn.classList.add("active");
     selectedCustomer = btn.dataset.kunde;
+    updatePrintButton();
   };
 });
 
