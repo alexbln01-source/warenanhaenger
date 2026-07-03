@@ -100,6 +100,14 @@ function setCornerInfo() {
 // ============================================================
 document.addEventListener("DOMContentLoaded", () => {
   if (kundenArea) kundenArea.classList.add("disabled");
+
+  if (isMobile || isZebra) {
+    document.body.classList.add("phone-layout");
+  }
+  if (isPC) {
+    document.body.classList.add("pc-device");
+  }
+
   setCornerInfo();
 });
 

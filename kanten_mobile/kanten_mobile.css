@@ -17,6 +17,13 @@ html, body {
     color: #003a73;
 }
 
+/* Handy + Zebra: App mittig wie auf dem Telefon */
+body.phone-layout {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
 /* =====================================================
    HAUPTCONTAINER – volle Höhe, kein Scroll außen
 ===================================================== */
@@ -30,6 +37,10 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+body.phone-layout #card {
+    box-shadow: 0 0 0 1px rgba(0, 58, 115, 0.06);
 }
 
 .phone-scroll {
@@ -298,14 +309,48 @@ button:focus-visible {
 }
 
 /* =====================================================
-   PC – etwas breiter, gleiches Design
+   PC – Handy-Rahmen in der Mitte
 ===================================================== */
-@media (min-width: 601px) {
-    #card {
-        max-width: 420px;
-        padding-top: 40px;
-    }
+body.pc-device {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
 
+body.pc-device #card {
+    max-width: 360px;
+    height: min(720px, 92vh);
+    border-radius: 22px;
+    box-shadow:
+        0 0 0 10px #1a1a1a,
+        0 0 0 12px #333,
+        0 20px 50px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    padding-top: 36px;
+}
+
+body.pc-device .phone-scroll {
+    overflow-y: auto;
+}
+
+/* Kleine Handys (schmal) */
+@media (max-width: 360px) {
+    #card { padding-left: 8px; padding-right: 8px; }
+    .kundeBtn { font-size: 10px; min-height: 44px; }
+    .artBtn { font-size: 16px; min-height: 50px; }
+}
+
+/* Querformat Zebra / Handy */
+@media (orientation: landscape) and (max-height: 420px) {
+    #card { padding-top: 28px; gap: 4px; }
+    .page-title { font-size: 17px; }
+    .artBtn { min-height: 44px; font-size: 15px; }
+    .kundeBtn { min-height: 40px; font-size: 10px; }
+    #btnBack, #btnDrucken { min-height: 44px; font-size: 14px; }
+}
+
+@media (min-width: 601px) {
     .artBtn { min-height: 58px; font-size: 18px; }
     .kundeBtn { min-height: 50px; font-size: 12px; }
 }
