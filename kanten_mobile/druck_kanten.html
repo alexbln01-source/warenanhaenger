@@ -513,7 +513,7 @@ const fallbackDelayMs = isKantenBatch
     ? (isZebra ? 30000 : (isMobileDevice || isEdge ? 20000 : 12000))
     : (isZebra || isMobileDevice || isEdge ? 8000 : 10000);
 
-function goHome() {
+function returnToBearbeitung() {
     if (goingHome) return;
     goingHome = true;
     didPrint = false;
@@ -523,13 +523,13 @@ function goHome() {
     returnFallback = null;
     goHomeTimer = null;
 
-    window.location.replace("../start.html?bereich=home");
+    window.location.replace("../start.html?bereich=kanten");
 }
 
-function scheduleGoHome() {
+function scheduleReturnToBearbeitung() {
     if (!didPrint || goingHome) return;
     clearTimeout(goHomeTimer);
-    goHomeTimer = setTimeout(goHome, 300);
+    goHomeTimer = setTimeout(returnToBearbeitung, 300);
 }
 
 function onPrintDialogClosed() {
@@ -538,7 +538,7 @@ function onPrintDialogClosed() {
 
     clearTimeout(returnFallback);
     returnFallback = null;
-    scheduleGoHome();
+    scheduleReturnToBearbeitung();
 }
 
 function armReturnFallback(ms) {
@@ -584,7 +584,7 @@ printBtn.onclick = () => {
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
-    window.location.replace("kanten_mobile.html");
+    window.location.replace("../start.html?bereich=kanten");
 };
 </script>
 
