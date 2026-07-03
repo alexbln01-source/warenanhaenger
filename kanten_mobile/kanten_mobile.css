@@ -62,10 +62,11 @@ body.pc-device {
 
 /* Bereichsüberschriften */
 .section-head {
-    margin: 0 0 8px 2px;
+    margin: 0 0 8px 0;
     font-size: 14px;
     font-weight: 800;
     color: var(--brand);
+    text-align: center;
     flex-shrink: 0;
 }
 
