@@ -1,106 +1,135 @@
-/* PAUS Lieferung A6 */
-body.module-paus {
-    --accent: #28a745;
-    --accent-dark: #1d7f31;
-}
+/* ===== RESET ===== */
+* { box-sizing: border-box; }
 
-.input-panel,
-.options-panel {
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #eef1f4;
+    font-family: Arial, sans-serif;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.options-panel {
-    flex: 1;
-    min-height: 0;
     justify-content: center;
+    align-items: center;
 }
 
+/* ===== DEVICE INFO + BUILD ===== */
+.device-info {
+    position: fixed;
+    top: 6px;
+    left: 10px;
+    font-size: 12px;
+    color: #003a73;
+}
+
+.build-info {
+    position: fixed;
+    bottom: 6px;
+    right: 10px;
+    font-size: 12px;
+    color: #003a73;
+}
+
+/* ===== PAGE FRAME ===== */
+.page {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    text-align: center;
+}
+
+/* ===== TITLE ===== */
+.title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #003a73;
+    margin-bottom: 12px;
+}
+
+/* ===== FARBBUTTONS ===== */
 .color-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 10px 0 16px 0;
 }
 
 .color-btn {
-    min-height: 52px;
-    font-size: 15px;
-    color: #fff !important;
-    border: 2px solid transparent !important;
+    flex: 1;
+    padding: 12px 0;
+    font-size: 18px;
+    border-radius: 14px;
+    border: none;
+    font-weight: bold;
+    color: white;
+    background: #555;
 }
 
-.color-btn[data-color="red"] {
-    background: linear-gradient(165deg, #e53935, #c62828) !important;
-}
-
-.color-btn[data-color="blue"] {
-    background: linear-gradient(165deg, #007bff, #0056b3) !important;
-}
-
-.color-btn[data-color="black"] {
-    background: linear-gradient(165deg, #444, #222) !important;
-}
+.color-btn[data-color="red"] { background: #c62828; }
+.color-btn[data-color="blue"] { background: #1565c0; }
+.color-btn[data-color="black"] { background: #333; }
 
 .color-btn.active {
-    outline: 3px solid var(--accent);
+    outline: 3px solid #ff9800;
     outline-offset: 2px;
-    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.35);
 }
 
+/* ===== VORGEZOGEN BUTTON ===== */
 .vorgezogen-btn {
     width: 100%;
-    min-height: 48px;
-    border: var(--tile-border);
-    border-radius: 12px;
-    background: #d5dde5;
-    color: var(--brand);
-    font-size: 15px;
-    font-weight: 800;
-    touch-action: manipulation;
+    padding: 14px;
+    margin: 10px 0 20px 0;
+    background: #777;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
 }
 
 .vorgezogen-btn.active {
-    border-color: var(--accent-dark);
-    background: linear-gradient(165deg, var(--accent), var(--accent-dark));
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.35);
+    outline: 3px solid #ff9800;
+    background: #00963d;
+    outline-offset: 2px;
 }
 
+/* ===== INPUTS ===== */
+.input-field {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    margin-bottom: 12px;
+    border: 1px solid #777;
+    border-radius: 14px;
+    text-align: center;
+    background: white;
+}
+
+/* Cursor sichtbar */
+input[inputmode="none"] {
+    caret-color: black !important;
+}
+
+/* ===== Tastatur öffnen ===== */
 .keyboard-open-btn {
     width: 100%;
-    min-height: 44px;
-    border: var(--tile-border);
-    border-radius: 12px;
-    background: var(--tile-bg);
-    color: var(--brand);
-    font-size: 15px;
-    font-weight: 800;
-    touch-action: manipulation;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: none;
+    background: #777;
+    color: white;
 }
 
 body.pc-device .keyboard-open-btn {
     display: none !important;
 }
 
-body.phone-layout .panel-side {
-    flex-shrink: 0;
-}
-
-body.phone-layout .panel-main {
-    flex: 1;
-    min-height: 0;
-}
-
-input[inputmode="none"] {
-    caret-color: black !important;
-}
-
 body.keyboard-open {
     overflow: hidden;
 }
 
-/* Popup-Tastatur */
+/* ===== POPUP TASTATUR (Vollbild, Zebra-tauglich) ===== */
 .keyboard-popup {
     display: none;
     position: fixed;
@@ -110,12 +139,15 @@ body.keyboard-open {
     background: #f7f8fa;
     z-index: 9999;
     flex-direction: column;
+    padding: 0;
 }
 
 .keyboard-content {
     flex: 1;
     width: 100%;
+    max-width: none;
     height: 100%;
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -125,7 +157,10 @@ body.keyboard-open {
         calc(16px + env(safe-area-inset-right, 0px))
         calc(12px + env(safe-area-inset-bottom, 0px))
         calc(16px + env(safe-area-inset-left, 0px));
+    border-radius: 0;
     text-align: center;
+    box-shadow: none;
+    box-sizing: border-box;
 }
 
 .keyboard-header {
@@ -136,6 +171,7 @@ body.keyboard-open {
     max-width: 520px;
     min-height: 40px;
     margin-bottom: 12px;
+    padding: 0;
     flex-shrink: 0;
 }
 
@@ -143,7 +179,7 @@ body.keyboard-open {
     margin: 0;
     font-size: 22px;
     font-weight: 900;
-    color: var(--brand);
+    color: #003a73;
 }
 
 .keyboard-close-x {
@@ -160,7 +196,15 @@ body.keyboard-open {
     font-size: 30px;
     font-weight: 700;
     line-height: 1;
+    padding: 0;
+    box-shadow: 0 3px 0 #8e0000;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.keyboard-close-x:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #8e0000;
 }
 
 .keyboard-input {
@@ -170,7 +214,7 @@ body.keyboard-open {
     margin-bottom: 16px;
     font-size: 32px;
     font-weight: bold;
-    border: var(--tile-border);
+    border: 2px solid #003a73;
     border-radius: 14px;
     text-align: center;
     background: white;
@@ -180,6 +224,7 @@ body.keyboard-open {
 .keyboard-keys-wrap {
     width: 100%;
     max-width: 520px;
+    margin: 0 auto;
     flex-shrink: 0;
 }
 
@@ -194,33 +239,102 @@ body.keyboard-open {
     width: 33.33%;
     height: 72px;
     padding: 0;
+    vertical-align: middle;
 }
 
 .kb-key {
     display: block;
     width: 100%;
     height: 72px;
+    margin: 0;
+    padding: 0;
     font-size: 32px;
     font-weight: 700;
     border-radius: 14px;
-    border: var(--tile-border);
-    background: var(--tile-bg);
+    border: none;
+    background: white;
     color: #111;
+    box-shadow: 0 3px 0 #c5c9d0;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.kb-key:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #c5c9d0;
+    background: #e8edf3;
+}
+
+.kb-key.key-delete,
+.kb-key.key-ok {
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: none;
 }
 
 .kb-key.key-delete {
     background: #c62828;
     color: white;
-    border-color: #a31f1f;
     font-size: 34px;
+    line-height: 1;
+}
+
+.kb-key.key-delete:active {
+    background: #a31f1f;
+    box-shadow: none;
 }
 
 .kb-key.key-ok {
-    background: var(--ok);
+    background: #00963d;
     color: white;
-    border-color: #007a31;
     font-size: 36px;
+    line-height: 1;
+}
+
+.kb-key.key-ok:active {
+    background: #007a31;
+    box-shadow: none;
+}
+
+@media (orientation: landscape), (max-height: 500px) {
+    .keyboard-content {
+        padding:
+            calc(8px + env(safe-area-inset-top, 0px))
+            calc(20px + env(safe-area-inset-right, 0px))
+            calc(8px + env(safe-area-inset-bottom, 0px))
+            calc(20px + env(safe-area-inset-left, 0px));
+    }
+
+    .keyboard-header,
+    .keyboard-input,
+    .keyboard-keys-wrap {
+        max-width: min(88vw, 640px);
+    }
+
+    .keyboard-grid td {
+        height: min(18vh, 68px);
+    }
+
+    .kb-key {
+        height: min(18vh, 68px);
+        font-size: clamp(24px, 4.5vh, 32px);
+    }
+
+    .kb-key.key-delete {
+        font-size: clamp(28px, 5vh, 34px);
+    }
+
+    .kb-key.key-ok {
+        font-size: clamp(30px, 5vh, 36px);
+    }
+
+    .keyboard-close-x {
+        width: 48px;
+        height: 48px;
+        font-size: 28px;
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        right: calc(20px + env(safe-area-inset-right, 0px));
+    }
 }
 
 body.keyboard-open .device-info,
@@ -228,6 +342,7 @@ body.keyboard-open .build-info {
     display: none;
 }
 
+/* PC: kompaktes Fenster (Tastatur dort meist aus) */
 body.pc-device .keyboard-popup {
     background: rgba(0, 0, 0, 0.45);
     justify-content: center;
@@ -240,6 +355,7 @@ body.pc-device .keyboard-content {
     width: 90%;
     max-width: 360px;
     height: auto;
+    min-height: 0;
     border-radius: 14px;
     padding: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
@@ -262,7 +378,47 @@ body.pc-device .kb-key {
     font-size: 22px;
 }
 
-@media (orientation: landscape) and (max-height: 420px) {
-    .page-title { font-size: 26px; }
-    .color-btn { min-height: 44px; font-size: 13px; }
+/* ===== BUTTONS ===== */
+.bottom-row {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.back-btn, .primary-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
+    color: white;
+}
+
+.back-btn { background: #333; }
+.primary-btn { background: #00963d; }
+
+/* =============================
+   PC – kompakteres Layout
+   (Zebra / Mobile bleiben unverändert)
+============================= */
+body.pc-device .page {
+    width: 80vw;
+    height: auto;
+    max-width: 1100px;
+    padding-top: 20px;
+}
+
+body.pc-device .kunden-grid {
+    grid-template-columns: repeat(3, 220px);
+    gap: 10px;
+}
+
+body.pc-device #eiltBtn {
+    margin-top: 12px;
+}
+
+body.pc-device .bottom-row {
+    margin-top: 40px;
 }
