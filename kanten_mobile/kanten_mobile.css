@@ -63,21 +63,37 @@ body.phone-layout #card {
 
 .page-badge {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 999px;
-    background: #003a73;
+    background: linear-gradient(180deg, #005ea6 0%, #003a73 100%);
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0, 58, 115, 0.35);
 }
 
 .page-title {
-    margin: 6px 0 0;
-    font-size: 20px;
+    margin: 8px 0 0;
+    font-size: 22px;
     font-weight: 900;
     letter-spacing: 0.2px;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #00963d;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    margin-right: 4px;
+    flex-shrink: 0;
 }
 
 /* =====================================================
@@ -96,7 +112,7 @@ body.phone-layout #card {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     font-size: 11px;
     font-weight: 800;
     text-align: center;
