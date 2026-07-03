@@ -1,37 +1,143 @@
 /* Beschichtung A5 */
-body.module-beschichtung {
+:root {
+    --brand: #003a73;
     --accent: #007bff;
     --accent-dark: #0056b3;
+    --danger: #e53935;
+    --danger-dark: #c62828;
+    --ok: #00963d;
+    --muted: #6b7c8f;
+    --tile-bg: #f0f4f9;
+    --tile-border: 2px solid rgba(0, 58, 115, 0.22);
+    --panel-border: 2px solid rgba(0, 58, 115, 0.16);
 }
 
-.input-panel {
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    color: var(--brand);
+}
+
+body.phone-layout,
+body.pc-device {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden { display: none !important; }
+
+#card {
+    width: 100%;
+    max-width: 380px;
+    height: 100vh;
+    height: 100dvh;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 14px calc(8px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    overflow: hidden;
 }
 
-.select-panel {
+.page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.page-sub {
+    margin: 2px 0 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+.section-head {
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.content-row {
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
-.beschichter-grid {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, minmax(0, 1fr));
+.input-block {
+    flex-shrink: 0;
+}
+
+.select-block {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-box {
+    border-radius: 14px;
+    background: #eef2f7;
+    border: var(--panel-border);
+    padding: 8px;
+}
+
+.grid-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    border: var(--tile-border);
+    border-radius: 12px;
+    text-align: center;
+    background: var(--tile-bg);
+    color: var(--brand);
+}
+
+.input-field:last-of-type {
+    margin-bottom: 6px;
+}
+
+.input-field:focus,
+.mobile-focus {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .eilt-toggle {
     width: 100%;
-    min-height: 44px;
-    margin-top: 4px;
+    min-height: 40px;
     border: var(--tile-border);
     border-radius: 12px;
     background: #d5dde5;
     color: var(--brand);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     touch-action: manipulation;
 }
@@ -40,70 +146,114 @@ body.module-beschichtung {
     border-color: var(--danger-dark);
     background: linear-gradient(165deg, var(--danger), var(--danger-dark));
     color: #fff;
-    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.35);
 }
 
-body.phone-layout .panel-side {
+.beschichter-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.kunde-btn {
+    min-height: 0;
+    border: var(--tile-border);
+    border-radius: 11px;
+    background: var(--tile-bg);
+    color: var(--brand);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.12;
+    padding: 3px 2px;
+    touch-action: manipulation;
+}
+
+.kunde-btn.active {
+    border-color: var(--accent-dark);
+    background: linear-gradient(165deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(0, 86, 179, 0.3);
+}
+
+.build-inline {
+    margin: 0 0 6px;
+    text-align: center;
+    font-size: 9px;
+    color: var(--muted);
     flex-shrink: 0;
 }
 
-body.phone-layout .panel-main {
-    flex: 1;
-    min-height: 0;
+#actionButtons {
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 8px;
 }
 
-body.phone-layout .beschichter-grid .tile-btn {
+#backBtn, #druckenBtn {
+    min-height: 46px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    touch-action: manipulation;
+}
+
+#backBtn {
+    background: #4a5568;
+    border: 2px solid #3d4650;
+}
+
+#druckenBtn {
+    background: linear-gradient(165deg, #00a844, var(--ok));
+    box-shadow: 0 4px 12px rgba(0, 150, 61, 0.3);
+}
+
+.device-info {
+    position: fixed;
+    top: 6px;
+    left: 10px;
     font-size: 10px;
+    font-weight: 600;
+    color: var(--brand);
+    z-index: 9;
 }
 
-body.pc-device .beschichter-grid .tile-btn {
-    font-size: 12px;
-    padding: 6px 4px;
-}
-
-/* Popup-Tastatur */
+/* Tastatur */
 .kb-mini {
     position: fixed;
-    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
-    padding: 10px 14px;
-    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.97);
+    padding: 8px 12px;
+    border-radius: 14px;
     border: var(--panel-border);
-    box-shadow: 0 8px 28px rgba(0, 58, 115, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 58, 115, 0.2);
     z-index: 9999;
-    width: 92%;
-    max-width: 420px;
-}
-
-.kb-mini.hidden {
-    display: none !important;
+    width: 94%;
+    max-width: 400px;
 }
 
 .kbm-row {
     display: flex;
-    justify-content: center;
-    margin: 5px 0;
+    margin: 4px 0;
 }
 
 .kbm-key {
     flex: 1;
-    margin: 4px;
-    padding: 11px 0;
-    font-size: 17px;
+    margin: 3px;
+    padding: 10px 0;
+    font-size: 16px;
     font-weight: 700;
-    border-radius: 12px;
+    border-radius: 10px;
     border: var(--tile-border);
-    color: var(--brand);
     background: var(--tile-bg);
+    color: var(--brand);
     touch-action: manipulation;
-}
-
-.kbm-key:active {
-    transform: scale(0.96);
-    background: #dfe7f1;
 }
 
 .kbm-del { color: var(--danger) !important; }
@@ -114,12 +264,64 @@ body.pc-device .beschichter-grid .tile-btn {
     color: #fff !important;
 }
 
-body.pc-device .kb-mini {
-    display: none !important;
+body.pc-device .kb-mini { display: none !important; }
+
+/* PC */
+body.pc-device {
+    padding: 20px;
+}
+
+body.pc-device #card {
+    width: min(720px, 96vw);
+    max-width: none;
+    height: min(780px, 94vh);
+    background: #f7f9fc;
+    border: var(--panel-border);
+    border-radius: 22px;
+    box-shadow: 0 16px 44px rgba(0, 58, 115, 0.14);
+    padding: 24px 24px 18px;
+}
+
+body.pc-device .page-title { font-size: 34px; }
+
+body.pc-device .content-row {
+    flex-direction: row;
+    gap: 18px;
+}
+
+body.pc-device .input-block {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+body.pc-device .select-block {
+    flex: 1;
+}
+
+body.pc-device .kunde-btn {
+    font-size: 12px;
+    padding: 5px 4px;
+}
+
+body.pc-device #backBtn,
+body.pc-device #druckenBtn {
+    min-height: 52px;
+    font-size: 16px;
+}
+
+/* Zebra TC21 */
+body.zebra-tc21 .kunde-btn {
+    font-size: 9px;
+}
+
+body.zebra-tc21 .input-field {
+    padding: 8px;
+    font-size: 14px;
 }
 
 @media (orientation: landscape) and (max-height: 420px) {
-    .page-title { font-size: 26px; }
-    .beschichter-grid .tile-btn { font-size: 9px; }
-    .eilt-toggle { min-height: 36px; font-size: 13px; }
+    .page-title { font-size: 22px; }
+    .page-sub { margin-bottom: 6px; }
+    .kunde-btn { font-size: 9px; }
+    #backBtn, #druckenBtn { min-height: 40px; font-size: 14px; }
 }
