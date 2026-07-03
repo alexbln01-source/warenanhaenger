@@ -5,62 +5,51 @@
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#003a73">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Kanten – Warenanhänger</title>
-<link rel="stylesheet" href="kanten_mobile.css?v=flat1">
+<title>Kanten</title>
+<link rel="stylesheet" href="kanten_mobile.css?v=compact1">
 </head>
 <body>
 
-<div id="deviceInfo" class="device-info"></div>
-
 <div id="card">
 
-    <header class="app-bar">
-        <button type="button" id="btnBack" class="app-back">← Start</button>
-        <div class="app-bar-title">Warenanhänger</div>
-        <div class="app-bar-sub">Kanten</div>
+    <header class="top-bar">
+        <button type="button" id="btnBack" class="btn-icon">←</button>
+        <span class="top-title">Kanten</span>
+        <span id="deviceInfo" class="device-info"></span>
     </header>
 
-    <main class="app-main">
+    <div class="art-grid">
+        <button type="button" id="btnKanten" class="artBtn">Kanten</button>
+        <button type="button" id="btnSchweissen" class="artBtn">Schweißen</button>
+        <button type="button" id="btnBohrwerk" class="artBtn">Bohrwerk</button>
+        <button type="button" id="btnEiltSehr" class="artBtn art-eilt">Eilt sehr</button>
+    </div>
 
-        <section class="panel">
-            <h2 class="panel-label">Bereich</h2>
-            <div class="art-list">
-                <button type="button" id="btnKanten" class="artBtn">Kanten</button>
-                <button type="button" id="btnSchweissen" class="artBtn">Schweißen</button>
-                <button type="button" id="btnBohrwerk" class="artBtn">Bohrwerk</button>
-                <button type="button" id="btnEiltSehr" class="artBtn art-eilt">Eilt sehr</button>
-            </div>
-        </section>
+    <div class="kunden-label">Kunde</div>
 
-        <section class="panel panel-grow">
-            <h2 class="panel-label">Kunde</h2>
-            <div id="kundenArea" class="kunden-liste disabled">
-                <button type="button" class="kundeBtn" data-kunde="Backhus">Backhus</button>
-                <button type="button" class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
-                <button type="button" class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
-                <button type="button" class="kundeBtn" data-kunde="Bücker">Bücker</button>
-                <button type="button" class="kundeBtn" data-kunde="FVG">FVG</button>
-                <button type="button" class="kundeBtn" data-kunde="Grimme">Grimme</button>
-                <button type="button" class="kundeBtn" data-kunde="Janzen">Janzen</button>
-                <button type="button" class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
-                <button type="button" class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
-                <button type="button" class="kundeBtn" data-kunde="PAUS">PAUS</button>
-                <button type="button" class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
-            </div>
-        </section>
+    <div id="kundenArea" class="kunden-grid disabled">
+        <button type="button" class="kundeBtn" data-kunde="Backhus">Backhus</button>
+        <button type="button" class="kundeBtn" data-kunde="Bergmann M-H">Bergmann M-H</button>
+        <button type="button" class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
+        <button type="button" class="kundeBtn" data-kunde="Bücker">Bücker</button>
+        <button type="button" class="kundeBtn" data-kunde="FVG">FVG</button>
+        <button type="button" class="kundeBtn" data-kunde="Grimme">Grimme</button>
+        <button type="button" class="kundeBtn" data-kunde="Janzen">Janzen</button>
+        <button type="button" class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
+        <button type="button" class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
+        <button type="button" class="kundeBtn" data-kunde="PAUS">PAUS</button>
+        <button type="button" class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
+    </div>
 
-    </main>
-
-    <footer class="app-footer">
+    <footer class="bottom-bar">
         <button type="button" id="btnDrucken" class="btn-print" disabled>Drucken</button>
     </footer>
 
+    <div id="buildInfo" class="build-info"></div>
+
 </div>
 
-<div id="buildInfo" class="build-info"></div>
-
-<script src="kanten_mobile.js?v=flat1"></script>
+<script src="kanten_mobile.js?v=compact1"></script>
 
 </body>
 </html>

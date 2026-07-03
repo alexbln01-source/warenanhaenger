@@ -62,35 +62,17 @@ let selectedArt = "";
 // ============================================================
 function setCornerInfo() {
   const deviceLabel =
-    isTC22 ? "Zebra TC22" :
-    isTC21 ? "Zebra TC21" :
+    isTC22 ? "TC22" :
+    isTC21 ? "TC21" :
     isZebra ? "Zebra" :
     isMobile ? "Mobil" : "PC";
 
   if (deviceInfo) {
     deviceInfo.textContent = deviceLabel;
-    deviceInfo.style.position  = "fixed";
-    deviceInfo.style.top       = "8px";
-    deviceInfo.style.right     = "12px";
-    deviceInfo.style.left      = "auto";
-    deviceInfo.style.bottom    = "auto";
-    deviceInfo.style.transform = "none";
-    deviceInfo.style.margin    = "0";
-    deviceInfo.style.zIndex    = "9999";
-    deviceInfo.style.width     = "auto";
   }
 
   if (buildInfo) {
     buildInfo.textContent = "Build " + buildStamp();
-    buildInfo.style.position  = "fixed";
-    buildInfo.style.bottom    = "8px";
-    buildInfo.style.right     = "12px";
-    buildInfo.style.left      = "auto";
-    buildInfo.style.top       = "auto";
-    buildInfo.style.transform = "none";
-    buildInfo.style.margin    = "0";
-    buildInfo.style.zIndex    = "9999";
-    buildInfo.style.width     = "auto";
   }
 }
 
