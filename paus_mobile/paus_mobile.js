@@ -113,8 +113,8 @@ backBtn.onclick = () => {
 };
 
 // ============================================================
-//  SCAN (Strichcode + Return / Zebra)
-//  Format: [ARTIKEL]*[KOMMISSION]*[DATUM]  (Artikel wird ignoriert)
+//  SCAN (QR-Code + Return / Zebra)
+//  Format: [BESTELLNR]*[DATUM]  → Kommission + Lieferdatum
 //  Datum im Scan: TT.MM.JJJJ möglich – Anzeige/Etikett nur TT.MM
 // ============================================================
 let scanParseTimer = null;
@@ -135,11 +135,51 @@ function scanDigits(text) {
 
 function hasScanDelimiter(text) {
     const t = normalizeScanText(text);
-    return t.includes("*") || /--/.test(t) || /K[0-9]+D\d{4}$/i.test(t);
+    return /[*;|,\t]/.test(t) || t.includes("--") || /^[0-9A-Za-z-]+D[\d.]+$/i.test(t);
 }
 
 function starCount(text) {
     return (normalizeScanText(text).match(/\*/g) || []).length;
+}
+
+function splitQrParts(text) {
+    const t = normalizeScanText(text);
+    if (!t) return [];
+
+    if (t.includes("--")) {
+        return t.split("--").map(p => p.trim()).filter(Boolean);
+    }
+
+    for (const delim of ["*", ";", "|", ",", "\t"]) {
+        if (!t.includes(delim)) continue;
+        const parts = t.split(delim).map(p => p.trim()).filter(Boolean);
+        if (parts.length >= 2) return parts;
+    }
+
+    return [];
+}
+
+function parseQrTwoPart(text) {
+    let parts = splitQrParts(text);
+    if (parts.length < 2) return null;
+
+    // Alt-Format mit Artikel vorne: Artikel*Bestell*Datum → nur letzte 2 Teile
+    if (parts.length >= 3) {
+        parts = [parts[parts.length - 2], parts[parts.length - 1]];
+    }
+
+    const bestellPart = parts[0];
+    const datePart = parts[1];
+    const lieferdatum = formatLieferdatum(datePart);
+    if (!isPlausibleLieferdatum(lieferdatum)) return null;
+
+    const bestellnr = scanDigits(bestellPart) || bestellPart;
+    if (!bestellnr) return null;
+
+    return {
+        kommission: bestellnr,
+        lieferdatum
+    };
 }
 
 function formatLieferdatum(raw) {
@@ -221,50 +261,16 @@ function isPlausibleDateDigits(d4) {
     return day >= 1 && day <= 31 && month >= 1 && month <= 12;
 }
 
-function parseStarScan(text) {
-    const t = normalizeScanText(text);
-    if (!t.includes("*")) return null;
-
-    const parts = t.split(/\*+/).map(p => p.trim()).filter(Boolean);
-    if (parts.length < 3) return null;
-
-    const komPart = parts[parts.length - 2];
-    const datePart = parts[parts.length - 1];
-    const lieferdatum = formatLieferdatum(datePart);
-    if (!isPlausibleLieferdatum(lieferdatum)) return null;
-
-    return {
-        kommission: scanDigits(komPart) || komPart,
-        lieferdatum
-    };
-}
-
 function parseKDScan(text) {
     const t = normalizeScanText(text);
-    const match = t.match(/^(.+?)K([0-9]+)D([\d.]+)$/i);
+    const match = t.match(/^([0-9A-Za-z-]+)D([\d.]+)$/i);
     if (!match) return null;
 
-    const lieferdatum = formatLieferdatum(match[3]);
+    const lieferdatum = formatLieferdatum(match[2]);
     if (!isPlausibleLieferdatum(lieferdatum)) return null;
 
     return {
-        kommission: match[2],
-        lieferdatum
-    };
-}
-
-function parseDoubleDashScan(text) {
-    const t = normalizeScanText(text);
-    if (!t.includes("--")) return null;
-
-    const parts = t.split("--").map(p => p.trim()).filter(Boolean);
-    if (parts.length !== 3) return null;
-
-    const lieferdatum = formatLieferdatum(parts[2]);
-    if (!isPlausibleLieferdatum(lieferdatum)) return null;
-
-    return {
-        kommission: scanDigits(parts[1]) || parts[1],
+        kommission: scanDigits(match[1]) || match[1],
         lieferdatum
     };
 }
@@ -305,16 +311,12 @@ function parseScanValue(raw) {
     const text = normalizeScanText(raw);
     if (!text) return null;
 
-    const star = parseStarScan(text);
-    if (star) return star;
+    const qr = parseQrTwoPart(text);
+    if (qr) return qr;
 
     const kd = parseKDScan(text);
     if (kd) return kd;
 
-    const dashed = parseDoubleDashScan(text);
-    if (dashed) return dashed;
-
-    // Nur ohne Trennzeichen: kurzer 2-teiliger Scan (Kommission + Datum, ohne Artikel)
     if (!hasScanDelimiter(text)) {
         const digits = scanDigits(text);
         const combo = parseKommissionUndDatum(digits);
@@ -416,11 +418,11 @@ function scheduleScanParse(input) {
 
 function handleScanInput(input) {
     const val = normalizeScanText(input.value);
-    if (val.length >= scanRawBuffer.length || starCount(val) > starCount(scanRawBuffer)) {
+    if (val.length >= scanRawBuffer.length || splitQrParts(val).length >= splitQrParts(scanRawBuffer).length) {
         scanRawBuffer = val;
     }
 
-    if (starCount(val) >= 2) {
+    if (splitQrParts(val).length >= 2) {
         if (tryParseScanSource(val)) return;
     }
 

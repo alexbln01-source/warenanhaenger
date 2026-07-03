@@ -1,4 +1,4 @@
-# PAUS Lieferung – Barcode-Vorgabe für IT
+# PAUS Lieferung – QR-Code-Vorgabe für IT
 
 Stand: Juli 2026  
 App: `paus_mobile` (Warenanhänger / GitHub Pages)
@@ -7,84 +7,67 @@ App: `paus_mobile` (Warenanhänger / GitHub Pages)
 
 ## 1. Zweck
 
-Beim Scannen eines Code-128-Barcodes sollen in der App **PAUS Lieferung** automatisch ausgefüllt werden:
+Beim Scannen eines **QR-Codes** sollen in der App **PAUS Lieferung** automatisch ausgefüllt werden:
 
-| Feld in der App | Quelle im Barcode |
+| Feld in der App | Quelle im QR-Code |
 |-----------------|-------------------|
-| **Kommissionsnummer** | Mittlerer Teil (nur Ziffern, variable Länge) |
-| **Lieferdatum** | Letzter Teil im Barcode (mit Jahr möglich) → Anzeige/Etikett nur **TT.MM** |
-| *(Artikelnummer)* | *Erster Teil – wird von der App **nicht** angezeigt und **ignoriert*** |
+| **Kommissionsnummer** (Bestell-Nr.) | Erster Teil |
+| **Lieferdatum** | Zweiter Teil → Anzeige/Etikett nur **TT.MM** |
+
+**Keine Artikelnummer mehr** im QR-Code.
 
 ---
 
-## 2. Barcode-Typ
+## 2. QR-Code-Typ
 
-- **Symbologie:** Code 128 (Code128)
-- **Empfohlene Druckgröße:** **40 mm breit × 10 mm hoch**
-- **Druck:** immer **100 % / Originalgröße** (nicht „an Seite anpassen“)
+- **Symbologie:** QR Code (QR-Code / QR-Model 2)
+- **Empfohlene Größe:** mindestens **25 × 25 mm**, besser **30 × 30 mm**
+- **Druck:** immer **100 % / Originalgröße**
+- **Fehlerkorrektur:** Level M oder Q (empfohlen)
 
 ---
 
 ## 3. Pflicht-Format (Hauptformat mit Stern)
 
 ```
-[ARTIKELNUMMER]*[KOMMISSION]*[DATUM]
+[BESTELLNR]*[DATUM]
 ```
 
 | Segment | Regel | Beispiele |
 |---------|--------|-----------|
-| **Artikelnummer** | Beliebig lang, Ziffern; Bindestriche im Artikel erlaubt | `70233514`, `12569`, `1258764899`, `31-027-1940-502` |
-| **Trennzeichen** | Stern `*` (ASCII 42) | `*` |
-| **Kommission** | Nur Ziffern, beliebig lang | `2154808`, `12345` |
-| **Trennzeichen** | Stern `*` | `*` |
+| **Bestell-Nr.** | Ziffern, beliebig lang | `2154808`, `12345` |
+| **Trennzeichen** | Stern `*` (empfohlen) | `*` |
 | **Datum** | **TT.MM.JJJJ** (empfohlen) oder TTMMJJJJ / TT.MM / TTMM | `24.06.2026` → Etikett **24.06** |
 
-### Beispiele (vollständiger Barcode-Inhalt)
+### Beispiele (vollständiger QR-Inhalt)
 
 ```
-70233514*2154808*24.06.2026
-70233514*2154808*2406
-12569*12345*24.06.2026
-1258764899*2154808*24062026
-31-027-1940-502*2154808*24.06.2026
+2154808*24.06.2026
+2154808*2406
+12345*01.07.2026
+2154808*24062026
 ```
 
 ### Ergebnis in der App (Beispiel 1)
 
-| Scanfeld (roh) | Kommission | Lieferdatum |
-|----------------|------------|-------------|
-| `70233514*2154808*24.06.2026` | `2154808` | `24.06` |
+| Scan (roh) | Kommission | Lieferdatum |
+|------------|------------|-------------|
+| `2154808*24.06.2026` | `2154808` | `24.06` |
 
 ---
 
-## 4. Alternative Formate (Fallback)
+## 4. Alternative Trennzeichen (QR)
 
-Falls der Zebra-Scanner den Stern `*` **nicht** überträgt, unterstützt die App zusätzlich:
+Im QR-Code sind auch diese Trennzeichen erlaubt (Scanner/IT):
 
-### Variante A – Buchstaben K und D
-
-```
-[ARTIKELNUMMER]K[KOMMISSION]D[DATUM]
-```
-
-Beispiel: `70233514K2154808D2406`
-
-### Variante B – Doppel-Bindestrich
-
-```
-[ARTIKELNUMMER]--[KOMMISSION]--[DATUM]
-```
-
-Beispiel: `70233514--2154808--2406`  
-*(Einfache Bindestriche im Artikel sind erlaubt; Trennung nur mit `--`)*
-
-### Nicht verwenden
-
-Diese Zeichen werden von vielen Zebra-Scannern **nicht** zuverlässig übertragen:
-
-- `;` Semikolon  
-- `|` Pipe  
-- `#` Raute  
+| Trenner | Beispiel |
+|---------|----------|
+| `*` Stern | `2154808*24.06.2026` |
+| `;` Semikolon | `2154808;24.06.2026` |
+| `\|` Pipe | `2154808\|24.06.2026` |
+| `,` Komma | `2154808,24.06.2026` |
+| `--` Doppelstrich | `2154808--24.06.2026` |
+| `D` Buchstabe | `2154808D2406` |
 
 ---
 
@@ -92,41 +75,32 @@ Diese Zeichen werden von vielen Zebra-Scannern **nicht** zuverlässig übertrage
 
 ### Scanner-Verhalten
 
-- Der Scanner arbeitet als **Tastatur (Keyboard Wedge)**.
-- Nach dem Scan soll **Return/Enter** gesendet werden (Standard).
-- Die App erkennt das Ende des Scans über **Enter/Tab** und über eine kurze Pause nach der Eingabe.
-
-### Stern `*` kommt nicht an?
-
-Wenn im Scanfeld **kein** Stern sichtbar ist (nur Ziffern und Bindestriche):
-
-1. In **DataWedge** prüfen, ob Sonderzeichen herausgefiltert werden.
-2. Profil für den Browser / die PAUS-URL anpassen.
-3. Oder Barcodes mit **K/D-Format** erzeugen (siehe Abschnitt 4).
+- QR-Code in DataWedge aktivieren (Decoders → QR Code **an**)
+- Scanner als **Tastatur (Keyboard Wedge)**
+- Nach dem Scan: **Enter/Return** senden (Standard)
+- App erkennt Ende über **Enter/Tab** und kurze Pause
 
 ### Test auf dem Gerät
 
-Nach dem Scan sollte im Feld **Kommissionsnummer** z. B. stehen:
-
-`70233514*2154808*2406`
-
-Danach füllt die App automatisch:
-
-- Kommission: `2154808`
-- Lieferdatum: `24.06` (Jahr nur im Barcode, nicht auf dem Etikett)
+1. App über `start.html?bereich=paus` öffnen
+2. Feld **Kommissionsnummer** fokussieren
+3. QR-Code scannen, z. B. `2154808*24.06.2026`
+4. Erwartet:
+   - Kommission: `2154808`
+   - Lieferdatum: `24.06`
 
 ---
 
-## 6. Regeln für die Barcode-Erzeugung (Checkliste IT)
+## 6. Checkliste IT
 
-- [ ] Code 128 verwenden  
-- [ ] Format: `Artikel*Kommission*Datum` (Stern als Trenner)  
-- [ ] Artikelnummer: variable Länge, Ziffern (Bindestriche optional)  
-- [ ] Kommission: nur Ziffern, variable Länge  
-- [ ] Datum: **TT.MM.JJJJ** empfohlen (z. B. `24.06.2026`), alternativ `24062026` oder `2406`
-- [ ] Kein Leerzeichen im Barcode-Inhalt  
-- [ ] Druckgröße: 40 mm × 10 mm bei 100 %  
-- [ ] Scanner: Enter/Return nach Scan aktiv  
+- [ ] **QR Code** (nicht mehr Code 128 als Standard)
+- [ ] Format: `Bestellnr*Datum` (nur 2 Teile)
+- [ ] Bestell-Nr.: nur Ziffern, variable Länge
+- [ ] Datum: **TT.MM.JJJJ** empfohlen (z. B. `24.06.2026`)
+- [ ] Kein Leerzeichen im QR-Inhalt
+- [ ] QR groß genug drucken (min. 25 mm)
+- [ ] Scanner: Enter nach Scan aktiv
+- [ ] DataWedge: QR-Decoder aktiv
 
 ---
 
@@ -136,29 +110,28 @@ Datei: `paus_mobile/paus_mobile.js`
 
 Erkennungsreihenfolge:
 
-1. Stern-Format `*`
-2. K/D-Format
-3. Doppel-Bindestrich `--`
-4. Einzelscan nur Kommission oder nur Datum (manuell / zweiter Scan)
+1. Zwei-Teiler mit Trennzeichen (`*`, `;`, `|`, `,`, `--`)
+2. Format mit `D` (z. B. `2154808D2406`)
+3. Nur Ziffern ohne Trenner (Bestellnr + Datum)
+4. Einzelwert nur Bestellnr oder nur Datum
 
-Die App lädt am besten über:
+**Hinweis:** Alte 3-teilige Barcodes (`Artikel*Bestell*Datum`) werden weiterhin gelesen – Artikel wird ignoriert.
+
+App starten:
 
 ```
 start.html?bereich=paus
 ```
 
-(Cache-Buster – immer aktuelle Version)
-
 ---
 
 ## 8. Kurztext zum Weiterleiten (Copy & Paste)
 
-> **PAUS Barcode Code128 – Vorgabe Langen CNC**  
-> Inhalt: `[Artikelnummer]*[Kommissionsnummer]*[TT.MM.JJJJ]`  
-> Beispiel: `70233514*2154808*24.06.2026`  
-> Artikel beliebig lang (wird in der App ignoriert), Kommission nur Ziffern, Datum mit Jahr.  
-> Druck: 40 × 10 mm, 100 %. Scanner: Enter nach Scan.  
-> Fallback ohne Stern: `70233514K2154808D2406`
+> **PAUS QR-Code – Vorgabe Langen CNC**  
+> Inhalt: `[Bestellnummer]*[TT.MM.JJJJ]`  
+> Beispiel: `2154808*24.06.2026`  
+> Nur 2 Teile: Bestell-Nr. + Datum. Keine Artikelnummer.  
+> QR-Code, min. 25 mm, 100 %. Scanner: Enter nach Scan.
 
 ---
 
