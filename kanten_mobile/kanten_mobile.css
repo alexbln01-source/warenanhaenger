@@ -1,13 +1,29 @@
-/* KANTEN – wie Startseite, kompakt, kein Scroll */
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* Bearbeitung – modern, kompakt, kein Scroll */
+:root {
+    --brand: #003a73;
+    --brand-mid: #0056b3;
+    --accent: #ff9800;
+    --accent-dark: #e67e00;
+    --danger: #e53935;
+    --danger-dark: #c62828;
+    --ok: #00963d;
+    --surface: #ffffff;
+    --muted: #5c6b7a;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     overflow: hidden;
-    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 40%, #c3cad4 100%);
-    font-family: "Segoe UI", Arial, sans-serif;
+    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--brand);
 }
 
 body.phone-layout,
@@ -22,126 +38,185 @@ body.pc-device {
     max-width: 380px;
     height: 100vh;
     height: 100dvh;
-    padding: 28px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(10px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-.title {
-    margin: 0 0 10px;
-    font-size: 28px;
-    font-weight: 900;
-    color: #003a73;
-    text-align: center;
+/* ===== KOPF ===== */
+.page-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 14px;
     flex-shrink: 0;
+}
+
+.title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    color: var(--brand);
+}
+
+.format-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--brand);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .section-label {
-    margin: 0 0 6px;
+    margin: 0 0 8px 2px;
     font-size: 13px;
-    font-weight: 800;
-    color: #003a73;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+    font-weight: 600;
+    color: var(--muted);
     flex-shrink: 0;
 }
 
-/* Art 2x2 */
+/* ===== ART ===== */
 .art-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 9px;
+    margin-bottom: 14px;
     flex-shrink: 0;
 }
 
 .artBtn {
-    min-height: 50px;
-    border: none;
-    border-radius: 14px;
+    min-height: 52px;
+    border: 1.5px solid rgba(0, 58, 115, 0.12);
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--brand);
     font-size: 16px;
-    font-weight: bold;
-    color: #003a73;
-    background: #e6ebf1;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 58, 115, 0.08);
     touch-action: manipulation;
+    transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.artBtn:active {
+    transform: scale(0.98);
 }
 
 .artBtn.active {
-    background: linear-gradient(#ff9800, #e67e00);
+    border-color: transparent;
+    background: linear-gradient(165deg, var(--accent) 0%, var(--accent-dark) 100%);
     color: #fff;
+    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.38);
 }
 
 .artBtn.art-eilt.active {
-    background: linear-gradient(#e53935, #c62828);
+    background: linear-gradient(165deg, var(--danger) 0%, var(--danger-dark) 100%);
+    box-shadow: 0 6px 16px rgba(229, 57, 53, 0.35);
 }
 
-/* Kunden 3x4 – füllt Rest, kein Scroll */
+/* ===== KUNDEN ===== */
 .kunden-grid {
     flex: 1;
     min-height: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: 7px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 12px;
     overflow: hidden;
 }
 
 .kunden-grid.disabled {
-    opacity: 0.35;
+    opacity: 0.38;
     pointer-events: none;
+    filter: grayscale(0.15);
 }
 
 .kundeBtn {
     min-height: 0;
-    border: none;
-    border-radius: 12px;
+    border: 1.5px solid rgba(0, 58, 115, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--brand);
     font-size: 11px;
-    font-weight: bold;
-    color: #003a73;
-    background: rgba(255, 255, 255, 0.92);
-    padding: 4px 2px;
+    font-weight: 700;
     line-height: 1.15;
+    padding: 4px 3px;
+    box-shadow: 0 2px 6px rgba(0, 58, 115, 0.07);
     touch-action: manipulation;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: transform 0.1s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.kundeBtn:active {
+    transform: scale(0.97);
 }
 
 .kundeBtn.active {
-    background: linear-gradient(#007bff, #0056b3);
+    border-color: transparent;
+    background: linear-gradient(165deg, #007bff 0%, var(--brand-mid) 100%);
     color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.32);
 }
 
-/* Unten wie früher */
+/* ===== AKTIONEN ===== */
 #actionButtons {
     flex-shrink: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.2fr;
     gap: 10px;
 }
 
 #btnBack,
 #btnDrucken {
-    min-height: 48px;
+    min-height: 50px;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 700;
     color: #fff;
     touch-action: manipulation;
+    transition: transform 0.1s ease, opacity 0.15s ease;
 }
 
-#btnBack { background: #444; }
-#btnDrucken { background: #00963d; }
-#btnDrucken:disabled { background: #8a9aa8; }
+#btnBack {
+    background: linear-gradient(165deg, #5a6570 0%, #3d4650 100%);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
 
+#btnDrucken {
+    background: linear-gradient(165deg, #00a844 0%, var(--ok) 100%);
+    box-shadow: 0 4px 14px rgba(0, 150, 61, 0.35);
+}
+
+#btnDrucken:disabled {
+    background: #9aa8b5;
+    box-shadow: none;
+    color: #e8edf2;
+}
+
+#btnBack:active,
+#btnDrucken:not(:disabled):active {
+    transform: scale(0.98);
+}
+
+/* ===== INFO ===== */
 .device-info {
     position: fixed;
     top: 6px;
     left: 10px;
     font-size: 11px;
-    color: #003a73;
+    font-weight: 600;
+    color: var(--brand);
+    opacity: 0.85;
     z-index: 9;
 }
 
@@ -150,26 +225,32 @@ body.pc-device {
     bottom: 6px;
     right: 10px;
     font-size: 10px;
-    color: #003a73;
+    color: var(--brand);
     opacity: 0.7;
     z-index: 9;
 }
 
-button:focus,
 button:focus-visible {
-    outline: 3px solid #ff9800;
+    outline: 3px solid var(--accent);
     outline-offset: 2px;
+}
+
+body.pc-device {
+    background: #1e293b;
+    padding: 16px;
 }
 
 body.pc-device #card {
     max-width: 400px;
     height: min(720px, 96vh);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
 }
 
 @media (orientation: landscape) and (max-height: 420px) {
-    .title { font-size: 22px; margin-bottom: 6px; }
+    .title { font-size: 24px; }
+    .page-head { margin-bottom: 8px; }
     .artBtn { min-height: 42px; font-size: 14px; }
     .kundeBtn { font-size: 10px; }
     #btnBack, #btnDrucken { min-height: 40px; font-size: 14px; }
