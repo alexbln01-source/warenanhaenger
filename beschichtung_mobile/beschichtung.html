@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#003a73">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Beschichtung</title>
+<script>
+(function () {
+    var v = Date.now();
+    document.write('<link rel="stylesheet" href="../common_mobile.css?v=' + v + '">');
+    document.write('<link rel="stylesheet" href="beschichtung_mobile.css?v=' + v + '">');
+})();
+</script>
+</head>
+<body class="module-beschichtung" data-page="beschichtung" data-ver="besc1">
+
+<div id="deviceInfo" class="device-info"></div>
+
+<div id="card">
+
+    <h1 class="page-title">Beschichtung</h1>
+    <p class="page-sub">Warenanhänger · A5</p>
+
+    <div class="work-area">
+        <div class="panel-section panel-side">
+            <p class="section-head">Eingabe</p>
+            <div class="panel-box input-panel">
+                <input id="beistellInput" class="input-field" type="text" placeholder="Beistellnummer" readonly>
+                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname (optional)" readonly>
+                <button type="button" id="eiltBtn" class="eilt-toggle">Eilt sehr: Aus</button>
+            </div>
+        </div>
+
+        <div class="panel-section panel-main">
+            <p class="section-head">Beschichter wählen</p>
+            <div class="panel-box select-panel">
+                <div class="tile-grid beschichter-grid">
+                    <button type="button" class="kunde-btn tile-btn" data-type="LP">L&amp;P</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="SCHUETTE">Schütte</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="KLEY">Kleymann</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="WOB">WOB</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="KALEY">Kaley</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="COMTEZN8">Comte ZN8</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="EKODEKOR">EKO-Dekor</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="COMTEZNI8">Comte ZnI8</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="CHEMISCH">Comte Chemisch</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="DICK">Comte Dickschicht</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="BLAU">Comte Blau</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="PENTZ">Pentz &amp; Gerdes ZN8</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="RCS">RCS – Schweißen</button>
+                    <button type="button" class="kunde-btn tile-btn" data-type="COATINC">Coatinc 24 Verzinken</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="actionButtons">
+        <button type="button" id="backBtn">◀ Zurück</button>
+        <button type="button" id="druckenBtn">Drucken</button>
+    </div>
+
+</div>
+
+<div id="buildInfo" class="build-info"></div>
+
+<!-- Tastaturen Mobil -->
+<div id="alphaKeyboard" class="kb-mini hidden">
+    <div class="kbm-row">
+        <button type="button" class="kbm-key">Q</button><button type="button" class="kbm-key">W</button><button type="button" class="kbm-key">E</button><button type="button" class="kbm-key">R</button><button type="button" class="kbm-key">T</button><button type="button" class="kbm-key">Z</button><button type="button" class="kbm-key">U</button><button type="button" class="kbm-key">I</button><button type="button" class="kbm-key">O</button><button type="button" class="kbm-key">P</button>
+    </div>
+    <div class="kbm-row">
+        <button type="button" class="kbm-key">A</button><button type="button" class="kbm-key">S</button><button type="button" class="kbm-key">D</button><button type="button" class="kbm-key">F</button><button type="button" class="kbm-key">G</button><button type="button" class="kbm-key">H</button><button type="button" class="kbm-key">J</button><button type="button" class="kbm-key">K</button><button type="button" class="kbm-key">L</button>
+    </div>
+    <div class="kbm-row">
+        <button type="button" class="kbm-key">Y</button><button type="button" class="kbm-key">X</button><button type="button" class="kbm-key">C</button><button type="button" class="kbm-key">V</button><button type="button" class="kbm-key">B</button><button type="button" class="kbm-key">N</button><button type="button" class="kbm-key">M</button>
+    </div>
+    <div class="kbm-row">
+        <button type="button" class="kbm-key kbm-del" id="alphaDel">⌫</button>
+        <button type="button" class="kbm-key" id="alphaSpace" style="flex:3;">␣</button>
+        <button type="button" class="kbm-key kbm-ok" id="alphaOk">OK</button>
+    </div>
+</div>
+
+<div id="numKeyboard" class="kb-mini hidden">
+    <div class="kbm-row">
+        <button type="button" class="kbm-key">1</button><button type="button" class="kbm-key">2</button><button type="button" class="kbm-key">3</button>
+    </div>
+    <div class="kbm-row">
+        <button type="button" class="kbm-key">4</button><button type="button" class="kbm-key">5</button><button type="button" class="kbm-key">6</button>
+    </div>
+    <div class="kbm-row">
+        <button type="button" class="kbm-key">7</button><button type="button" class="kbm-key">8</button><button type="button" class="kbm-key">9</button>
+    </div>
+    <div class="kbm-row">
+        <button type="button" class="kbm-key kbm-del" id="numDel">⌫</button>
+        <button type="button" class="kbm-key" id="num0">0</button>
+        <button type="button" class="kbm-key kbm-ok" id="numOk">OK</button>
+    </div>
+</div>
+
+<script>
+(function () {
+    var v = Date.now();
+    document.write('<script src="beschichtung_mobile.js?v=' + v + '"><\/script>');
+})();
+</script>
+
+</body>
+</html>

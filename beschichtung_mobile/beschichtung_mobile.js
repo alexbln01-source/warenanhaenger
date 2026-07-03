@@ -1,26 +1,17 @@
 let selectedType = null;
 let isEilt = false;
 
-/* ============================================================
-   GRUNDREFERENZEN
-============================================================ */
 const beistell   = document.getElementById("beistellInput");
 const kundenname = document.getElementById("kundeInput");
 const numKb      = document.getElementById("numKeyboard");
 const alphaKb    = document.getElementById("alphaKeyboard");
-
-
 const druckenBtn = document.getElementById("druckenBtn");
 const eiltBtn    = document.getElementById("eiltBtn");
-
+const backBtn    = document.getElementById("backBtn");
 const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 
-let activeInput       = null;
-let lastCustomerIndex = 0;
+let activeInput = null;
 
-/* ============================================================
-   GERÄTEERKENNUNG
-============================================================ */
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = window.screen.width;
 const sh  = window.screen.height;
@@ -29,45 +20,76 @@ const dpr = window.devicePixelRatio;
 const isMobile = /android|iphone|ipad|ipod/i.test(ua);
 const isZebraTC21 = ua.includes("android") && sw === 360 && sh === 640;
 const isZebraTC22 = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
+const isZebra = isZebraTC21 || isZebraTC22 || ua.includes("zebra");
+const isPC = !isZebra && !isMobile;
 
-if (isZebraTC21) document.body.classList.add("zebra-tc21");
-if (isZebraTC22) document.body.classList.add("zebra-tc22");
-
-if (!isMobile && !isZebraTC21 && !isZebraTC22) {
-    document.body.classList.add("pc-device");
+function showKb(el) {
+    if (el) el.classList.remove("hidden");
 }
 
-/* Debug-Ausgabe */
-const deviceInfo = document.getElementById("deviceInfo");
-if (deviceInfo) {
-    if (isZebraTC22) deviceInfo.textContent = "Gerät: Zebra TC22";
-    else if (isZebraTC21) deviceInfo.textContent = "Gerät: Zebra TC21";
-    else if (isMobile) deviceInfo.textContent = "Gerät: Android / iOS";
-    else deviceInfo.textContent = "Gerät: PC";
+function hideKb(el) {
+    if (el) el.classList.add("hidden");
 }
 
-/* ============================================================
-   MOBIL: POPUP-TASTATUREN
-============================================================ */
-if (isMobile) {
+function hideAllKb() {
+    hideKb(numKb);
+    hideKb(alphaKb);
+}
 
-    beistell.readOnly   = true;
+function setCornerInfo() {
+    const deviceInfo = document.getElementById("deviceInfo");
+    const buildInfo  = document.getElementById("buildInfo");
+
+    if (deviceInfo) {
+        if (isZebraTC22) deviceInfo.textContent = "Gerät: Zebra TC22";
+        else if (isZebraTC21) deviceInfo.textContent = "Gerät: Zebra TC21";
+        else if (isZebra) deviceInfo.textContent = "Gerät: Zebra";
+        else if (isMobile) deviceInfo.textContent = "Gerät: Mobil";
+        else deviceInfo.textContent = "Gerät: PC";
+    }
+
+    if (buildInfo) {
+        const d = new Date(document.lastModified);
+        const stamp =
+            d.getFullYear() +
+            String(d.getMonth() + 1).padStart(2, "0") +
+            String(d.getDate()).padStart(2, "0") + "." +
+            String(d.getHours()).padStart(2, "0") +
+            String(d.getMinutes()).padStart(2, "0");
+        buildInfo.textContent = "Beschichtung · Build " + stamp;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.title = "Beschichtung";
+
+    if (isMobile || isZebra) document.body.classList.add("phone-layout");
+    if (isPC) document.body.classList.add("pc-device");
+
+    if (isZebraTC21) document.body.classList.add("zebra-tc21");
+    if (isZebraTC22) document.body.classList.add("zebra-tc22");
+
+    setCornerInfo();
+});
+
+if (isMobile || isZebra) {
+    beistell.readOnly = true;
     kundenname.readOnly = true;
 
     beistell.addEventListener("click", () => {
         activeInput = beistell;
         beistell.classList.add("mobile-focus");
         kundenname.classList.remove("mobile-focus");
-        numKb.style.display = "block";
-        alphaKb.style.display = "none";
+        showKb(numKb);
+        hideKb(alphaKb);
     });
 
     kundenname.addEventListener("click", () => {
         activeInput = kundenname;
         kundenname.classList.add("mobile-focus");
         beistell.classList.remove("mobile-focus");
-        numKb.style.display = "none";
-        alphaKb.style.display = "block";
+        hideKb(numKb);
+        showKb(alphaKb);
     });
 
     document.querySelectorAll("#numKeyboard .kbm-key").forEach(key => {
@@ -80,10 +102,10 @@ if (isMobile) {
             }
 
             if (key.id === "numOk") {
-                numKb.style.display = "none";
+                hideKb(numKb);
                 activeInput = kundenname;
                 kundenname.classList.add("mobile-focus");
-                alphaKb.style.display = "block";
+                showKb(alphaKb);
                 return;
             }
 
@@ -93,7 +115,6 @@ if (isMobile) {
 
     document.querySelectorAll("#alphaKeyboard .kbm-key").forEach(key => {
         key.addEventListener("click", () => {
-
             if (!activeInput) return;
 
             if (key.id === "alphaDel") {
@@ -107,7 +128,7 @@ if (isMobile) {
             }
 
             if (key.id === "alphaOk") {
-                alphaKb.style.display = "none";
+                hideKb(alphaKb);
                 activeInput = null;
                 return;
             }
@@ -115,66 +136,40 @@ if (isMobile) {
             activeInput.value += key.textContent;
         });
     });
-
 } else {
-
-    /* ============================================================
-       PC MODUS
-============================================================ */
-    numKb.style.display   = "none";
-    alphaKb.style.display = "none";
-
-    beistell.readOnly   = false;
+    hideAllKb();
+    beistell.readOnly = false;
     kundenname.readOnly = false;
 }
 
-/* ============================================================
-   EILT BUTTON
-============================================================ */
 eiltBtn.onclick = () => {
     isEilt = !isEilt;
     if (isEilt) {
-        eiltBtn.textContent = "EILT SEHR: AN";
+        eiltBtn.textContent = "Eilt sehr: An";
         eiltBtn.classList.add("on");
     } else {
-        eiltBtn.textContent = "EILT SEHR: AUS";
+        eiltBtn.textContent = "Eilt sehr: Aus";
         eiltBtn.classList.remove("on");
     }
 };
 
-/* ============================================================
-   KUNDENBUTTON AUSWAHL + Tastatur schließen
-============================================================ */
-kundenButtons.forEach((btn, index) => {
+kundenButtons.forEach(btn => {
+    btn.onclick = () => {
+        beistell.blur();
+        kundenname.blur();
+        activeInput = null;
+        hideAllKb();
+        beistell.classList.remove("mobile-focus");
+        kundenname.classList.remove("mobile-focus");
 
-    const selectCustomer = () => {
         kundenButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         selectedType = btn.dataset.type;
         eiltBtn.focus();
     };
-
-    btn.onclick = () => {
-
-        beistell.blur();
-        kundenname.blur();
-        activeInput = null;
-
-        numKb.style.display = "none";
-        alphaKb.style.display = "none";
-
-        beistell.classList.remove("mobile-focus");
-        kundenname.classList.remove("mobile-focus");
-
-        selectCustomer();
-    };
 });
 
-/* ============================================================
-   PRINT — EILT-Logik (MINIMAL ERWEITERT)
-============================================================ */
 druckenBtn.onclick = () => {
-
     if (isEilt) {
         switch (selectedType) {
             case "LP":       selectedType = "LPEILT"; break;
@@ -182,8 +177,6 @@ druckenBtn.onclick = () => {
             case "KLEY":     selectedType = "KLEYEILT"; break;
             case "KALEY":    selectedType = "KALEYEILT"; break;
             case "WOB":      selectedType = "WOBEILT"; break;
-
-            /* ✅ NUR DAS IST NEU */
             case "EKODEKOR": selectedType = "EKODEKOREILT"; break;
         }
     }
@@ -198,20 +191,9 @@ druckenBtn.onclick = () => {
         "druck.html?data=" + encodeURIComponent(JSON.stringify(data));
 };
 
-/* ============================================================
-   BUILD INFO
-============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-    const lastMod = new Date(document.lastModified);
-    const build =
-        lastMod.getFullYear().toString() +
-        String(lastMod.getMonth() + 1).padStart(2, "0") +
-        String(lastMod.getDate()).padStart(2, "0") + "." +
-        String(lastMod.getHours()).padStart(2, "0") +
-        String(lastMod.getMinutes()).padStart(2, "0");
-
-    const el = document.getElementById("buildInfo");
-    if (el) el.textContent = "Build " + build;
-});
-
-
+if (backBtn) {
+    backBtn.onclick = () => {
+        const base = location.pathname.split("/").slice(0, -2).join("/");
+        window.location.href = base + "/index.html";
+    };
+}

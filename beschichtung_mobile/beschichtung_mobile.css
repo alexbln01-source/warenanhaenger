@@ -1,224 +1,125 @@
-* {
-    box-sizing: border-box;
+/* Beschichtung A5 */
+body.module-beschichtung {
+    --accent: #007bff;
+    --accent-dark: #0056b3;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background: #eef1f4;
-    font-family: Arial, sans-serif;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
-/* =============================
-   Hauptseite Basis
-============================= */
-.page {
-    width: 94vw;
-    height: 92vh;
+.input-panel {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 8px;
+}
+
+.select-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
 }
 
-/* =============================
-   Titel
-============================= */
-.title {
-    font-size: 24px;
-    font-weight: 900;
-    color: #003a73;
-    margin-bottom: 10px;
-}
-
-/* =============================
-   Grid-Label
-============================= */
-.grid-label {
-    font-size: 18px;
-    font-weight: 900;
-    color: #003a73;
-    text-align: center;
-    margin: 10px 0 6px 0;
-}
-
-/* ======================================================
-   🔶 EINHEITLICHER ORANGE-RAHMEN (FOKUS + AKTIV)
-====================================================== */
-
-button:focus,
-.kunde-btn.active,
-#eiltBtn.on,
-#beistellInput:focus,
-#kundeInput:focus {
-    outline: 3px solid #ff9800;
-    outline-offset: 3px;
-}
-
-/* =============================
-   Eingabefelder
-============================= */
-#beistellInput,
-#kundeInput {
-    width: 90%;
-    padding: 12px;
-    margin-bottom: 10px;
-    font-size: 18px;
-    border: 1px solid #777;
-    border-radius: 14px;
-}
-
-#beistellInput::placeholder,
-#kundeInput::placeholder {
-    color: #999;
-}
-
-/* =============================
-   GRID Standard
-============================= */
-.kunden-grid {
-    width: 100%;
-    padding: 0 12px;
-    display: grid;
+.beschichter-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    justify-items: stretch;
-    justify-content: center;
+    grid-template-rows: repeat(5, minmax(0, 1fr));
 }
 
-/* =============================
-   TC21 Layout
-============================= */
-body.zebra-tc21 .kunden-grid {
-    padding: 0 6px;
-    grid-template-columns: repeat(3, 100px);
-    gap: 8px;
-    justify-content: center;
-}
-
-body.zebra-tc21 .kunde-btn {
-    width: 100px;
-    font-size: 12px;
-    padding: 4px;
-}
-
-/* =============================
-   TC22 Layout
-============================= */
-body.zebra-tc22 .kunden-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
-body.zebra-tc22 .kunde-btn {
-    min-height: 42px;
-    padding: 4px;
-    font-size: 14px;
-    line-height: 1.2;
-}
-
-/* =============================
-   Kundenbuttons Standard
-============================= */
-.kunde-btn {
+.eilt-toggle {
     width: 100%;
-    min-height: 62px;
-    padding: 6px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-
-    border-radius: 14px;
-    border: none;
-    font-size: 14px;
-    font-weight: 700;
-    color: #003a73;
-    background: white;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    min-height: 44px;
+    margin-top: 4px;
+    border: var(--tile-border);
+    border-radius: 12px;
+    background: #d5dde5;
+    color: var(--brand);
+    font-size: 15px;
+    font-weight: 800;
+    touch-action: manipulation;
 }
 
-.kunde-btn.active {
-    background: #1a73e8;
-    color: white;
+.eilt-toggle.on {
+    border-color: var(--danger-dark);
+    background: linear-gradient(165deg, var(--danger), var(--danger-dark));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.35);
 }
 
-/* =============================
-   EILT Button
-============================= */
-#eiltBtn {
-    margin-top: 14px;
-    width: 90%;
-    padding: 14px;
-    font-size: 20px;
-    border-radius: 14px;
-    border: none;
-    background: #777;
-    color: white;
-    font-weight: bold;
+body.phone-layout .panel-side {
+    flex-shrink: 0;
 }
 
-#eiltBtn.on {
-    background: #c80000;
-}
-
-/* =============================
-   Untere Buttons
-============================= */
-.bottom-row {
-    width: 90%;
-    display: flex;
-    gap: 12px;
-    margin-top: auto;
-    padding-bottom: 10px;
-}
-
-.back-btn,
-.primary-btn {
+body.phone-layout .panel-main {
     flex: 1;
-    padding: 14px;
-    border-radius: 14px;
-    border: none;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
+    min-height: 0;
 }
 
-.back-btn { background: #444; }
-.primary-btn { background: #00963d; }
-
-/* =============================
-   Mobile Fokus Klasse
-============================= */
-.mobile-focus {
-    outline: 3px solid #ff9800 !important;
-    outline-offset: 3px;
-    border-radius: 14px;
+body.phone-layout .beschichter-grid .tile-btn {
+    font-size: 10px;
 }
 
-/* =============================
-   PC Layout
-============================= */
-body.pc-device .page {
-    width: 80vw;
-    height: auto;
-    max-width: 1100px;
-    padding-top: 20px;
+body.pc-device .beschichter-grid .tile-btn {
+    font-size: 12px;
+    padding: 6px 4px;
 }
 
-body.pc-device .kunden-grid {
-    grid-template-columns: repeat(3, 317px);
-    gap: 10px;
+/* Popup-Tastatur */
+.kb-mini {
+    position: fixed;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    padding: 10px 14px;
+    border-radius: 16px;
+    border: var(--panel-border);
+    box-shadow: 0 8px 28px rgba(0, 58, 115, 0.2);
+    z-index: 9999;
+    width: 92%;
+    max-width: 420px;
 }
 
-body.pc-device .bottom-row {
-    margin-top: 40px;
+.kb-mini.hidden {
+    display: none !important;
+}
+
+.kbm-row {
+    display: flex;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+.kbm-key {
+    flex: 1;
+    margin: 4px;
+    padding: 11px 0;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 12px;
+    border: var(--tile-border);
+    color: var(--brand);
+    background: var(--tile-bg);
+    touch-action: manipulation;
+}
+
+.kbm-key:active {
+    transform: scale(0.96);
+    background: #dfe7f1;
+}
+
+.kbm-del { color: var(--danger) !important; }
+
+.kbm-ok {
+    background: var(--ok) !important;
+    border-color: #007a31 !important;
+    color: #fff !important;
+}
+
+body.pc-device .kb-mini {
+    display: none !important;
+}
+
+@media (orientation: landscape) and (max-height: 420px) {
+    .page-title { font-size: 26px; }
+    .beschichter-grid .tile-btn { font-size: 9px; }
+    .eilt-toggle { min-height: 36px; font-size: 13px; }
 }

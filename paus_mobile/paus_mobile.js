@@ -48,6 +48,7 @@ deviceInfo.textContent =
     isZebra ? "Gerät: Zebra" :
     isMobile ? "Gerät: Mobil" : "Gerät: PC";
 
+if (isMobile || isZebra) document.body.classList.add("phone-layout");
 if (isPC) document.body.classList.add("pc-device");
 
 // ============================================================
@@ -58,6 +59,7 @@ window.onload = () => {
     kommission.value  = "";
     lieferdatum.value = "";
 
+    document.title = "PAUS Lieferung";
     buildNumber();
 
     // Android Tastatur blockieren
@@ -489,7 +491,7 @@ function buildNumber() {
         String(d.getHours()).padStart(2,"0") +
         String(d.getMinutes()).padStart(2,"0");
 
-    buildInfo.textContent = "Build " + stamp;
+    buildInfo.textContent = "PAUS Lieferung · Build " + stamp;
 }
 
 // ============================================================
