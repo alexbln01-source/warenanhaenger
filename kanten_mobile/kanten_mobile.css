@@ -1,228 +1,178 @@
-/* KANTEN – kompakt, alles auf einem Bildschirm, kein Scroll */
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+/* KANTEN – wie Startseite, kompakt, kein Scroll */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body {
     margin: 0;
     padding: 0;
-    width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #c8d0d9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 40%, #c3cad4 100%);
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body.phone-layout,
 body.pc-device {
     display: flex;
     justify-content: center;
-    align-items: stretch;
+    align-items: center;
 }
 
 #card {
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
     height: 100vh;
     height: 100dvh;
-    margin: 0 auto;
-    display: grid;
-    grid-template-rows: auto 1fr auto auto auto;
-    grid-template-areas:
-        "top"
-        "art"
-        "label"
-        "kunden"
-        "foot";
-    overflow: hidden;
-    background: #e8ecf1;
-}
-
-/* ===== KOPF ===== */
-.top-bar {
-    grid-area: top;
+    padding: 28px 14px calc(8px + env(safe-area-inset-bottom, 0px));
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: calc(6px + env(safe-area-inset-top, 0px)) 10px 6px;
-    background: #003a73;
-    color: #fff;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.btn-icon {
-    width: 40px;
-    height: 36px;
-    border: none;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    font-size: 20px;
-    font-weight: 700;
+.title {
+    margin: 0 0 10px;
+    font-size: 28px;
+    font-weight: 900;
+    color: #003a73;
+    text-align: center;
     flex-shrink: 0;
 }
 
-.top-title {
-    flex: 1;
-    font-size: 18px;
+.section-label {
+    margin: 0 0 6px;
+    font-size: 13px;
     font-weight: 800;
+    color: #003a73;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
 }
 
-.device-info {
-    font-size: 10px;
-    opacity: 0.65;
-    font-weight: 600;
-}
-
-/* ===== ART 2x2 ===== */
+/* Art 2x2 */
 .art-grid {
-    grid-area: art;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 6px;
-    padding: 8px 8px 4px;
-    min-height: 0;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .artBtn {
-    border: 1px solid #b0bcc8;
-    border-radius: 8px;
-    background: #fff;
+    min-height: 50px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: bold;
     color: #003a73;
-    font-size: 17px;
-    font-weight: 800;
+    background: #e6ebf1;
     touch-action: manipulation;
-    min-height: 0;
-}
-
-.artBtn:active {
-    background: #dce4ec;
 }
 
 .artBtn.active {
-    background: #003a73;
-    border-color: #003a73;
+    background: linear-gradient(#ff9800, #e67e00);
     color: #fff;
-}
-
-.artBtn.art-eilt {
-    color: #c62828;
 }
 
 .artBtn.art-eilt.active {
-    background: #c62828;
-    border-color: #c62828;
-    color: #fff;
+    background: linear-gradient(#e53935, #c62828);
 }
 
-/* ===== KUNDEN ===== */
-.kunden-label {
-    grid-area: label;
-    padding: 2px 12px 4px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #5a6a78;
-}
-
+/* Kunden 3x4 – füllt Rest, kein Scroll */
 .kunden-grid {
-    grid-area: kunden;
+    flex: 1;
+    min-height: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: 5px;
-    padding: 0 8px 6px;
-    min-height: 0;
+    gap: 7px;
+    margin-bottom: 10px;
     overflow: hidden;
 }
 
 .kunden-grid.disabled {
-    opacity: 0.3;
+    opacity: 0.35;
     pointer-events: none;
 }
 
 .kundeBtn {
-    border: 1px solid #b8c2cc;
-    border-radius: 6px;
-    background: #fff;
-    color: #1e3a50;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.1;
-    padding: 4px 3px;
-    touch-action: manipulation;
     min-height: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.kundeBtn:active {
-    background: #dce4ec;
+    border: none;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #003a73;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 4px 2px;
+    line-height: 1.15;
+    touch-action: manipulation;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .kundeBtn.active {
-    background: #00963d;
-    border-color: #007a31;
+    background: linear-gradient(#007bff, #0056b3);
     color: #fff;
 }
 
-/* ===== UNTEN ===== */
-.bottom-bar {
-    grid-area: foot;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
-    background: #dfe5eb;
-    border-top: 1px solid #c5cdd6;
+/* Unten wie früher */
+#actionButtons {
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
-.btn-print {
-    width: 100%;
-    height: 46px;
+#btnBack,
+#btnDrucken {
+    min-height: 48px;
     border: none;
-    border-radius: 8px;
-    background: #00963d;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: bold;
     color: #fff;
-    font-size: 17px;
-    font-weight: 800;
+    touch-action: manipulation;
 }
 
-.btn-print:disabled {
-    background: #9eabb6;
+#btnBack { background: #444; }
+#btnDrucken { background: #00963d; }
+#btnDrucken:disabled { background: #8a9aa8; }
+
+.device-info {
+    position: fixed;
+    top: 6px;
+    left: 10px;
+    font-size: 11px;
+    color: #003a73;
+    z-index: 9;
 }
 
 .build-info {
     position: fixed;
-    bottom: calc(54px + env(safe-area-inset-bottom, 0px));
-    right: 8px;
-    font-size: 9px;
-    color: #7a8794;
-    pointer-events: none;
+    bottom: 6px;
+    right: 10px;
+    font-size: 10px;
+    color: #003a73;
+    opacity: 0.7;
+    z-index: 9;
 }
 
 button:focus,
 button:focus-visible {
-    outline: 2px solid #ff9800;
-    outline-offset: 1px;
-}
-
-body.pc-device {
-    align-items: center;
-    justify-content: center;
-    background: #333;
-    padding: 10px;
+    outline: 3px solid #ff9800;
+    outline-offset: 2px;
 }
 
 body.pc-device #card {
+    max-width: 400px;
     height: min(720px, 96vh);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.15);
 }
 
-@media (orientation: landscape) and (max-height: 400px) {
-    .artBtn { font-size: 14px; }
+@media (orientation: landscape) and (max-height: 420px) {
+    .title { font-size: 22px; margin-bottom: 6px; }
+    .artBtn { min-height: 42px; font-size: 14px; }
     .kundeBtn { font-size: 10px; }
-    .btn-print { height: 40px; font-size: 15px; }
+    #btnBack, #btnDrucken { min-height: 40px; font-size: 14px; }
 }
 
 #keyboardPopup { display: none; }

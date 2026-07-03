@@ -62,18 +62,13 @@ let selectedArt = "";
 // ============================================================
 function setCornerInfo() {
   const deviceLabel =
-    isTC22 ? "TC22" :
-    isTC21 ? "TC21" :
+    isTC22 ? "Zebra TC22" :
+    isTC21 ? "Zebra TC21" :
     isZebra ? "Zebra" :
     isMobile ? "Mobil" : "PC";
 
-  if (deviceInfo) {
-    deviceInfo.textContent = deviceLabel;
-  }
-
-  if (buildInfo) {
-    buildInfo.textContent = "Build " + buildStamp();
-  }
+  if (deviceInfo) deviceInfo.textContent = "Gerät: " + deviceLabel;
+  if (buildInfo) buildInfo.textContent = "Build " + buildStamp();
 }
 
 

@@ -2,22 +2,21 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#003a73">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#d8dee6">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Kanten</title>
-<link rel="stylesheet" href="kanten_mobile.css?v=compact1">
+<link rel="stylesheet" href="kanten_mobile.css?v=langen8">
 </head>
 <body>
 
+<div id="deviceInfo" class="device-info"></div>
+
 <div id="card">
 
-    <header class="top-bar">
-        <button type="button" id="btnBack" class="btn-icon">←</button>
-        <span class="top-title">Kanten</span>
-        <span id="deviceInfo" class="device-info"></span>
-    </header>
+    <h1 class="title">Kanten</h1>
 
+    <p class="section-label">Art wählen</p>
     <div class="art-grid">
         <button type="button" id="btnKanten" class="artBtn">Kanten</button>
         <button type="button" id="btnSchweissen" class="artBtn">Schweißen</button>
@@ -25,8 +24,7 @@
         <button type="button" id="btnEiltSehr" class="artBtn art-eilt">Eilt sehr</button>
     </div>
 
-    <div class="kunden-label">Kunde</div>
-
+    <p class="section-label">Kunde wählen</p>
     <div id="kundenArea" class="kunden-grid disabled">
         <button type="button" class="kundeBtn" data-kunde="Backhus">Backhus</button>
         <button type="button" class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
@@ -41,15 +39,16 @@
         <button type="button" class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
     </div>
 
-    <footer class="bottom-bar">
-        <button type="button" id="btnDrucken" class="btn-print" disabled>Drucken</button>
-    </footer>
-
-    <div id="buildInfo" class="build-info"></div>
+    <div id="actionButtons">
+        <button type="button" id="btnBack">◀ Zurück</button>
+        <button type="button" id="btnDrucken" disabled>🖨️ Drucken</button>
+    </div>
 
 </div>
 
-<script src="kanten_mobile.js?v=compact1"></script>
+<div id="buildInfo" class="build-info"></div>
+
+<script src="kanten_mobile.js?v=langen8"></script>
 
 </body>
 </html>
