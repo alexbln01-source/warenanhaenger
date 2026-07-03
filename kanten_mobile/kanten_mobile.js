@@ -1,13 +1,7 @@
 // ============================================================
-//  KANTEN – kanten_mobile.js (STABIL)
-//  - Anzeige: oben links Gerät, unten rechts Build
-//  - Zurück: wie in PAUS (base path)
+//  BEARBEITUNG – kanten_mobile.js
 // ============================================================
 
-
-// ============================================================
-//  DEVICE DETECTION (wie in PAUS)
-// ============================================================
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = window.screen.width;
 const sh  = window.screen.height;
@@ -19,10 +13,6 @@ const isZebra = isTC22 || isTC21 || ua.includes("zebra");
 const isMobile = /android|iphone|ipad|ipod/.test(ua);
 const isPC     = !isZebra && !isMobile;
 
-
-// ============================================================
-//  BUILD STAMP (wie du es willst: 20260213.1338)
-// ============================================================
 function buildStamp() {
   const d = new Date(document.lastModified);
   const y  = d.getFullYear();
@@ -33,33 +23,24 @@ function buildStamp() {
   return `${y}${mo}${da}.${hh}${mm}`;
 }
 
-
-// ============================================================
-//  DOM ELEMENTE
-// ============================================================
-const deviceInfo = document.getElementById("deviceInfo");
-const buildInfo  = document.getElementById("buildInfo");
-const kundenArea = document.getElementById("kundenArea");
+const deviceInfo   = document.getElementById("deviceInfo");
+const buildInfo    = document.getElementById("buildInfo");
+const kundenArea   = document.getElementById("kundenArea");
+const kundenHint   = document.getElementById("kundenHint");
+const kundenReady  = document.getElementById("kundenReady");
+const stepArt      = document.getElementById("stepArt");
+const stepKunde    = document.getElementById("stepKunde");
 
 const btnEiltSehr   = document.getElementById("btnEiltSehr");
 const btnKanten     = document.getElementById("btnKanten");
 const btnSchweissen = document.getElementById("btnSchweissen");
 const btnBohrwerk   = document.getElementById("btnBohrwerk");
+const btnBack       = document.getElementById("btnBack");
+const btnDrucken    = document.getElementById("btnDrucken");
 
-const btnBack    = document.getElementById("btnBack");
-const btnDrucken = document.getElementById("btnDrucken");
-
-
-// ============================================================
-//  STATE
-// ============================================================
 let selectedCustomer = "";
 let selectedArt = "";
 
-
-// ============================================================
-//  CORNER INFO
-// ============================================================
 function setCornerInfo() {
   const deviceLabel =
     isTC22 ? "Zebra TC22" :
@@ -68,61 +49,91 @@ function setCornerInfo() {
     isMobile ? "Mobil" : "PC";
 
   if (deviceInfo) deviceInfo.textContent = "Gerät: " + deviceLabel;
-  if (buildInfo) buildInfo.textContent = "Build " + buildStamp();
+  if (buildInfo) buildInfo.textContent = "Bearbeitung · Build " + buildStamp();
 }
 
-
-// ============================================================
-//  INIT
-// ============================================================
-document.addEventListener("DOMContentLoaded", () => {
-  if (kundenArea) kundenArea.classList.add("disabled");
-
-  if (isMobile || isZebra) {
-    document.body.classList.add("phone-layout");
-  }
-  if (isPC) {
-    document.body.classList.add("pc-device");
-  }
-
-  setCornerInfo();
-  updatePrintButton();
-});
-
-
-// ============================================================
-//  HILFSFUNKTIONEN
-// ============================================================
 function updatePrintButton() {
   if (!btnDrucken) return;
   const ready = selectedArt === "eilt_sehr" || (selectedArt && selectedCustomer);
   btnDrucken.disabled = !ready;
 }
 
+function updateSteps() {
+  if (!stepArt || !stepKunde) return;
+
+  stepArt.classList.remove("is-on", "is-done");
+  stepKunde.classList.remove("is-on", "is-done");
+
+  if (!selectedArt) {
+    stepArt.classList.add("is-on");
+    return;
+  }
+
+  stepArt.classList.add("is-done");
+
+  if (selectedArt === "eilt_sehr") {
+    stepKunde.classList.add("is-done");
+    return;
+  }
+
+  if (selectedCustomer) {
+    stepKunde.classList.add("is-done");
+  } else {
+    stepKunde.classList.add("is-on");
+  }
+}
+
+function updateKundenPanel() {
+  if (!kundenHint || !kundenArea || !kundenReady) return;
+
+  kundenHint.classList.add("hidden");
+  kundenArea.classList.add("hidden");
+  kundenReady.classList.add("hidden");
+
+  if (!selectedArt) {
+    kundenHint.classList.remove("hidden");
+    return;
+  }
+
+  if (selectedArt === "eilt_sehr") {
+    kundenReady.classList.remove("hidden");
+    return;
+  }
+
+  kundenArea.classList.remove("hidden");
+}
+
+function updateUI() {
+  updateKundenPanel();
+  updateSteps();
+  updatePrintButton();
+}
+
 function clearArtSelection() {
   document.querySelectorAll(".artBtn").forEach(b => b.classList.remove("active"));
-  updatePrintButton();
 }
 
 function clearCustomerSelection() {
   document.querySelectorAll(".kundeBtn").forEach(b => b.classList.remove("active"));
-  updatePrintButton();
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  document.title = "Bearbeitung";
 
-// ============================================================
-//  ART BUTTONS
-// ============================================================
+  if (isMobile || isZebra) document.body.classList.add("phone-layout");
+  if (isPC) document.body.classList.add("pc-device");
+
+  setCornerInfo();
+  updateUI();
+});
+
 btnEiltSehr.onclick = () => {
   selectedArt = "eilt_sehr";
   selectedCustomer = "EILT_SEHR";
-
   clearArtSelection();
   btnEiltSehr.classList.add("active");
   clearCustomerSelection();
-
-  if (kundenArea) kundenArea.classList.add("disabled");
-  updatePrintButton();
+  updateUI();
 };
 
 btnKanten.onclick     = () => setNormalArt("kanten", btnKanten);
@@ -131,45 +142,27 @@ btnBohrwerk.onclick   = () => setNormalArt("bohrwerk", btnBohrwerk);
 
 function setNormalArt(art, btn) {
   selectedArt = art;
-
   clearArtSelection();
   btn.classList.add("active");
-
   selectedCustomer = "";
   clearCustomerSelection();
-
-  if (kundenArea) kundenArea.classList.remove("disabled");
-  updatePrintButton();
+  updateUI();
 }
 
-
-// ============================================================
-//  KUNDEN BUTTONS
-// ============================================================
 document.querySelectorAll(".kundeBtn").forEach(btn => {
   btn.onclick = () => {
-    if (kundenArea && kundenArea.classList.contains("disabled")) {
-      alert("Bitte zuerst eine Art auswählen.");
-      return;
-    }
-
     clearCustomerSelection();
     btn.classList.add("active");
     selectedCustomer = btn.dataset.kunde;
-    updatePrintButton();
+    updateUI();
   };
 });
 
-
-// ============================================================
-//  DRUCK
-// ============================================================
 btnDrucken.onclick = () => {
   if (selectedArt === "eilt_sehr") {
     location.href = "druck_kanten.html?kunde=EILT_SEHR";
     return;
   }
-
   if (!selectedArt) return alert("Bitte eine Art auswählen.");
   if (!selectedCustomer) return alert("Bitte einen Kunden auswählen.");
 
@@ -178,10 +171,6 @@ btnDrucken.onclick = () => {
     "&art=" + encodeURIComponent(selectedArt);
 };
 
-
-// ============================================================
-//  ZURÜCK (wie PAUS)
-// ============================================================
 btnBack.onclick = () => {
   const base = location.pathname.split("/").slice(0, -2).join("/");
   window.location.href = base + "/index.html";

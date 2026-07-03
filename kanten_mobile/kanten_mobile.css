@@ -1,14 +1,13 @@
-/* Bearbeitung – modern, kompakt, kein Scroll */
+/* Bearbeitung A6 – kompakt, kein Scroll */
 :root {
     --brand: #003a73;
-    --brand-mid: #0056b3;
+    --brand-light: #e8f0fa;
     --accent: #ff9800;
     --accent-dark: #e67e00;
     --danger: #e53935;
     --danger-dark: #c62828;
     --ok: #00963d;
-    --surface: #ffffff;
-    --muted: #5c6b7a;
+    --muted: #6b7c8f;
 }
 
 * {
@@ -22,7 +21,7 @@ html, body {
     height: 100%;
     overflow: hidden;
     background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
     color: var(--brand);
 }
 
@@ -33,97 +32,168 @@ body.pc-device {
     align-items: center;
 }
 
+.hidden {
+    display: none !important;
+}
+
 #card {
     width: 100%;
     max-width: 380px;
     height: 100vh;
     height: 100dvh;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 16px calc(10px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-/* ===== KOPF ===== */
-.page-head {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-shrink: 0;
-}
-
-.title {
-    margin: 0;
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -0.4px;
-    color: var(--brand);
-}
-
-.format-tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 38px;
-    height: 26px;
-    padding: 0 10px;
-    border-radius: 999px;
-    background: var(--brand);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-}
-
-.section-label {
-    margin: 0 0 8px 2px;
+.page-sub {
+    margin: 4px 0 12px;
+    text-align: center;
     font-size: 13px;
     font-weight: 600;
     color: var(--muted);
     flex-shrink: 0;
 }
 
-/* ===== ART ===== */
+/* Schritte */
+.steps {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.step {
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.65);
+    color: var(--muted);
+    border: 1.5px solid rgba(0, 58, 115, 0.1);
+}
+
+.step.is-on {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+}
+
+.step.is-done {
+    background: #00963d;
+    color: #fff;
+    border-color: #00963d;
+}
+
+/* Art */
 .art-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 9px;
-    margin-bottom: 14px;
+    gap: 10px;
+    margin-bottom: 12px;
     flex-shrink: 0;
 }
 
 .artBtn {
-    min-height: 52px;
-    border: 1.5px solid rgba(0, 58, 115, 0.12);
+    min-height: 54px;
+    border: none;
     border-radius: 16px;
-    background: var(--surface);
+    background: #fff;
     color: var(--brand);
     font-size: 16px;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(0, 58, 115, 0.08);
+    font-weight: 800;
+    box-shadow: 0 2px 10px rgba(0, 58, 115, 0.1);
     touch-action: manipulation;
-    transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-
-.artBtn:active {
-    transform: scale(0.98);
 }
 
 .artBtn.active {
-    border-color: transparent;
-    background: linear-gradient(165deg, var(--accent) 0%, var(--accent-dark) 100%);
+    background: linear-gradient(165deg, var(--accent), var(--accent-dark));
     color: #fff;
-    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.38);
+    box-shadow: 0 6px 18px rgba(255, 152, 0, 0.4);
 }
 
 .artBtn.art-eilt.active {
-    background: linear-gradient(165deg, var(--danger) 0%, var(--danger-dark) 100%);
-    box-shadow: 0 6px 16px rgba(229, 57, 53, 0.35);
+    background: linear-gradient(165deg, var(--danger), var(--danger-dark));
+    box-shadow: 0 6px 18px rgba(229, 57, 53, 0.35);
 }
 
-/* ===== KUNDEN ===== */
+/* Kunden-Bereich */
+.kunden-wrap {
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.kunden-hint,
+.kunden-ready {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 18px;
+    background: var(--brand-light);
+    border: 2px dashed rgba(0, 58, 115, 0.18);
+    text-align: center;
+    padding: 16px;
+}
+
+.hint-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.hint-title,
+.ready-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--brand);
+}
+
+.hint-text,
+.ready-text {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.kunden-ready {
+    background: #e8f5e9;
+    border-color: rgba(0, 150, 61, 0.25);
+    border-style: solid;
+}
+
+.ready-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ok);
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
 .kunden-grid {
     flex: 1;
     min-height: 0;
@@ -131,43 +201,30 @@ body.pc-device {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: 8px;
-    margin-bottom: 12px;
     overflow: hidden;
-}
-
-.kunden-grid.disabled {
-    opacity: 0.38;
-    pointer-events: none;
-    filter: grayscale(0.15);
 }
 
 .kundeBtn {
     min-height: 0;
-    border: 1.5px solid rgba(0, 58, 115, 0.1);
+    border: none;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.96);
+    background: #fff;
     color: var(--brand);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.15;
     padding: 4px 3px;
-    box-shadow: 0 2px 6px rgba(0, 58, 115, 0.07);
+    box-shadow: 0 2px 8px rgba(0, 58, 115, 0.09);
     touch-action: manipulation;
-    transition: transform 0.1s ease, background 0.15s ease, color 0.15s ease;
-}
-
-.kundeBtn:active {
-    transform: scale(0.97);
 }
 
 .kundeBtn.active {
-    border-color: transparent;
-    background: linear-gradient(165deg, #007bff 0%, var(--brand-mid) 100%);
+    background: linear-gradient(165deg, #007bff, #0056b3);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.32);
+    box-shadow: 0 4px 12px rgba(0, 86, 179, 0.35);
 }
 
-/* ===== AKTIONEN ===== */
+/* Aktionen */
 #actionButtons {
     flex-shrink: 0;
     display: grid;
@@ -181,34 +238,27 @@ body.pc-device {
     border: none;
     border-radius: 16px;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     color: #fff;
     touch-action: manipulation;
-    transition: transform 0.1s ease, opacity 0.15s ease;
 }
 
 #btnBack {
-    background: linear-gradient(165deg, #5a6570 0%, #3d4650 100%);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+    background: #4a5568;
 }
 
 #btnDrucken {
-    background: linear-gradient(165deg, #00a844 0%, var(--ok) 100%);
+    background: linear-gradient(165deg, #00a844, var(--ok));
     box-shadow: 0 4px 14px rgba(0, 150, 61, 0.35);
 }
 
 #btnDrucken:disabled {
-    background: #9aa8b5;
+    background: #b0bec9;
     box-shadow: none;
-    color: #e8edf2;
+    color: #eef2f6;
 }
 
-#btnBack:active,
-#btnDrucken:not(:disabled):active {
-    transform: scale(0.98);
-}
-
-/* ===== INFO ===== */
+/* Info */
 .device-info {
     position: fixed;
     top: 6px;
@@ -216,7 +266,6 @@ body.pc-device {
     font-size: 11px;
     font-weight: 600;
     color: var(--brand);
-    opacity: 0.85;
     z-index: 9;
 }
 
@@ -226,7 +275,7 @@ body.pc-device {
     right: 10px;
     font-size: 10px;
     color: var(--brand);
-    opacity: 0.7;
+    opacity: 0.75;
     z-index: 9;
 }
 
@@ -244,14 +293,11 @@ body.pc-device #card {
     max-width: 400px;
     height: min(720px, 96vh);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(8px);
 }
 
 @media (orientation: landscape) and (max-height: 420px) {
-    .title { font-size: 24px; }
-    .page-head { margin-bottom: 8px; }
-    .artBtn { min-height: 42px; font-size: 14px; }
+    .page-title { font-size: 26px; }
+    .artBtn { min-height: 44px; font-size: 14px; }
     .kundeBtn { font-size: 10px; }
     #btnBack, #btnDrucken { min-height: 40px; font-size: 14px; }
 }

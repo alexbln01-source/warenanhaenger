@@ -5,21 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#003a73">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Bearbeitung</title>
-<link rel="stylesheet" href="kanten_mobile.css?v=bearb2">
+<script>
+(function () {
+    var v = Date.now();
+    document.write('<link rel="stylesheet" href="kanten_mobile.css?v=' + v + '">');
+})();
+</script>
+<style>
+/* Kritisch: Titel bleibt Bearbeitung auch bei altem CSS-Cache */
+.page-title {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 900;
+    color: #003a73;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+</style>
 </head>
-<body>
+<body data-page="bearbeitung" data-ver="bearb3">
 
 <div id="deviceInfo" class="device-info"></div>
 
 <div id="card">
 
-    <header class="page-head">
-        <h1 class="title">Bearbeitung</h1>
-        <span class="format-tag">A6</span>
-    </header>
+    <h1 class="page-title" id="pageTitle">Bearbeitung</h1>
+    <p class="page-sub">Warenanhänger · A6</p>
 
-    <p class="section-label">Art</p>
+    <div class="steps" aria-hidden="true">
+        <span class="step is-on" id="stepArt">① Art</span>
+        <span class="step" id="stepKunde">② Kunde</span>
+    </div>
+
     <div class="art-grid">
         <button type="button" id="btnKanten" class="artBtn">Kanten</button>
         <button type="button" id="btnSchweissen" class="artBtn">Schweißen</button>
@@ -27,19 +47,32 @@
         <button type="button" id="btnEiltSehr" class="artBtn art-eilt">Eilt sehr</button>
     </div>
 
-    <p class="section-label">Kunde</p>
-    <div id="kundenArea" class="kunden-grid disabled">
-        <button type="button" class="kundeBtn" data-kunde="Backhus">Backhus</button>
-        <button type="button" class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
-        <button type="button" class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
-        <button type="button" class="kundeBtn" data-kunde="Bücker">Bücker</button>
-        <button type="button" class="kundeBtn" data-kunde="FVG">FVG</button>
-        <button type="button" class="kundeBtn" data-kunde="Grimme">Grimme</button>
-        <button type="button" class="kundeBtn" data-kunde="Janzen">Janzen</button>
-        <button type="button" class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
-        <button type="button" class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
-        <button type="button" class="kundeBtn" data-kunde="PAUS">PAUS</button>
-        <button type="button" class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
+    <div class="kunden-wrap">
+        <div id="kundenHint" class="kunden-hint">
+            <div class="hint-circle">1</div>
+            <p class="hint-title">Zuerst Art wählen</p>
+            <p class="hint-text">Danach erscheinen die Kunden</p>
+        </div>
+
+        <div id="kundenReady" class="kunden-ready hidden">
+            <div class="ready-icon">✓</div>
+            <p class="ready-title">Eilt sehr</p>
+            <p class="ready-text">Bereit zum Drucken</p>
+        </div>
+
+        <div id="kundenArea" class="kunden-grid hidden">
+            <button type="button" class="kundeBtn" data-kunde="Backhus">Backhus</button>
+            <button type="button" class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
+            <button type="button" class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
+            <button type="button" class="kundeBtn" data-kunde="Bücker">Bücker</button>
+            <button type="button" class="kundeBtn" data-kunde="FVG">FVG</button>
+            <button type="button" class="kundeBtn" data-kunde="Grimme">Grimme</button>
+            <button type="button" class="kundeBtn" data-kunde="Janzen">Janzen</button>
+            <button type="button" class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
+            <button type="button" class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
+            <button type="button" class="kundeBtn" data-kunde="PAUS">PAUS</button>
+            <button type="button" class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
+        </div>
     </div>
 
     <div id="actionButtons">
@@ -51,7 +84,12 @@
 
 <div id="buildInfo" class="build-info"></div>
 
-<script src="kanten_mobile.js?v=bearb2"></script>
+<script>
+(function () {
+    var v = Date.now();
+    document.write('<script src="kanten_mobile.js?v=' + v + '"><\/script>');
+})();
+</script>
 
 </body>
 </html>
