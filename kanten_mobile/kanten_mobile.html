@@ -26,7 +26,7 @@
 }
 </style>
 </head>
-<body data-page="bearbeitung" data-ver="bearb4">
+<body data-page="bearbeitung" data-ver="bearb5">
 
 <div id="deviceInfo" class="device-info"></div>
 
@@ -35,13 +35,9 @@
     <h1 class="page-title" id="pageTitle">Bearbeitung</h1>
     <p class="page-sub">Warenanhänger · A6</p>
 
-    <div class="steps" aria-hidden="true">
-        <span class="step is-on" id="stepArt">① Art</span>
-        <span class="step" id="stepKunde">② Kunde</span>
-    </div>
-
     <div class="work-area">
         <div class="art-section">
+            <p class="section-head">Tätigkeit wählen</p>
             <div class="art-grid">
                 <button type="button" id="btnKanten" class="artBtn">Kanten</button>
                 <button type="button" id="btnSchweissen" class="artBtn">Schweißen</button>
@@ -51,10 +47,10 @@
         </div>
 
         <div class="kunden-wrap">
+        <p class="section-head">Kunde wählen</p>
         <div id="kundenHint" class="kunden-hint">
-            <div class="hint-circle">1</div>
-            <p class="hint-title">Zuerst Art wählen</p>
-            <p class="hint-text">Danach erscheinen die Kunden</p>
+            <p class="hint-title">Noch kein Kunde</p>
+            <p class="hint-text">Bitte zuerst eine Tätigkeit auswählen</p>
         </div>
 
         <div id="kundenReady" class="kunden-ready hidden">

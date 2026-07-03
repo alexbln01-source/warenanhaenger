@@ -28,8 +28,6 @@ const buildInfo    = document.getElementById("buildInfo");
 const kundenArea   = document.getElementById("kundenArea");
 const kundenHint   = document.getElementById("kundenHint");
 const kundenReady  = document.getElementById("kundenReady");
-const stepArt      = document.getElementById("stepArt");
-const stepKunde    = document.getElementById("stepKunde");
 
 const btnEiltSehr   = document.getElementById("btnEiltSehr");
 const btnKanten     = document.getElementById("btnKanten");
@@ -58,31 +56,6 @@ function updatePrintButton() {
   btnDrucken.disabled = !ready;
 }
 
-function updateSteps() {
-  if (!stepArt || !stepKunde) return;
-
-  stepArt.classList.remove("is-on", "is-done");
-  stepKunde.classList.remove("is-on", "is-done");
-
-  if (!selectedArt) {
-    stepArt.classList.add("is-on");
-    return;
-  }
-
-  stepArt.classList.add("is-done");
-
-  if (selectedArt === "eilt_sehr") {
-    stepKunde.classList.add("is-done");
-    return;
-  }
-
-  if (selectedCustomer) {
-    stepKunde.classList.add("is-done");
-  } else {
-    stepKunde.classList.add("is-on");
-  }
-}
-
 function updateKundenPanel() {
   if (!kundenHint || !kundenArea || !kundenReady) return;
 
@@ -105,7 +78,6 @@ function updateKundenPanel() {
 
 function updateUI() {
   updateKundenPanel();
-  updateSteps();
   updatePrintButton();
 }
 
@@ -163,7 +135,7 @@ btnDrucken.onclick = () => {
     location.href = "druck_kanten.html?kunde=EILT_SEHR";
     return;
   }
-  if (!selectedArt) return alert("Bitte eine Art auswählen.");
+  if (!selectedArt) return alert("Bitte eine Tätigkeit auswählen.");
   if (!selectedCustomer) return alert("Bitte einen Kunden auswählen.");
 
   location.href =

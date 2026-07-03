@@ -60,35 +60,13 @@ body.pc-device {
     flex-shrink: 0;
 }
 
-/* Schritte */
-.steps {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 12px;
+/* Bereichsüberschriften */
+.section-head {
+    margin: 0 0 8px 2px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--brand);
     flex-shrink: 0;
-}
-
-.step {
-    padding: 5px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    background: rgba(255, 255, 255, 0.65);
-    color: var(--muted);
-    border: 1.5px solid rgba(0, 58, 115, 0.1);
-}
-
-.step.is-on {
-    background: var(--brand);
-    color: #fff;
-    border-color: var(--brand);
-}
-
-.step.is-done {
-    background: #00963d;
-    color: #fff;
-    border-color: #00963d;
 }
 
 /* Art */
@@ -161,17 +139,7 @@ body.pc-device {
 }
 
 .hint-circle {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--brand);
-    color: #fff;
-    font-size: 20px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 4px;
+    display: none;
 }
 
 .hint-title,
@@ -265,6 +233,7 @@ body.pc-device {
 
 #btnBack {
     background: #4a5568;
+    border-color: #3d4650;
 }
 
 #btnDrucken {
@@ -341,6 +310,11 @@ body.pc-device .art-grid {
 body.pc-device .artBtn {
     min-height: 0;
     font-size: 17px;
+}
+
+body.pc-device .section-head {
+    font-size: 15px;
+    margin-bottom: 10px;
 }
 
 body.pc-device .page-title {
