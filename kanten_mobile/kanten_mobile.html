@@ -6,42 +6,51 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Warenanhänger</title>
-<link rel="stylesheet" href="kanten_mobile.css">
+<link rel="stylesheet" href="kanten_mobile.css?v=handy1">
 </head>
 <body>
 
 <div id="deviceInfo" class="device-info"></div>
 
-<div id="card">
+<div id="card" class="phone-shell">
 
-    <div class="grid-label spacer-top">WARENANHÄNGER AUSWÄHLEN</div>
+    <header class="page-head">
+        <span class="page-badge">Kanten</span>
+        <h1 class="page-title">Warenanhänger</h1>
+    </header>
 
-    <div class="art-btn-row">
-        <button id="btnKanten" class="artBtn">Kanten</button>
-        <button id="btnSchweissen" class="artBtn">Schweißen</button>
-        <button id="btnBohrwerk" class="artBtn">Bohrwerk</button>
-        <button id="btnEiltSehr" class="artBtn eilt-art">
-            <span class="art-title">Anhänger</span>
-            <span class="art-sub">Eilt Sehr</span>
-        </button>
-    </div>
+    <div class="phone-scroll">
 
-    <div class="grid-label">KUNDE AUSWÄHLEN</div>
+        <section class="step-block">
+            <div class="grid-label spacer-top">Art wählen</div>
+            <div class="art-btn-row">
+                <button id="btnKanten" class="artBtn">Kanten</button>
+                <button id="btnSchweissen" class="artBtn">Schweißen</button>
+                <button id="btnBohrwerk" class="artBtn">Bohrwerk</button>
+                <button id="btnEiltSehr" class="artBtn eilt-art">
+                    <span class="art-title">Anhänger</span>
+                    <span class="art-sub">Eilt Sehr</span>
+                </button>
+            </div>
+        </section>
 
-    <div class="section">
-        <div id="kundenArea" class="disabled">
-            <button class="kundeBtn" data-kunde="Backhus">Backhus</button>
-            <button class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
-            <button class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
-            <button class="kundeBtn" data-kunde="Bücker">Bücker</button>
-            <button class="kundeBtn" data-kunde="FVG">FVG</button>
-            <button class="kundeBtn" data-kunde="Grimme">Grimme</button>
-            <button class="kundeBtn" data-kunde="Janzen">Janzen</button>
-            <button class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
-            <button class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
-            <button class="kundeBtn" data-kunde="PAUS">PAUS</button>
-            <button class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
-        </div>
+        <section class="step-block section">
+            <div class="grid-label">Kunde wählen</div>
+            <div id="kundenArea" class="disabled">
+                <button class="kundeBtn" data-kunde="Backhus">Backhus</button>
+                <button class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
+                <button class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
+                <button class="kundeBtn" data-kunde="Bücker">Bücker</button>
+                <button class="kundeBtn" data-kunde="FVG">FVG</button>
+                <button class="kundeBtn" data-kunde="Grimme">Grimme</button>
+                <button class="kundeBtn" data-kunde="Janzen">Janzen</button>
+                <button class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
+                <button class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
+                <button class="kundeBtn" data-kunde="PAUS">PAUS</button>
+                <button class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
+            </div>
+        </section>
+
     </div>
 
     <div id="actionButtons">

@@ -1,286 +1,314 @@
 /* =====================================================
-   GLOBAL RESET
+   KANTEN – Handy-Design (gleicher Viewport / Zebra TC)
 ===================================================== */
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* =====================================================
-   GRUNDLAYOUT
-===================================================== */
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     height: 100%;
-    background: #eef1f4;
-    font-family: Arial, sans-serif;
-
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    overflow: hidden;
+    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 45%, #c3cad4 100%);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #003a73;
 }
 
 /* =====================================================
-   HAUPTCONTAINER
+   HAUPTCONTAINER – volle Höhe, kein Scroll außen
 ===================================================== */
 #card {
-    width: 94%;
-    max-width: 900px;
-    margin-top: 20px;
+    width: 100%;
+    max-width: 360px;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0 auto;
+    padding: 34px 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.phone-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
 }
 
 /* =====================================================
-   LABELS
+   KOPFZEILE
 ===================================================== */
-.grid-label {
-    font-size: 16px;
-    font-weight: 900;
+.page-head {
     text-align: center;
-    margin: 12px 0 10px;
+    flex-shrink: 0;
+    margin-bottom: 2px;
+}
+
+.page-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #003a73;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.page-title {
+    margin: 6px 0 0;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+}
+
+/* =====================================================
+   SCHRITT-BLÖCKE
+===================================================== */
+.step-block {
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 16px;
+    padding: 10px 10px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 14px rgba(0, 58, 115, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.grid-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: center;
+    margin: 0 0 8px;
     color: #003a73;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.45px;
+    text-transform: uppercase;
+}
+
+.grid-label::before {
+    content: "";
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: #00963d;
+}
+
+.grid-label::after {
+    content: "";
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: #00963d;
 }
 
 .spacer-top {
-    margin-top: 22px;
+    margin-top: 0;
 }
 
 /* =====================================================
-   SEKTIONEN
-===================================================== */
-.section {
-    width: 100%;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid #d0d6de;
-}
-
-/* =====================================================
-   ART BUTTONS
+   ART BUTTONS – große Kacheln
 ===================================================== */
 .art-btn-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 8px;
 }
 
 .artBtn {
-    min-height: 56px;
-    border-radius: 10px;
-    border: 2px solid #c7cdd6;
-    font-size: 20px;
-    font-weight: 900;
-    background: #e6ebf1;
+    min-height: 52px;
+    border-radius: 14px;
+    border: none;
+    font-size: 17px;
+    font-weight: 800;
+    background: #fff;
     color: #003a73;
+    box-shadow: 0 3px 0 #c5cdd8, 0 2px 8px rgba(0, 0, 0, 0.06);
+    touch-action: manipulation;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.artBtn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #c5cdd8;
 }
 
 .artBtn.active {
-    background: #007bff;
-    color: white;
-    border-color: #0056b3;
+    background: linear-gradient(180deg, #00a844 0%, #00963d 100%);
+    color: #fff;
+    box-shadow: 0 3px 0 #006e2d, 0 4px 12px rgba(0, 150, 61, 0.35);
+}
+
+.artBtn.eilt-art {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+    background: linear-gradient(180deg, #fff5f5 0%, #ffe8e8 100%);
+    color: #b71c1c;
+    box-shadow: 0 3px 0 #e8b4b4;
+}
+
+.artBtn.eilt-art.active {
+    background: linear-gradient(180deg, #e53935 0%, #c62828 100%);
+    color: #fff;
+    box-shadow: 0 3px 0 #8e0000;
+}
+
+.art-title {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.art-sub {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.9;
 }
 
 /* =====================================================
    KUNDENAUSWAHL
 ===================================================== */
+.section {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+}
+
 #kundenArea {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 7px;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+#kundenArea.disabled {
+    opacity: 0.38;
+    filter: grayscale(0.4);
+    pointer-events: none;
 }
 
 .kundeBtn {
-    min-height: 56px;
-    border-radius: 10px;
-    border: 2px solid #c7cdd6;
-    background: #f9fafb;
+    min-height: 46px;
+    padding: 6px 4px;
+    border-radius: 12px;
+    border: none;
+    background: #fff;
     color: #003a73;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
+    line-height: 1.15;
+    box-shadow: 0 2px 0 #d0d6de, 0 1px 4px rgba(0, 0, 0, 0.05);
+    touch-action: manipulation;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.kundeBtn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #d0d6de;
 }
 
 .kundeBtn.active {
-    background: #007bff;
-    color: white;
-    border-color: #0056b3;
+    background: linear-gradient(180deg, #0078d7 0%, #005ea6 100%);
+    color: #fff;
+    box-shadow: 0 2px 0 #004578, 0 3px 10px rgba(0, 94, 166, 0.3);
 }
 
 /* =====================================================
-   KUNDENNAME BEREICH (JETZT SAUBER MITTIG)
-===================================================== */
-.kundenname-wrapper {
-    text-align: center;
-    margin-top: 14px;
-}
-
-.kundenname-wrapper label {
-    display: block;
-    font-size: 16px;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-.kundenname-wrapper input {
-    width: 80%;
-    max-width: 500px;
-    display: block;
-    margin: 0 auto;
-
-    padding: 14px;
-    font-size: 18px;
-
-    border-radius: 16px;
-    border: 2px solid #2e7d32;
-    background: #ffffff;
-}
-
-/* =====================================================
-   AKTIONSBUTTONS
+   AKTIONSBUTTONS – fest unten (Handy-Leiste)
 ===================================================== */
 #actionButtons {
-    margin-top: 18px;
+    flex-shrink: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 8px;
+    padding: 8px 0 calc(6px + env(safe-area-inset-bottom, 0px));
+    margin-top: 0;
 }
 
 #btnBack,
 #btnDrucken {
-    padding: 20px 0;
+    min-height: 50px;
+    padding: 0;
     border-radius: 14px;
     border: none;
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-}
-
-#btnBack     { background: #444; }
-#btnDrucken  { background: #00963d; }
-
-/* =====================================================
-   KEYBOARD POPUP (STABIL & ZENTRIERT)
-===================================================== */
-#keyboardPopup {
-    position: fixed;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 94vw;
-    max-width: 900px;
-    z-index: 9999;
-}
-
-.keyboard-box {
-    width: 100%;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    padding: 14px;
-    border-radius: 18px;
-    box-shadow: 0 6px 30px rgba(0,0,0,0.25);
-}
-
-.keyboard-title {
     font-size: 16px;
-    margin-bottom: 10px;
-    text-align: center;
+    font-weight: 800;
+    color: #fff;
+    touch-action: manipulation;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
 }
 
-#keyboardInput {
-    width: 80%;
-    display: block;
-    margin: 0 auto 14px auto;
-    padding: 14px;
-    font-size: 18px;
-    border-radius: 16px;
-
-    border: 2px solid #2e7d32;   /* Standard grün */
-    transition: border 0.15s ease, box-shadow 0.15s ease;
+#btnBack:active,
+#btnDrucken:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 
-/* ORANGE WENN AKTIV */
-#keyboardInput.active-input {
-    border: 2px solid #ff9800 !important;
-    box-shadow: 0 0 0 2px rgba(255,152,0,0.25);
-}
-
-/* ORANGE BEI FOCUS */
-#keyboardInput:focus,
-#keyboardInput:focus-visible {
-    border: 2px solid #ff9800;   /* echter orangener Rahmen */
-    box-shadow: 0 0 0 2px rgba(255,152,0,0.25);
-    outline: none;               /* Standard entfernen */
-}
-
-.kbm-row {
-    display: flex;
-    justify-content: center;
-    margin: 6px 0;
-}
-
-.kbm-key {
-    flex: 1;
-    margin: 5px;
-    padding: 13px 0;
-    font-size: 18px;
-    font-weight: 600;
-    border-radius: 14px;
-    border: none;
-    background: #ffffff;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.18);
-}
-
-
-.kbm-key.ok {
-    background: #00963d;
-    color: white;
-    font-weight: 700;
-}
-
-.kbm-key.del {
-    color: #b00020;
-}
-
-.bottom-row .space {
-    flex: 3;
+#btnBack  { background: linear-gradient(180deg, #555 0%, #333 100%); }
+#btnDrucken {
+    background: linear-gradient(180deg, #00a844 0%, #00963d 100%);
+    box-shadow: 0 3px 0 #006e2d;
 }
 
 /* =====================================================
-   DEVICE INFO
+   DEVICE INFO (JS setzt Position)
 ===================================================== */
 .device-info {
     position: fixed;
     top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 14px;
-    font-weight: bold;
+    left: 10px;
+    font-size: 11px;
+    font-weight: 700;
     color: #003a73;
-    opacity: 0.8;
+    opacity: 0.85;
+    z-index: 9999;
 }
 
 .build-info {
     position: fixed;
     bottom: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 13px;
-    color: #333;
+    right: 10px;
+    font-size: 10px;
+    color: #003a73;
     opacity: 0.7;
-}
-/* =====================================================
-   GLOBAL FOCUS (ORANGE MARKIERUNG)
-===================================================== */
-button:focus {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
+    z-index: 9999;
 }
 
-/* Optional: kein Standard-Blau auf Mobile */
+/* =====================================================
+   FOKUS (Zebra / Touch)
+===================================================== */
+button:focus,
 button:focus-visible {
     outline: 3px solid #ff9800;
     outline-offset: 2px;
 }
 
+/* =====================================================
+   PC – etwas breiter, gleiches Design
+===================================================== */
+@media (min-width: 601px) {
+    #card {
+        max-width: 420px;
+        padding-top: 40px;
+    }
+
+    .artBtn { min-height: 58px; font-size: 18px; }
+    .kundeBtn { min-height: 50px; font-size: 12px; }
+}
+
+/* Keyboard legacy (falls wieder eingebaut) */
+#keyboardPopup { display: none; }
