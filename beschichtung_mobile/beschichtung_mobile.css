@@ -230,7 +230,7 @@ body.pc-device {
     opacity: 0.75;
 }
 
-/* POPUP TASTATUR – Eingabe oben, Tasten unten (wie PAUS, kompakt) */
+/* POPUP TASTATUR (wie PAUS: Block mittig, Eingabe direkt über Tasten) */
 body.keyboard-open {
     overflow: hidden;
 }
@@ -254,39 +254,25 @@ body.keyboard-open {
 .keyboard-content {
     flex: 1;
     width: 100%;
-    height: 100dvh;
-    max-height: 100dvh;
+    height: 100%;
+    min-height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding:
-        calc(8px + env(safe-area-inset-top, 0px))
-        12px
-        calc(10px + env(safe-area-inset-bottom, 0px));
+        calc(12px + env(safe-area-inset-top, 0px))
+        calc(16px + env(safe-area-inset-right, 0px))
+        calc(12px + env(safe-area-inset-bottom, 0px))
+        calc(16px + env(safe-area-inset-left, 0px));
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
-.keyboard-top {
+.keyboard-block {
     width: 100%;
     max-width: 520px;
     flex-shrink: 0;
-}
-
-body.keyboard-open .keyboard-header {
-    margin-bottom: 6px;
-    min-height: 24px;
-}
-
-body.keyboard-open #keyboardTitle {
-    font-size: 17px;
-}
-
-body.keyboard-open .keyboard-input {
-    padding: 10px 12px;
-    margin-bottom: 0;
-    font-size: 20px;
 }
 
 .keyboard-header {
@@ -294,29 +280,30 @@ body.keyboard-open .keyboard-input {
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 32px;
-    margin-bottom: 8px;
+    min-height: 40px;
+    margin-bottom: 12px;
 }
 
 #keyboardTitle {
     margin: 0;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 900;
     color: var(--brand);
+    text-align: center;
 }
 
 .keyboard-close-x {
     position: fixed;
-    top: calc(8px + env(safe-area-inset-top, 0px));
-    right: calc(12px + env(safe-area-inset-right, 0px));
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    right: calc(18px + env(safe-area-inset-right, 0px));
     z-index: 10001;
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border: none;
     border-radius: 50%;
     background: #c62828;
     color: #fff;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
     line-height: 1;
     padding: 0;
@@ -331,32 +318,31 @@ body.keyboard-open .keyboard-input {
 
 .keyboard-input {
     width: 100%;
-    padding: 12px;
-    font-size: 24px;
+    padding: 16px 14px;
+    margin-bottom: 14px;
+    font-size: 28px;
     font-weight: bold;
-    border: var(--tile-border);
-    border-radius: 12px;
+    border: 2px solid var(--brand);
+    border-radius: 14px;
     text-align: center;
-    background: var(--tile-bg);
+    background: #fafbfc;
     color: var(--brand);
 }
 
 .keyboard-keys-wrap {
     width: 100%;
-    max-width: 520px;
-    flex-shrink: 0;
 }
 
 .keyboard-grid {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 5px;
+    border-spacing: 8px;
     table-layout: fixed;
 }
 
 .keyboard-grid td {
     width: 33.33%;
-    height: 50px;
+    height: 64px;
     padding: 0;
     vertical-align: middle;
 }
@@ -364,47 +350,47 @@ body.keyboard-open .keyboard-input {
 .kb-key {
     display: block;
     width: 100%;
-    height: 50px;
+    height: 64px;
     margin: 0;
     padding: 0;
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 700;
-    border-radius: 10px;
-    border: none;
-    background: #fff;
-    color: #111;
-    box-shadow: 0 2px 0 #c5c9d0;
+    border-radius: 12px;
+    border: var(--tile-border);
+    background: #eef2f7;
+    color: var(--brand);
+    box-shadow: 0 2px 0 rgba(0, 58, 115, 0.12);
     touch-action: manipulation;
 }
 
-/* Text: 3 Zeilen QWERTZ + Aktionszeile */
 .keyboard-alpha-wrap {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
 }
 
 .kb-alpha-rows {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
 }
 
 .kb-row {
     display: flex;
-    gap: 4px;
+    gap: 5px;
 }
 
 .kb-row-shift {
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 12px;
+    padding-right: 12px;
 }
 
 .kb-row .kb-key {
     flex: 1 1 0;
     min-width: 0;
-    height: 40px;
+    height: 42px;
     font-size: 16px;
+    border-radius: 10px;
 }
 
 .kb-key.key-space {
@@ -413,58 +399,79 @@ body.keyboard-open .keyboard-input {
 
 .kb-key:active {
     transform: translateY(1px);
-    box-shadow: 0 1px 0 #c5c9d0;
-    background: #e8edf3;
+    box-shadow: 0 1px 0 rgba(0, 58, 115, 0.12);
+    background: #e4eaf1;
 }
 
 .kb-key.key-delete,
 .kb-key.key-ok {
     font-weight: 800;
     box-shadow: none;
+    border: none;
 }
 
 .kb-key.key-delete {
-    background: #c62828;
-    color: #fff;
-    font-size: 26px;
-    line-height: 1;
-}
-
-.kb-key.key-delete:active {
-    background: #a31f1f;
-}
-
-.kb-key.key-ok {
-    background: var(--ok);
+    background: #b71c1c;
     color: #fff;
     font-size: 28px;
     line-height: 1;
 }
 
-.kb-key.key-ok:active {
+.kb-key.key-delete:active {
+    background: #8e0000;
+}
+
+.kb-key.key-ok {
     background: #007a31;
+    color: #fff;
+    font-size: 30px;
+    line-height: 1;
+}
+
+.kb-key.key-ok:active {
+    background: #006428;
+}
+
+body.zebra-device .keyboard-grid td {
+    height: 68px;
+}
+
+body.zebra-device .kb-key {
+    height: 68px;
+    font-size: 30px;
 }
 
 body.zebra-device .kb-row .kb-key {
     height: 44px;
-    font-size: 17px;
-}
-
-body.zebra-device .keyboard-grid td,
-body.zebra-device .keyboard-grid .kb-key {
-    height: 52px;
 }
 
 @media (orientation: landscape), (max-height: 500px) {
+    .keyboard-block {
+        max-width: min(88vw, 520px);
+    }
+
+    .keyboard-grid td {
+        height: 52px;
+    }
+
+    .kb-key {
+        height: 52px;
+        font-size: 24px;
+    }
+
     .kb-row .kb-key {
         height: 36px;
         font-size: 14px;
     }
 
-    .keyboard-grid td,
-    .kb-key {
-        height: 44px;
+    #keyboardTitle {
+        font-size: 18px;
+    }
+
+    .keyboard-input {
         font-size: 22px;
+        padding: 12px;
+        margin-bottom: 10px;
     }
 }
 
