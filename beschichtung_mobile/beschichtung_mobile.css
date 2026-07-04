@@ -596,8 +596,8 @@ html.early-pc #card {
 }
 
 html.early-pc .content-row {
-    flex-direction: row;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
 }
 
 html.early-pc .beschichter-grid {

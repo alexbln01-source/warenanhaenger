@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc26";
+const BUILD = "besc27";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -194,7 +194,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.title = "Beschichtung";
 
     if (isMobile || isZebra || isPC) document.body.classList.add("phone-layout");
-    if (isPC) document.documentElement.classList.add("early-pc");
+    if (isPC) {
+        document.body.classList.add("pc-device");
+        document.documentElement.classList.add("early-pc");
+    }
 
     if (isZebraTC21) document.body.classList.add("zebra-tc21");
     if (isZebraTC22) document.body.classList.add("zebra-tc22");
