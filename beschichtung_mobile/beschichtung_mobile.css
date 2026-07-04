@@ -574,6 +574,29 @@ body.pc-device .keyboard-popup {
     display: none !important;
 }
 
+html.early-pc body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+html.early-pc #card {
+    width: 100%;
+    max-width: 380px;
+}
+
+html.early-pc .content-row {
+    flex-direction: column;
+    gap: 10px;
+}
+
+html.early-pc .beschichter-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(7, minmax(44px, 1fr));
+    gap: 8px;
+}
+
 body.pc-device {
     padding: 20px;
 }

@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc24";
+const BUILD = "besc25";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -32,7 +32,8 @@ const isMobile = /android|iphone|ipad|ipod/i.test(ua);
 const isZebraTC21 = ua.includes("android") && (ua.includes("tc21") || (sw === 360 && sh === 640));
 const isZebraTC22 = ua.includes("android") && (ua.includes("tc22") || (sw === 360 && sh === 720 && dpr === 3));
 const isZebra = isZebraTC21 || isZebraTC22 || ua.includes("zebra");
-const isPC = !isZebra && !isMobile;
+const hasFinePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+const isPC = !isZebra && !isMobile && hasFinePointer;
 
 function clearInputHighlight() {
     beistell.classList.remove("mobile-focus");
@@ -59,6 +60,7 @@ function showKeyboardPanel(mode) {
 function setupPCInputs() {
     [beistell, kundenname].forEach((inp) => {
         inp.readOnly = false;
+        inp.removeAttribute("readonly");
         inp.setAttribute("autocomplete", "off");
         inp.setAttribute("autocorrect", "off");
         inp.setAttribute("autocapitalize", "off");
@@ -76,6 +78,8 @@ function bindKeyboardHandlers() {
 
     beistell.readOnly = true;
     kundenname.readOnly = true;
+    beistell.setAttribute("readonly", "");
+    kundenname.setAttribute("readonly", "");
 
     beistell.addEventListener("click", () => openKeyboard(beistell, "num"));
     kundenname.addEventListener("click", () => openKeyboard(kundenname, "alpha"));

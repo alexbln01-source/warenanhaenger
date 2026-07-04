@@ -7,9 +7,19 @@
 <link rel="stylesheet" href="../shared_page_bg.css">
 <script>
 (function () {
-    var BUILD = "besc24";
+    var BUILD = "besc25";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
+    }
+})();
+</script>
+<script>
+(function () {
+    var ua = navigator.userAgent.toLowerCase();
+    var mobile = /android|iphone|ipad|ipod/i.test(ua);
+    var zebra = ua.includes("zebra") || ua.includes("tc21") || ua.includes("tc22");
+    if (!mobile && !zebra && window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
+        document.documentElement.classList.add("early-pc");
     }
 })();
 </script>
@@ -19,9 +29,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc24">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc25b">
 </head>
-<body data-page="beschichtung" data-ver="besc24">
+<body data-page="beschichtung" data-ver="besc25">
 
 <div id="deviceInfo" class="device-info"></div>
 <p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
@@ -35,8 +45,8 @@
         <div class="input-block">
             <p class="section-head">Eingabe</p>
             <div class="panel-box">
-                <input id="beistellInput" class="input-field" type="text" placeholder="Beistellnummer" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
-                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname (optional)" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+                <input id="beistellInput" class="input-field" type="text" placeholder="Beistellnummer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname (optional)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
                 <button type="button" id="eiltBtn" class="eilt-toggle">Eilt sehr: Aus</button>
             </div>
         </div>
@@ -166,7 +176,14 @@
     </div>
 </div>
 
-<script src="beschichtung_mobile.js?v=20260704besc24" defer></script>
+<script>
+(function () {
+    var s = document.createElement("script");
+    s.src = "beschichtung_mobile.js?v=" + Date.now();
+    s.defer = true;
+    document.head.appendChild(s);
+})();
+</script>
 
 </body>
 </html>
