@@ -214,51 +214,13 @@ body.pc-device {
 
 .device-info {
     position: fixed;
-    top: 6px;
-    left: 10px;
-    font-size: 10px;
+    top: 4px;
+    left: 8px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--brand);
     z-index: 9;
-}
-
-/* Zebra: Querformat sperren – Hinweis zum Drehen */
-.rotate-hint {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 28px;
-    background: linear-gradient(165deg, #003a73, #0056b3);
-    color: #fff;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 700;
-}
-
-.rotate-hint[hidden] {
-    display: none !important;
-}
-
-.rotate-hint-icon {
-    font-size: 64px;
-    line-height: 1;
-    animation: rotateHintPulse 1.4s ease-in-out infinite;
-}
-
-@keyframes rotateHintPulse {
-    0%, 100% { transform: rotate(90deg) scale(1); }
-    50%      { transform: rotate(90deg) scale(1.08); }
-}
-
-body.zebra-landscape #card,
-body.zebra-landscape .kb-mini {
-    visibility: hidden;
-    pointer-events: none;
+    opacity: 0.75;
 }
 
 /* Tastatur */
@@ -362,92 +324,111 @@ body.phone-layout:not(.zebra-device) .kunde-btn {
     line-height: 1.2;
 }
 
-/* Zebra Hochformat: flexibles 2×7-Grid über volle Höhe */
+/* Zebra Hochformat: kompakt, nichts abgeschnitten */
+body.zebra-device.phone-layout {
+    align-items: stretch;
+}
+
 body.zebra-device #card {
+    width: 100%;
     max-width: 100%;
-    padding-left: 12px;
-    padding-right: 12px;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: calc(18px + env(safe-area-inset-top, 0px)) 10px calc(6px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
 }
 
 body.zebra-device .page-title {
-    font-size: 24px;
+    font-size: 20px;
+    line-height: 1.1;
+}
+
+body.zebra-device .page-title::after {
+    content: " · A5";
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
 }
 
 body.zebra-device .page-sub {
-    margin-bottom: 6px;
-    font-size: 12px;
+    display: none;
+}
+
+body.zebra-device .section-head {
+    margin: 0 0 3px;
+    font-size: 11px;
 }
 
 body.zebra-device .content-row {
-    gap: 6px;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+body.zebra-device .panel-box {
+    padding: 5px;
+    border-radius: 10px;
+}
+
+body.zebra-device .grid-panel {
+    padding: 5px;
 }
 
 body.zebra-device .input-field {
-    padding: 8px;
-    font-size: 14px;
-    margin-bottom: 4px;
+    padding: 6px 8px;
+    margin-bottom: 3px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+body.zebra-device .input-field:last-of-type {
+    margin-bottom: 3px;
 }
 
 body.zebra-device .eilt-toggle {
-    min-height: 38px;
-    font-size: 13px;
+    min-height: 32px;
+    font-size: 12px;
+    border-radius: 8px;
 }
 
 body.zebra-device .build-inline {
-    margin-bottom: 4px;
+    display: none;
 }
 
 body.zebra-device .beschichter-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(7, minmax(0, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, minmax(0, 1fr));
+    gap: 4px;
 }
 
 body.zebra-device .kunde-btn {
-    font-size: 11px;
+    font-size: 10px;
     min-height: 0;
-    padding: 4px 6px;
-    line-height: 1.15;
+    padding: 2px 3px;
+    line-height: 1.1;
+    border-radius: 8px;
+}
+
+body.zebra-device #actionButtons {
+    gap: 6px;
 }
 
 body.zebra-device #backBtn,
 body.zebra-device #druckenBtn {
-    min-height: 44px;
+    min-height: 40px;
     font-size: 14px;
-}
-
-/* Zebra TC22 */
-body.zebra-tc22 .page-title {
-    font-size: 26px;
-}
-
-body.zebra-tc22 .input-field {
-    padding: 10px;
-    font-size: 15px;
-}
-
-body.zebra-tc22 .eilt-toggle {
-    min-height: 42px;
-    font-size: 14px;
+    border-radius: 10px;
 }
 
 body.zebra-tc22 .kunde-btn {
-    font-size: 12px;
+    font-size: 10px;
 }
 
-body.zebra-tc22 #backBtn,
-body.zebra-tc22 #druckenBtn {
-    min-height: 48px;
-    font-size: 15px;
-}
-
-/* Zebra TC21 – etwas kompakter */
 body.zebra-tc21 .page-title {
-    font-size: 22px;
+    font-size: 18px;
 }
 
 body.zebra-tc21 .kunde-btn {
-    font-size: 10px;
+    font-size: 9px;
 }
 
 /* Querformat nur für Nicht-Zebra-Geräte */
