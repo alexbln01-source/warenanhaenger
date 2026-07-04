@@ -12,7 +12,9 @@
 html, body {
     margin: 0;
     padding: 0;
-    background: #dcdcdc;
+    background-color: #d8dee6;
+    background-image: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+    background-attachment: fixed;
     font-family: Arial, sans-serif;
     height: 100%;
     overflow: hidden;
@@ -32,9 +34,8 @@ html, body {
 .preview-area {
     width: 148mm;
     height: 105mm;
-    background: #fff;
-    border: 1px solid #bbb;
-    box-shadow: 0 0 12px rgba(0,0,0,0.35);
+    background: white;
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
     transform-origin: center;
 }
 
@@ -91,26 +92,37 @@ html, body {
     height: 105mm;
     padding: 8mm;
     box-sizing: border-box;
+    position: relative;
 }
 
-.etikett-center {
+.etikett-inner {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 25mm);
+    margin-bottom: 25mm;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
 }
 
-.etikett-center div {
+.etikett-inner > div {
     width: 100%;
     font-weight: bold;
 }
 
-.etikett-center.batch-kanten {
+.etikett-inner.batch-kanten {
     justify-content: flex-start;
     padding-top: 2mm;
     padding-bottom: 5mm;
+}
+
+.logo {
+    position: absolute;
+    left: 5mm;
+    bottom: 4mm;
+    width: 40mm;
+    filter: grayscale(100%);
 }
 
 .etikett.batch-etikett {
@@ -137,7 +149,7 @@ html, body {
 }
 
 .back-btn  { background:#444; }
-.print-btn { background:#15803d; }
+.print-btn { background:#00963d; }
 
 /* =======================
    PRINT (A6 HOCH – INHALT GEDREHT)
@@ -206,6 +218,18 @@ html, body {
         transform-origin: center;
     }
 
+    .print-page .etikett-inner {
+        width: 100%;
+        height: calc(100% - 25mm);
+        margin-bottom: 25mm;
+    }
+
+    .print-page .etikett-inner.batch-kanten {
+        justify-content: flex-start;
+        padding-top: 2mm;
+        padding-bottom: 5mm;
+    }
+
     .print-page .etikett.batch-etikett {
         top: 16mm;
         padding: 4mm 8mm 8mm 8mm;
@@ -220,14 +244,15 @@ html, body {
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
-            <div class="etikett-center" id="previewContent"></div>
+            <div class="etikett-inner" id="previewContent"></div>
+            <img src="langen.png" class="logo" alt="">
         </div>
     </div>
 </div>
 
 <div class="warnbox">
     ⚠️ Achtung!<br>
-    (<b>A6 Hochformat</b><br>
+    (<b>A6 Hochformat</b>)
 </div>
 
 <!-- ===== DRUCK ===== -->
@@ -295,7 +320,8 @@ if (isEiltSehr) {
     printArea.innerHTML = `
         <div class="print-page">
             <div class="etikett">
-                <div class="etikett-center">${html}</div>
+                <div class="etikett-inner">${html}</div>
+                <img src="langen.png" class="logo" alt="">
             </div>
         </div>`;
 }
@@ -461,7 +487,8 @@ function buildPrintPages(rows, paletteNumbers, batchKanten){
     printArea.innerHTML = paletteNumbers.map(num => `
         <div class="print-page">
             <div class="etikett${batchKanten ? " batch-etikett" : ""}">
-                <div class="etikett-center${batchKanten ? " batch-kanten" : ""}">${render(rows, num)}</div>
+                <div class="etikett-inner${batchKanten ? " batch-kanten" : ""}">${render(rows, num)}</div>
+                <img src="langen.png" class="logo" alt="">
             </div>
         </div>
     `).join("");
@@ -477,7 +504,7 @@ if (!isEiltSehr) {
     if (isKantenBatch) {
         const paletteNumbers = buildPaletteNumbers(kantenBatch);
 
-        previewContent.className = "etikett-center batch-kanten";
+        previewContent.className = "etikett-inner batch-kanten";
         previewContent.innerHTML = render(rows, paletteNumbers[0]);
         previewContent.parentElement.classList.add("batch-etikett");
 
@@ -485,7 +512,7 @@ if (!isEiltSehr) {
 
         printBtn.textContent = batchButtonLabel(kantenBatch);
     } else {
-        previewContent.className = "etikett-center";
+        previewContent.className = "etikett-inner";
         previewContent.innerHTML = render(rows);
         buildPrintPages(rows, [null], false);
     }
