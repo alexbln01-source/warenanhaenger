@@ -70,19 +70,22 @@
 
 <div id="keyboardPopup" class="keyboard-popup">
     <div class="keyboard-content">
-        <div class="keyboard-header">
-            <h3 id="keyboardTitle">Eingabe</h3>
-            <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
+        <div class="keyboard-top">
+            <div class="keyboard-header">
+                <h3 id="keyboardTitle">Eingabe</h3>
+            </div>
+
+            <input id="keyboardInput"
+                   class="keyboard-input"
+                   inputmode="none"
+                   autocomplete="off"
+                   autocorrect="off"
+                   autocapitalize="characters"
+                   spellcheck="false"
+                   readonly>
         </div>
 
-        <input id="keyboardInput"
-               class="keyboard-input"
-               inputmode="none"
-               autocomplete="off"
-               autocorrect="off"
-               autocapitalize="characters"
-               spellcheck="false"
-               readonly>
+        <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
 
         <div id="keyboardKeysNum" class="keyboard-keys-wrap">
             <table class="keyboard-grid" role="presentation">
@@ -119,8 +122,6 @@
                     <button type="button" class="kb-key" data-key="E">E</button>
                     <button type="button" class="kb-key" data-key="R">R</button>
                     <button type="button" class="kb-key" data-key="T">T</button>
-                </div>
-                <div class="kb-row">
                     <button type="button" class="kb-key" data-key="Z">Z</button>
                     <button type="button" class="kb-key" data-key="U">U</button>
                     <button type="button" class="kb-key" data-key="I">I</button>
@@ -133,21 +134,17 @@
                     <button type="button" class="kb-key" data-key="D">D</button>
                     <button type="button" class="kb-key" data-key="F">F</button>
                     <button type="button" class="kb-key" data-key="G">G</button>
-                </div>
-                <div class="kb-row kb-row-center">
                     <button type="button" class="kb-key" data-key="H">H</button>
                     <button type="button" class="kb-key" data-key="J">J</button>
                     <button type="button" class="kb-key" data-key="K">K</button>
                     <button type="button" class="kb-key" data-key="L">L</button>
                 </div>
-                <div class="kb-row">
+                <div class="kb-row kb-row-shift">
                     <button type="button" class="kb-key" data-key="Y">Y</button>
                     <button type="button" class="kb-key" data-key="X">X</button>
                     <button type="button" class="kb-key" data-key="C">C</button>
                     <button type="button" class="kb-key" data-key="V">V</button>
                     <button type="button" class="kb-key" data-key="B">B</button>
-                </div>
-                <div class="kb-row kb-row-center">
                     <button type="button" class="kb-key" data-key="N">N</button>
                     <button type="button" class="kb-key" data-key="M">M</button>
                 </div>
