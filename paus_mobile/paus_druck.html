@@ -324,7 +324,7 @@ if (!isMobileDevice) {
         didPrint = false;
 
         setTimeout(() => {
-            window.location.replace("../start.html?bereich=paus");
+            window.location.replace("paus_mobile.html?v=" + Date.now());
         }, 300);
     };
 
@@ -341,7 +341,7 @@ if (isMobileDevice) {
         didPrint = false;
 
         setTimeout(() => {
-            window.location.replace("../start.html?bereich=paus");
+            window.location.replace("paus_mobile.html?v=" + Date.now());
         }, 300);
     });
 
@@ -349,7 +349,7 @@ if (isMobileDevice) {
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
-    window.location.replace("../start.html?bereich=paus");
+    window.location.replace("paus_mobile.html?v=" + Date.now());
 };
 };
 </script>

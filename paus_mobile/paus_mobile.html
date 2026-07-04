@@ -1,101 +1,19 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" style="background-color:#d8dee6">
 <head>
 <meta charset="UTF-8">
-<style>html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
+<style>html,body{margin:0;min-height:100%;background-color:#d8dee6;background-image:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
 <link rel="stylesheet" href="../shared_page_bg.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#d8dee6">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>PAUS Lieferung</title>
-<link rel="stylesheet" href="../shared_page_bg.css">
+<link rel="stylesheet" href="paus_mobile.css">
 <script>
 (function () {
-    var v = Date.now();
-    document.write('<link rel="stylesheet" href="paus_mobile.css?v=' + v + '">');
+    var link = document.querySelector('link[href="paus_mobile.css"]');
+    if (link) link.href = "paus_mobile.css?v=" + Date.now();
 })();
 </script>
 </head>
 <body>
-
-<div id="deviceInfo" class="device-info"></div>
-
-<div class="page">
-
-    <h1 class="title">PAUS Lieferung</h1>
-
-    <input id="kommission" class="input-field" type="text" placeholder="Kommissionsnummer" autocomplete="off">
-    <input id="lieferdatum" class="input-field" type="text" placeholder="TT.MM" autocomplete="off">
-
-    <div class="color-row">
-        <button type="button" class="color-btn" data-color="red">Rot</button>
-        <button type="button" class="color-btn" data-color="blue">Blau</button>
-        <button type="button" class="color-btn" data-color="black">Schwarz</button>
-    </div>
-
-    <button type="button" id="btnVorgezogen" class="vorgezogen-btn">Auftrag vorgezogen</button>
-
-    <button type="button" id="openKeyboardBtn" class="keyboard-open-btn">Tastatur öffnen</button>
-
-    <div id="keyboardPopup" class="keyboard-popup">
-        <div class="keyboard-content">
-            <div class="keyboard-header">
-                <h3 id="keyboardTitle">Eingabe</h3>
-                <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
-            </div>
-
-            <input id="keyboardInput"
-                   class="keyboard-input"
-                   inputmode="none"
-                   autocomplete="off"
-                   autocorrect="off"
-                   autocapitalize="off"
-                   spellcheck="false">
-
-            <div id="keyboardKeys" class="keyboard-keys-wrap">
-                <table class="keyboard-grid" role="presentation">
-                    <tbody>
-                        <tr>
-                            <td><button type="button" class="kb-key" data-key="1">1</button></td>
-                            <td><button type="button" class="kb-key" data-key="2">2</button></td>
-                            <td><button type="button" class="kb-key" data-key="3">3</button></td>
-                        </tr>
-                        <tr>
-                            <td><button type="button" class="kb-key" data-key="4">4</button></td>
-                            <td><button type="button" class="kb-key" data-key="5">5</button></td>
-                            <td><button type="button" class="kb-key" data-key="6">6</button></td>
-                        </tr>
-                        <tr>
-                            <td><button type="button" class="kb-key" data-key="7">7</button></td>
-                            <td><button type="button" class="kb-key" data-key="8">8</button></td>
-                            <td><button type="button" class="kb-key" data-key="9">9</button></td>
-                        </tr>
-                        <tr>
-                            <td><button type="button" id="keyboardDelete" class="kb-key key-delete" aria-label="Letzte Ziffer löschen">⌫</button></td>
-                            <td><button type="button" class="kb-key" data-key="0">0</button></td>
-                            <td><button type="button" id="keyboardOK" class="kb-key key-ok" aria-label="OK">✓</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="bottom-row">
-        <button type="button" id="backBtn" class="back-btn">◀ Zurück</button>
-        <button type="button" id="druckenBtn" class="primary-btn">Drucken</button>
-    </div>
-
-    <div id="buildInfo" class="build-info"></div>
-
-</div>
-
-<script>
-(function () {
-    var v = Date.now();
-    document.write('<script src="paus_mobile.js?v=' + v + '"><\/script>');
-})();
-</script>
-
-</body>
-</html>

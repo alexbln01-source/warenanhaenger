@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" style="background-color:#d8dee6">
 <head>
 <meta charset="utf-8">
 <title>Start</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#d8dee6">
-<style>html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
-<link rel="stylesheet" href="shared_page_bg.css">
+<style>html,body{margin:0;min-height:100%;background-color:#d8dee6;background-image:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
 <script>
 (function () {
     var params = new URLSearchParams(location.search);
@@ -28,11 +27,10 @@
     var ziel = routes[bereich];
     if (!ziel) return;
 
-    var qs = bereich === "beschichtung" ? "besc21=" : "v=";
+    var qs = bereich === "beschichtung" ? "besc22=" : "v=";
     location.replace(ziel + "?" + qs + Date.now());
 })();
 </script>
 </head>
-<body>
-</body>
+<body></body>
 </html>

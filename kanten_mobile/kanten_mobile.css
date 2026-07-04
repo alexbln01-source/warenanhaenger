@@ -24,7 +24,8 @@ html, body {
     padding: 0;
     height: 100%;
     overflow: hidden;
-    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+    background-color: #d8dee6;
+    background-image: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
     background-attachment: fixed;
     font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
     color: var(--brand);
@@ -284,7 +285,8 @@ button:focus-visible {
 }
 
 body.pc-device {
-    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+    background-color: #d8dee6;
+    background-image: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
     background-attachment: fixed;
     padding: 24px;
 }

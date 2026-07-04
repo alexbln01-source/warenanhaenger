@@ -523,7 +523,7 @@ function returnToBearbeitung() {
     returnFallback = null;
     goHomeTimer = null;
 
-    window.location.replace("../start.html?bereich=kanten");
+    window.location.replace("bearbeitung.html?v=" + Date.now());
 }
 
 function scheduleReturnToBearbeitung() {
@@ -584,7 +584,7 @@ printBtn.onclick = () => {
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
-    window.location.replace("../start.html?bereich=kanten");
+    window.location.replace("bearbeitung.html?v=" + Date.now());
 };
 </script>
 

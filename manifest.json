@@ -3,8 +3,8 @@
   "short_name": "",
   "start_url": "index.html?launcher=true",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#003a73",
+  "background_color": "#d8dee6",
+  "theme_color": "#d8dee6",
   "icons": [
     {
       "src": "icon192.png",
@@ -18,5 +18,3 @@
     }
   ]
 }
-
-

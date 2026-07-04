@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" style="background-color:#d8dee6">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#d8dee6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>html,body{margin:0;padding:0;min-height:100vh;background-color:#d8dee6;background-image:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 40%,#c3cad4 100%);background-attachment:fixed;}</style>
 
 <title>Warenanhänger</title>
 
@@ -125,16 +128,16 @@ footer{
    NAVIGATION
 ===================== */
 function openBeschichtung(){
-    location.href="start.html?bereich=beschichtung";
+    location.href="beschichtung_mobile/beschichtung.html?besc22=" + Date.now();
 }
 function openKanten(){
-    location.href="start.html?bereich=kanten";
+    location.href="kanten_mobile/bearbeitung.html?v=" + Date.now();
 }
 function openLieferung(){
     location.href="index2.html";
 }
 function openPaus(){
-    location.href="start.html?bereich=paus";
+    location.href="paus_mobile/paus_mobile.html?v=" + Date.now();
 }
 
 /* =================================================

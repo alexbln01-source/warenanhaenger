@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" style="background-color:#d8dee6">
 <head>
 <meta charset="UTF-8">
-<style>html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
+<style>html,body{margin:0;min-height:100%;background-color:#d8dee6;background-image:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
 <link rel="stylesheet" href="../shared_page_bg.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#d8dee6">
@@ -10,10 +10,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Bearbeitung</title>
+<link rel="stylesheet" href="kanten_mobile.css">
 <script>
 (function () {
-    var v = Date.now();
-    document.write('<link rel="stylesheet" href="kanten_mobile.css?v=' + v + '">');
+    var link = document.querySelector('link[href="kanten_mobile.css"]');
+    if (link) link.href = "kanten_mobile.css?v=" + Date.now();
 })();
 </script>
 <style>
@@ -28,68 +29,3 @@
 </style>
 </head>
 <body data-page="bearbeitung" data-ver="bearb7">
-
-<div id="deviceInfo" class="device-info"></div>
-<p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
-
-<div id="card">
-
-    <h1 class="page-title" id="pageTitle">Bearbeitung</h1>
-    <p class="page-sub">Warenanhänger · A6</p>
-
-    <div class="work-area">
-        <div class="art-section">
-            <p class="section-head">Tätigkeit wählen</p>
-            <div class="art-grid">
-                <button type="button" id="btnKanten" class="artBtn">Kanten</button>
-                <button type="button" id="btnSchweissen" class="artBtn">Schweißen</button>
-                <button type="button" id="btnBohrwerk" class="artBtn">Bohrwerk</button>
-                <button type="button" id="btnEiltSehr" class="artBtn art-eilt">Eilt sehr</button>
-            </div>
-        </div>
-
-        <div class="kunden-wrap">
-            <p class="section-head">Kunde wählen</p>
-            <div id="kundenHint" class="kunden-hint">
-                <p class="hint-title">Noch kein Kunde</p>
-                <p class="hint-text">Bitte zuerst eine Tätigkeit auswählen</p>
-            </div>
-
-            <div id="kundenReady" class="kunden-ready hidden">
-                <div class="ready-icon">✓</div>
-                <p class="ready-title">Eilt sehr</p>
-                <p class="ready-text">Bereit zum Drucken</p>
-            </div>
-
-            <div id="kundenArea" class="kunden-grid hidden">
-                <button type="button" class="kundeBtn" data-kunde="Backhus">Backhus</button>
-                <button type="button" class="kundeBtn" data-kunde="Bergmann M-H">Bergmann Meppen Hüntel</button>
-                <button type="button" class="kundeBtn" data-kunde="Böckmann">Böckmann</button>
-                <button type="button" class="kundeBtn" data-kunde="Bücker">Bücker</button>
-                <button type="button" class="kundeBtn" data-kunde="FVG">FVG</button>
-                <button type="button" class="kundeBtn" data-kunde="Grimme">Grimme</button>
-                <button type="button" class="kundeBtn" data-kunde="Janzen">Janzen</button>
-                <button type="button" class="kundeBtn" data-kunde="Krone Spelle">Krone Spelle</button>
-                <button type="button" class="kundeBtn" data-kunde="L.Bergmann">L.Bergmann</button>
-                <button type="button" class="kundeBtn" data-kunde="PAUS">PAUS</button>
-                <button type="button" class="kundeBtn" data-kunde="Sonstige">Sonstige</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="actionButtons">
-        <button type="button" id="btnBack">◀ Zurück</button>
-        <button type="button" id="btnDrucken" disabled>Drucken</button>
-    </div>
-
-</div>
-
-<script>
-(function () {
-    var v = Date.now();
-    document.write('<script src="kanten_mobile.js?v=' + v + '"><\/script>');
-})();
-</script>
-
-</body>
-</html>
