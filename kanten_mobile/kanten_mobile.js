@@ -47,7 +47,7 @@ function setCornerInfo() {
     isMobile ? "Mobil" : "PC";
 
   if (deviceInfo) deviceInfo.textContent = "Gerät: " + deviceLabel;
-  if (buildInfo) buildInfo.textContent = buildStamp();
+  if (buildInfo) buildInfo.textContent = "Build " + buildStamp();
 }
 
 function updatePrintButton() {

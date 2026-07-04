@@ -12,7 +12,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 
 let activeInput = null;
 
-const BUILD = "besc8";
+const BUILD = "besc9";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -77,7 +77,7 @@ function setCornerInfo() {
             String(d.getDate()).padStart(2, "0") + "." +
             String(d.getHours()).padStart(2, "0") +
             String(d.getMinutes()).padStart(2, "0");
-        buildInfo.textContent = stamp;
+        buildInfo.textContent = "Build " + stamp;
     }
 }
 
