@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc18";
+const BUILD = "besc19";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -66,7 +66,7 @@ function openKeyboard(input, mode) {
     if (keyboardTitle) {
         keyboardTitle.textContent = mode === "num"
             ? "Beistellnummer"
-            : "Kundenname (optional)";
+            : "Kundenname";
     }
 
     keyboardInput.value = input.value;
