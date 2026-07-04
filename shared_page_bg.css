@@ -1,0 +1,15 @@
+/* Einheitlicher Seitenhintergrund (Beschichtung, Bearbeitung, PAUS, Start) */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    min-height: 100dvh;
+    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+    background-attachment: fixed;
+}
+
+.app-bg,
+.keyboard-popup {
+    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
+}
