@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="../shared_page_bg.css">
 <script>
 (function () {
-    var BUILD = "besc22";
+    var BUILD = "besc23";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -19,9 +19,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc22">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc23">
 </head>
-<body data-page="beschichtung" data-ver="besc22">
+<body data-page="beschichtung" data-ver="besc23">
 
 <div id="deviceInfo" class="device-info"></div>
 <p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
@@ -35,8 +35,8 @@
         <div class="input-block">
             <p class="section-head">Eingabe</p>
             <div class="panel-box">
-                <input id="beistellInput" class="input-field" type="text" placeholder="Beistellnummer" readonly>
-                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname (optional)" readonly>
+                <input id="beistellInput" class="input-field" type="text" placeholder="Beistellnummer" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname (optional)" readonly autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
                 <button type="button" id="eiltBtn" class="eilt-toggle">Eilt sehr: Aus</button>
             </div>
         </div>
@@ -84,8 +84,10 @@
                    inputmode="none"
                    autocomplete="off"
                    autocorrect="off"
-                   autocapitalize="characters"
+                   autocapitalize="off"
                    spellcheck="false"
+                   data-lpignore="true"
+                   data-form-type="other"
                    readonly>
 
             <div id="keyboardKeysNum" class="keyboard-keys-wrap">
@@ -164,7 +166,7 @@
     </div>
 </div>
 
-<script src="beschichtung_mobile.js?v=20260704besc22" defer></script>
+<script src="beschichtung_mobile.js?v=20260704besc23" defer></script>
 
 </body>
 </html>

@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc22";
+const BUILD = "besc23";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -56,6 +56,103 @@ function showKeyboardPanel(mode) {
     }
 }
 
+function applyPastedText(raw) {
+    if (!keyboardInput) return;
+    let text = String(raw || "");
+    if (keyboardMode === "num") {
+        text = text.replace(/\D/g, "");
+    }
+    keyboardInput.value = text;
+    syncKeyboardToField();
+}
+
+function setupKeyboardInputPaste() {
+    if (!keyboardInput || !isPC) return;
+
+    keyboardInput.addEventListener("mousedown", (e) => {
+        if (e.button === 2) {
+            keyboardInput.readOnly = false;
+        } else {
+            e.preventDefault();
+        }
+    });
+
+    keyboardInput.addEventListener("contextmenu", () => {
+        keyboardInput.readOnly = false;
+    });
+
+    keyboardInput.addEventListener("paste", (e) => {
+        e.preventDefault();
+        applyPastedText(e.clipboardData && e.clipboardData.getData("text/plain"));
+        keyboardInput.readOnly = true;
+        keyboardInput.blur();
+    });
+
+    keyboardInput.addEventListener("blur", () => {
+        keyboardInput.readOnly = true;
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (!document.body.classList.contains("keyboard-open")) return;
+        if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "v") return;
+        e.preventDefault();
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            navigator.clipboard.readText()
+                .then(applyPastedText)
+                .catch(() => {});
+        }
+    });
+}
+
+function bindKeyboardHandlers() {
+    beistell.readOnly = true;
+    kundenname.readOnly = true;
+
+    beistell.addEventListener("click", () => openKeyboard(beistell, "num"));
+    kundenname.addEventListener("click", () => openKeyboard(kundenname, "alpha"));
+
+    if (!keyboardPopup) return;
+
+    keyboardPopup.addEventListener("click", (e) => {
+        const btn = e.target.closest(".kb-key");
+        if (!btn) return;
+
+        if (btn.id === "keyboardDelete" || btn.id === "keyboardDeleteAlpha") {
+            handleDelete();
+            return;
+        }
+
+        if (btn.id === "keyboardOK") {
+            syncKeyboardToField();
+            openKeyboard(kundenname, "alpha");
+            return;
+        }
+
+        if (btn.id === "keyboardOKAlpha") {
+            syncKeyboardToField();
+            closeKeyboard();
+            return;
+        }
+
+        if (btn.dataset.key) {
+            handleKeyPress(btn.dataset.key);
+        }
+    });
+
+    if (keyboardClose) {
+        keyboardClose.onclick = () => {
+            syncKeyboardToField();
+            closeKeyboard();
+        };
+    }
+
+    [beistell, kundenname].forEach((inp) => {
+        inp.addEventListener("focus", () => inp.blur());
+    });
+
+    setupKeyboardInputPaste();
+}
+
 function openKeyboard(input, mode) {
     if (!keyboardPopup || !keyboardInput) return;
 
@@ -70,6 +167,7 @@ function openKeyboard(input, mode) {
     }
 
     keyboardInput.value = input.value;
+    keyboardInput.readOnly = true;
     keyboardPopup.classList.add("is-open");
     document.body.classList.add("keyboard-open");
 }
@@ -77,6 +175,7 @@ function openKeyboard(input, mode) {
 function closeKeyboard() {
     if (keyboardPopup) keyboardPopup.classList.remove("is-open");
     document.body.classList.remove("keyboard-open");
+    if (keyboardInput) keyboardInput.readOnly = true;
     activeInput = null;
     clearInputHighlight();
 }
@@ -135,54 +234,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isZebra) document.body.classList.add("zebra-device");
 
     setCornerInfo();
+    bindKeyboardHandlers();
 });
-
-if (isMobile || isZebra) {
-    beistell.readOnly = true;
-    kundenname.readOnly = true;
-
-    beistell.addEventListener("click", () => openKeyboard(beistell, "num"));
-    kundenname.addEventListener("click", () => openKeyboard(kundenname, "alpha"));
-
-    if (keyboardPopup) {
-        keyboardPopup.addEventListener("click", (e) => {
-            const btn = e.target.closest(".kb-key");
-            if (!btn) return;
-
-            if (btn.id === "keyboardDelete" || btn.id === "keyboardDeleteAlpha") {
-                handleDelete();
-                return;
-            }
-
-            if (btn.id === "keyboardOK") {
-                syncKeyboardToField();
-                openKeyboard(kundenname, "alpha");
-                return;
-            }
-
-            if (btn.id === "keyboardOKAlpha") {
-                syncKeyboardToField();
-                closeKeyboard();
-                return;
-            }
-
-            if (btn.dataset.key) {
-                handleKeyPress(btn.dataset.key);
-            }
-        });
-    }
-
-    if (keyboardClose) {
-        keyboardClose.onclick = () => {
-            syncKeyboardToField();
-            closeKeyboard();
-        };
-    }
-} else {
-    if (keyboardPopup) keyboardPopup.classList.remove("is-open");
-    beistell.readOnly = false;
-    kundenname.readOnly = false;
-}
 
 eiltBtn.onclick = () => {
     closeKeyboard();
