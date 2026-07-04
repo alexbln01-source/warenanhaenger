@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>
 (function () {
-    var BUILD = "besc12";
+    var BUILD = "besc13";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -16,9 +16,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc12">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc13">
 </head>
-<body data-page="beschichtung" data-ver="besc12">
+<body data-page="beschichtung" data-ver="besc13">
 
 <div id="deviceInfo" class="device-info"></div>
 <p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
@@ -111,57 +111,52 @@
             </table>
         </div>
 
-        <div id="keyboardKeysAlpha" class="keyboard-keys-wrap hidden">
+        <div id="keyboardKeysAlpha" class="keyboard-keys-wrap keyboard-alpha-wrap hidden">
+            <div class="kb-alpha-rows">
+                <div class="kb-row">
+                    <button type="button" class="kb-key" data-key="Q">Q</button>
+                    <button type="button" class="kb-key" data-key="W">W</button>
+                    <button type="button" class="kb-key" data-key="E">E</button>
+                    <button type="button" class="kb-key" data-key="R">R</button>
+                    <button type="button" class="kb-key" data-key="T">T</button>
+                </div>
+                <div class="kb-row">
+                    <button type="button" class="kb-key" data-key="Z">Z</button>
+                    <button type="button" class="kb-key" data-key="U">U</button>
+                    <button type="button" class="kb-key" data-key="I">I</button>
+                    <button type="button" class="kb-key" data-key="O">O</button>
+                    <button type="button" class="kb-key" data-key="P">P</button>
+                </div>
+                <div class="kb-row">
+                    <button type="button" class="kb-key" data-key="A">A</button>
+                    <button type="button" class="kb-key" data-key="S">S</button>
+                    <button type="button" class="kb-key" data-key="D">D</button>
+                    <button type="button" class="kb-key" data-key="F">F</button>
+                    <button type="button" class="kb-key" data-key="G">G</button>
+                </div>
+                <div class="kb-row kb-row-center">
+                    <button type="button" class="kb-key" data-key="H">H</button>
+                    <button type="button" class="kb-key" data-key="J">J</button>
+                    <button type="button" class="kb-key" data-key="K">K</button>
+                    <button type="button" class="kb-key" data-key="L">L</button>
+                </div>
+                <div class="kb-row">
+                    <button type="button" class="kb-key" data-key="Y">Y</button>
+                    <button type="button" class="kb-key" data-key="X">X</button>
+                    <button type="button" class="kb-key" data-key="C">C</button>
+                    <button type="button" class="kb-key" data-key="V">V</button>
+                    <button type="button" class="kb-key" data-key="B">B</button>
+                </div>
+                <div class="kb-row kb-row-center">
+                    <button type="button" class="kb-key" data-key="N">N</button>
+                    <button type="button" class="kb-key" data-key="M">M</button>
+                </div>
+            </div>
             <table class="keyboard-grid" role="presentation">
                 <tbody>
                     <tr>
-                        <td><button type="button" class="kb-key" data-key="Q">Q</button></td>
-                        <td><button type="button" class="kb-key" data-key="W">W</button></td>
-                        <td><button type="button" class="kb-key" data-key="E">E</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="R">R</button></td>
-                        <td><button type="button" class="kb-key" data-key="T">T</button></td>
-                        <td><button type="button" class="kb-key" data-key="Z">Z</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="U">U</button></td>
-                        <td><button type="button" class="kb-key" data-key="I">I</button></td>
-                        <td><button type="button" class="kb-key" data-key="O">O</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="P">P</button></td>
-                        <td><button type="button" class="kb-key" data-key="A">A</button></td>
-                        <td><button type="button" class="kb-key" data-key="S">S</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="D">D</button></td>
-                        <td><button type="button" class="kb-key" data-key="F">F</button></td>
-                        <td><button type="button" class="kb-key" data-key="G">G</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="H">H</button></td>
-                        <td><button type="button" class="kb-key" data-key="J">J</button></td>
-                        <td><button type="button" class="kb-key" data-key="K">K</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="L">L</button></td>
-                        <td><button type="button" class="kb-key" data-key="Y">Y</button></td>
-                        <td><button type="button" class="kb-key" data-key="X">X</button></td>
-                    </tr>
-                    <tr>
-                        <td><button type="button" class="kb-key" data-key="C">C</button></td>
-                        <td><button type="button" class="kb-key" data-key="V">V</button></td>
-                        <td><button type="button" class="kb-key" data-key="B">B</button></td>
-                    </tr>
-                    <tr>
-                        <td class="kb-empty"></td>
-                        <td><button type="button" class="kb-key" data-key="N">N</button></td>
-                        <td><button type="button" class="kb-key" data-key="M">M</button></td>
-                    </tr>
-                    <tr>
                         <td><button type="button" id="keyboardDeleteAlpha" class="kb-key key-delete" aria-label="Löschen">⌫</button></td>
-                        <td><button type="button" class="kb-key key-space" data-key=" ">Leerzeichen</button></td>
+                        <td><button type="button" class="kb-key key-space" data-key=" ">Leerz.</button></td>
                         <td><button type="button" id="keyboardOKAlpha" class="kb-key key-ok" aria-label="OK">✓</button></td>
                     </tr>
                 </tbody>
@@ -170,7 +165,7 @@
     </div>
 </div>
 
-<script src="beschichtung_mobile.js?v=20260704besc12" defer></script>
+<script src="beschichtung_mobile.js?v=20260704besc13" defer></script>
 
 </body>
 </html>
