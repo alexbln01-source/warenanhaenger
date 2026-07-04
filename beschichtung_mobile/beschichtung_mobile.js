@@ -13,13 +13,13 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 
 const ua  = navigator.userAgent.toLowerCase();
-const sw  = window.screen.width;
-const sh  = window.screen.height;
+const sw  = Math.min(window.screen.width, window.screen.height);
+const sh  = Math.max(window.screen.width, window.screen.height);
 const dpr = window.devicePixelRatio;
 
 const isMobile = /android|iphone|ipad|ipod/i.test(ua);
-const isZebraTC21 = ua.includes("android") && sw === 360 && sh === 640;
-const isZebraTC22 = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
+const isZebraTC21 = ua.includes("android") && (ua.includes("tc21") || (sw === 360 && sh === 640));
+const isZebraTC22 = ua.includes("android") && (ua.includes("tc22") || (sw === 360 && sh === 720 && dpr === 3));
 const isZebra = isZebraTC21 || isZebraTC22 || ua.includes("zebra");
 const isPC = !isZebra && !isMobile;
 
@@ -56,7 +56,7 @@ function setCornerInfo() {
             String(d.getDate()).padStart(2, "0") + "." +
             String(d.getHours()).padStart(2, "0") +
             String(d.getMinutes()).padStart(2, "0");
-        buildInfo.textContent = "Beschichtung · Build " + stamp;
+        buildInfo.textContent = "Beschichtung · Build " + stamp + " · besc3";
     }
 }
 
