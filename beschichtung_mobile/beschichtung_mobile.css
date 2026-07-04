@@ -309,9 +309,73 @@ body.pc-device #druckenBtn {
     font-size: 16px;
 }
 
-/* Zebra TC21 */
-body.zebra-tc21 .kunde-btn {
-    font-size: 9px;
+/* Mobil + Zebra: 2×7-Grid – 14 Beschichter, keine Leerzelle, größere Touch-Ziele */
+body.phone-layout .beschichter-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(7, minmax(44px, 1fr));
+    gap: 8px;
+}
+
+body.phone-layout .kunde-btn {
+    font-size: 12px;
+    min-height: 44px;
+    padding: 6px 8px;
+    line-height: 1.2;
+}
+
+/* Zebra TC22 */
+body.zebra-tc22 .page-title {
+    font-size: 26px;
+}
+
+body.zebra-tc22 .page-sub {
+    margin-bottom: 8px;
+}
+
+body.zebra-tc22 .content-row {
+    gap: 8px;
+}
+
+body.zebra-tc22 .panel-box {
+    padding: 6px;
+}
+
+body.zebra-tc22 .input-field {
+    padding: 10px;
+    font-size: 15px;
+}
+
+body.zebra-tc22 .eilt-toggle {
+    min-height: 44px;
+    font-size: 14px;
+}
+
+body.zebra-tc22 .kunde-btn {
+    font-size: 12px;
+    min-height: 46px;
+}
+
+body.zebra-tc22 #backBtn,
+body.zebra-tc22 #druckenBtn {
+    min-height: 48px;
+    font-size: 15px;
+}
+
+/* Zebra TC21 – etwas kompakter */
+body.zebra-tc21 .page-title {
+    font-size: 24px;
+}
+
+body.zebra-tc21 .page-sub {
+    margin-bottom: 6px;
+}
+
+body.zebra-tc21 .content-row {
+    gap: 6px;
+}
+
+body.zebra-tc21 .panel-box {
+    padding: 6px;
 }
 
 body.zebra-tc21 .input-field {
@@ -319,9 +383,27 @@ body.zebra-tc21 .input-field {
     font-size: 14px;
 }
 
+body.zebra-tc21 .eilt-toggle {
+    min-height: 40px;
+    font-size: 13px;
+}
+
+body.zebra-tc21 .kunde-btn {
+    font-size: 11px;
+    min-height: 42px;
+}
+
+body.zebra-tc21 #backBtn,
+body.zebra-tc21 #druckenBtn {
+    min-height: 44px;
+    font-size: 14px;
+}
+
+/* Querformat nur für Nicht-Zebra-Geräte */
 @media (orientation: landscape) and (max-height: 420px) {
-    .page-title { font-size: 22px; }
-    .page-sub { margin-bottom: 6px; }
-    .kunde-btn { font-size: 9px; }
-    #backBtn, #druckenBtn { min-height: 40px; font-size: 14px; }
+    body:not(.zebra-tc21):not(.zebra-tc22) .page-title { font-size: 22px; }
+    body:not(.zebra-tc21):not(.zebra-tc22) .page-sub { margin-bottom: 6px; }
+    body:not(.zebra-tc21):not(.zebra-tc22) .kunde-btn { font-size: 9px; }
+    body:not(.zebra-tc21):not(.zebra-tc22) #backBtn,
+    body:not(.zebra-tc21):not(.zebra-tc22) #druckenBtn { min-height: 40px; font-size: 14px; }
 }
