@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>
 (function () {
-    var BUILD = "besc9";
+    var BUILD = "besc10";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -16,12 +16,12 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc8">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc10">
 </head>
-<body data-page="beschichtung" data-ver="besc8">
+<body data-page="beschichtung" data-ver="besc10">
 
 <div id="deviceInfo" class="device-info"></div>
-<p id="buildInfo" class="build-info"></p>
+<p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
 
 <div id="card">
 
@@ -68,41 +68,98 @@
 
 </div>
 
-<div id="alphaKeyboard" class="kb-mini hidden">
-    <div class="kbm-row">
-        <button type="button" class="kbm-key">Q</button><button type="button" class="kbm-key">W</button><button type="button" class="kbm-key">E</button><button type="button" class="kbm-key">R</button><button type="button" class="kbm-key">T</button><button type="button" class="kbm-key">Z</button><button type="button" class="kbm-key">U</button><button type="button" class="kbm-key">I</button><button type="button" class="kbm-key">O</button><button type="button" class="kbm-key">P</button>
-    </div>
-    <div class="kbm-row">
-        <button type="button" class="kbm-key">A</button><button type="button" class="kbm-key">S</button><button type="button" class="kbm-key">D</button><button type="button" class="kbm-key">F</button><button type="button" class="kbm-key">G</button><button type="button" class="kbm-key">H</button><button type="button" class="kbm-key">J</button><button type="button" class="kbm-key">K</button><button type="button" class="kbm-key">L</button>
-    </div>
-    <div class="kbm-row">
-        <button type="button" class="kbm-key">Y</button><button type="button" class="kbm-key">X</button><button type="button" class="kbm-key">C</button><button type="button" class="kbm-key">V</button><button type="button" class="kbm-key">B</button><button type="button" class="kbm-key">N</button><button type="button" class="kbm-key">M</button>
-    </div>
-    <div class="kbm-row">
-        <button type="button" class="kbm-key kbm-del" id="alphaDel">⌫</button>
-        <button type="button" class="kbm-key" id="alphaSpace" style="flex:3;">␣</button>
-        <button type="button" class="kbm-key kbm-ok" id="alphaOk">OK</button>
+<div id="keyboardPopup" class="keyboard-popup">
+    <div class="keyboard-content">
+        <div class="keyboard-header">
+            <h3 id="keyboardTitle">Eingabe</h3>
+            <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
+        </div>
+
+        <input id="keyboardInput"
+               class="keyboard-input"
+               inputmode="none"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="characters"
+               spellcheck="false"
+               readonly>
+
+        <div id="keyboardKeysNum" class="keyboard-keys-wrap">
+            <table class="keyboard-grid" role="presentation">
+                <tbody>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="1">1</button></td>
+                        <td><button type="button" class="kb-key" data-key="2">2</button></td>
+                        <td><button type="button" class="kb-key" data-key="3">3</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="4">4</button></td>
+                        <td><button type="button" class="kb-key" data-key="5">5</button></td>
+                        <td><button type="button" class="kb-key" data-key="6">6</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="7">7</button></td>
+                        <td><button type="button" class="kb-key" data-key="8">8</button></td>
+                        <td><button type="button" class="kb-key" data-key="9">9</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" id="keyboardDelete" class="kb-key key-delete" aria-label="Löschen">⌫</button></td>
+                        <td><button type="button" class="kb-key" data-key="0">0</button></td>
+                        <td><button type="button" id="keyboardOK" class="kb-key key-ok" aria-label="OK">✓</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="keyboardKeysAlpha" class="keyboard-keys-wrap hidden">
+            <table class="keyboard-grid keyboard-grid-10" role="presentation">
+                <tbody>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="Q">Q</button></td>
+                        <td><button type="button" class="kb-key" data-key="W">W</button></td>
+                        <td><button type="button" class="kb-key" data-key="E">E</button></td>
+                        <td><button type="button" class="kb-key" data-key="R">R</button></td>
+                        <td><button type="button" class="kb-key" data-key="T">T</button></td>
+                        <td><button type="button" class="kb-key" data-key="Z">Z</button></td>
+                        <td><button type="button" class="kb-key" data-key="U">U</button></td>
+                        <td><button type="button" class="kb-key" data-key="I">I</button></td>
+                        <td><button type="button" class="kb-key" data-key="O">O</button></td>
+                        <td><button type="button" class="kb-key" data-key="P">P</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="A">A</button></td>
+                        <td><button type="button" class="kb-key" data-key="S">S</button></td>
+                        <td><button type="button" class="kb-key" data-key="D">D</button></td>
+                        <td><button type="button" class="kb-key" data-key="F">F</button></td>
+                        <td><button type="button" class="kb-key" data-key="G">G</button></td>
+                        <td><button type="button" class="kb-key" data-key="H">H</button></td>
+                        <td><button type="button" class="kb-key" data-key="J">J</button></td>
+                        <td><button type="button" class="kb-key" data-key="K">K</button></td>
+                        <td><button type="button" class="kb-key" data-key="L">L</button></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="Y">Y</button></td>
+                        <td><button type="button" class="kb-key" data-key="X">X</button></td>
+                        <td><button type="button" class="kb-key" data-key="C">C</button></td>
+                        <td><button type="button" class="kb-key" data-key="V">V</button></td>
+                        <td><button type="button" class="kb-key" data-key="B">B</button></td>
+                        <td><button type="button" class="kb-key" data-key="N">N</button></td>
+                        <td><button type="button" class="kb-key" data-key="M">M</button></td>
+                        <td colspan="3"></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" id="keyboardDeleteAlpha" class="kb-key key-delete" aria-label="Löschen">⌫</button></td>
+                        <td colspan="8"><button type="button" class="kb-key key-space" data-key=" ">Leerzeichen</button></td>
+                        <td><button type="button" id="keyboardOKAlpha" class="kb-key key-ok" aria-label="OK">✓</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<div id="numKeyboard" class="kb-mini hidden">
-    <div class="kbm-row">
-        <button type="button" class="kbm-key">1</button><button type="button" class="kbm-key">2</button><button type="button" class="kbm-key">3</button>
-    </div>
-    <div class="kbm-row">
-        <button type="button" class="kbm-key">4</button><button type="button" class="kbm-key">5</button><button type="button" class="kbm-key">6</button>
-    </div>
-    <div class="kbm-row">
-        <button type="button" class="kbm-key">7</button><button type="button" class="kbm-key">8</button><button type="button" class="kbm-key">9</button>
-    </div>
-    <div class="kbm-row">
-        <button type="button" class="kbm-key kbm-del" id="numDel">⌫</button>
-        <button type="button" class="kbm-key" id="num0">0</button>
-        <button type="button" class="kbm-key kbm-ok" id="numOk">OK</button>
-    </div>
-</div>
-
-<script src="beschichtung_mobile.js?v=20260704besc8" defer></script>
+<script src="beschichtung_mobile.js?v=20260704besc10" defer></script>
 
 </body>
 </html>
