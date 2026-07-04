@@ -50,9 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ziel = routes[bereich];
 
     if (ziel) {
-        // 🔥 Immer frische Version laden
-        const versionTag = Date.now();
-        location.replace(ziel + "?v=" + versionTag);
+        location.replace(ziel + "?besc6=" + Date.now());
     } else {
         console.warn("Unbekannter Bereich:", bereich);
     }

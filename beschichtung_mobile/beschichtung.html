@@ -2,13 +2,23 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<script>
+(function () {
+    var BUILD = "besc6";
+    if (location.search.indexOf(BUILD) < 0) {
+        location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
+    }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#003a73">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc5">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc6">
 </head>
-<body data-page="beschichtung" data-ver="besc5">
+<body data-page="beschichtung" data-ver="besc6">
 
 <div id="deviceInfo" class="device-info"></div>
 
@@ -93,7 +103,7 @@
     </div>
 </div>
 
-<script src="beschichtung_mobile.js?v=20260704besc5" defer></script>
+<script src="beschichtung_mobile.js?v=20260704besc6" defer></script>
 
 </body>
 </html>

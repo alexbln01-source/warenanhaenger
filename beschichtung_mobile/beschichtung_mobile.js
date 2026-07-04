@@ -12,6 +12,8 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 
 let activeInput = null;
 
+const BUILD = "besc6";
+
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
 const sh  = Math.max(window.screen.width, window.screen.height);
@@ -41,11 +43,12 @@ function setCornerInfo() {
     const buildInfo  = document.getElementById("buildInfo");
 
     if (deviceInfo) {
-        if (isZebraTC22) deviceInfo.textContent = "Gerät: Zebra TC22";
-        else if (isZebraTC21) deviceInfo.textContent = "Gerät: Zebra TC21";
-        else if (isZebra) deviceInfo.textContent = "Gerät: Zebra";
-        else if (isMobile) deviceInfo.textContent = "Gerät: Mobil";
-        else deviceInfo.textContent = "Gerät: PC";
+        let label = "Gerät: PC";
+        if (isZebraTC22) label = "Gerät: Zebra TC22";
+        else if (isZebraTC21) label = "Gerät: Zebra TC21";
+        else if (isZebra) label = "Gerät: Zebra";
+        else if (isMobile) label = "Gerät: Mobil";
+        deviceInfo.textContent = label + " · " + BUILD;
     }
 
     if (buildInfo) {
@@ -56,7 +59,7 @@ function setCornerInfo() {
             String(d.getDate()).padStart(2, "0") + "." +
             String(d.getHours()).padStart(2, "0") +
             String(d.getMinutes()).padStart(2, "0");
-        buildInfo.textContent = "Beschichtung · Build " + stamp + " · besc5";
+        buildInfo.textContent = "Beschichtung · Build " + stamp + " · " + BUILD;
     }
 }
 
