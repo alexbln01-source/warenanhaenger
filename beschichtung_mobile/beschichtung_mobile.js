@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.title = "Beschichtung";
 
     if (isMobile || isZebra || isPC) document.body.classList.add("phone-layout");
-    if (isPC) document.body.classList.add("pc-device");
+    if (isPC) document.documentElement.classList.add("early-pc");
 
     if (isZebraTC21) document.body.classList.add("zebra-tc21");
     if (isZebraTC22) document.body.classList.add("zebra-tc22");

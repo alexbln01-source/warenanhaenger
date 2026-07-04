@@ -574,6 +574,13 @@ body.pc-device .keyboard-popup {
     display: none !important;
 }
 
+html.early-pc {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 html.early-pc body {
     display: flex;
     justify-content: center;
