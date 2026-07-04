@@ -304,16 +304,16 @@ body.keyboard-open .keyboard-input {
 
 .keyboard-close-x {
     position: fixed;
-    top: calc(16px + env(safe-area-inset-top, 0px));
-    right: calc(22px + env(safe-area-inset-right, 0px));
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: calc(14px + env(safe-area-inset-right, 0px));
     z-index: 10001;
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border: none;
     border-radius: 50%;
     background: #c62828;
     color: #fff;
-    font-size: 30px;
+    font-size: 24px;
     font-weight: 700;
     line-height: 1;
     padding: 0;
@@ -345,51 +345,91 @@ body.keyboard-open .keyboard-input {
     width: 100%;
     max-width: 520px;
     margin: 0 auto;
-    flex-shrink: 0;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .keyboard-grid {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 10px;
+    border-spacing: 6px;
     table-layout: fixed;
 }
 
 .keyboard-grid td {
     width: 33.33%;
-    height: 72px;
+    height: clamp(44px, 11dvh, 56px);
     padding: 0;
     vertical-align: middle;
-}
-
-#keyboardKeysAlpha .keyboard-grid td {
-    height: 58px;
-}
-
-#keyboardKeysAlpha .kb-key {
-    height: 58px;
-    font-size: 28px;
-}
-
-.kb-empty {
-    background: transparent;
-    border: none;
 }
 
 .kb-key {
     display: block;
     width: 100%;
-    height: 72px;
+    height: clamp(44px, 11dvh, 56px);
     margin: 0;
     padding: 0;
-    font-size: 32px;
+    font-size: clamp(22px, 5dvh, 28px);
     font-weight: 700;
-    border-radius: 14px;
+    border-radius: 12px;
     border: none;
     background: #fff;
     color: #111;
     box-shadow: 0 3px 0 #c5c9d0;
     touch-action: manipulation;
+}
+
+/* Texttastatur: 5 Spalten, kompakt */
+.keyboard-alpha-wrap {
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.kb-alpha-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.kb-row {
+    display: flex;
+    gap: 5px;
+    justify-content: stretch;
+}
+
+.kb-row-center {
+    justify-content: center;
+}
+
+.kb-row .kb-key {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    height: clamp(38px, 8.5dvh, 46px);
+    font-size: clamp(18px, 4.2dvh, 22px);
+}
+
+.kb-row-center .kb-key {
+    flex: 0 1 calc((100% - 20px) / 5);
+    max-width: calc((100% - 20px) / 5);
+}
+
+.keyboard-alpha-wrap .keyboard-grid td {
+    height: clamp(44px, 11dvh, 52px);
+}
+
+.keyboard-alpha-wrap .keyboard-grid .kb-key {
+    height: clamp(44px, 11dvh, 52px);
+}
+
+.kb-key.key-space {
+    font-size: clamp(14px, 3.5dvh, 18px);
+    letter-spacing: 0;
 }
 
 .kb-key:active {
@@ -407,7 +447,7 @@ body.keyboard-open .keyboard-input {
 .kb-key.key-delete {
     background: #c62828;
     color: #fff;
-    font-size: 34px;
+    font-size: clamp(24px, 5.5dvh, 30px);
     line-height: 1;
 }
 
@@ -418,7 +458,7 @@ body.keyboard-open .keyboard-input {
 .kb-key.key-ok {
     background: var(--ok);
     color: #fff;
-    font-size: 36px;
+    font-size: clamp(26px, 6dvh, 32px);
     line-height: 1;
 }
 
@@ -426,18 +466,15 @@ body.keyboard-open .keyboard-input {
     background: #007a31;
 }
 
-.kb-key.key-space {
-    font-size: 22px;
-    letter-spacing: 0.02em;
-}
-
 @media (orientation: landscape), (max-height: 500px) {
-    .keyboard-content {
-        padding:
-            calc(8px + env(safe-area-inset-top, 0px))
-            calc(20px + env(safe-area-inset-right, 0px))
-            calc(8px + env(safe-area-inset-bottom, 0px))
-            calc(20px + env(safe-area-inset-left, 0px));
+    body.keyboard-open #keyboardTitle {
+        font-size: 16px;
+    }
+
+    body.keyboard-open .keyboard-input {
+        font-size: 18px;
+        padding: 8px;
+        margin-bottom: 6px;
     }
 
     .keyboard-header,
@@ -447,29 +484,36 @@ body.keyboard-open .keyboard-input {
     }
 
     .keyboard-grid td {
-        height: min(18vh, 68px);
-    }
-
-    #keyboardKeysAlpha .keyboard-grid td {
-        height: min(14vh, 54px);
+        height: clamp(38px, 16dvh, 48px);
     }
 
     .kb-key {
-        height: min(18vh, 68px);
-        font-size: clamp(24px, 4.5vh, 32px);
+        height: clamp(38px, 16dvh, 48px);
+        font-size: clamp(18px, 4dvh, 24px);
     }
 
-    #keyboardKeysAlpha .kb-key {
-        height: min(14vh, 54px);
-        font-size: clamp(20px, 3.8vh, 28px);
+    .kb-row .kb-key {
+        height: clamp(34px, 14dvh, 42px);
+        font-size: clamp(16px, 3.5dvh, 20px);
+    }
+
+    .keyboard-alpha-wrap .keyboard-grid td,
+    .keyboard-alpha-wrap .keyboard-grid .kb-key {
+        height: clamp(38px, 16dvh, 46px);
     }
 
     .kb-key.key-delete {
-        font-size: clamp(28px, 5vh, 34px);
+        font-size: clamp(20px, 4.5dvh, 26px);
     }
 
     .kb-key.key-ok {
-        font-size: clamp(30px, 5vh, 36px);
+        font-size: clamp(22px, 5dvh, 28px);
+    }
+
+    .keyboard-close-x {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
     }
 }
 
