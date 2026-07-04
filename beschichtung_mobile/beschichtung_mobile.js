@@ -36,6 +36,22 @@ function hideAllKb() {
     hideKb(alphaKb);
 }
 
+function isLandscapeView() {
+    return window.innerWidth > window.innerHeight;
+}
+
+function updateZebraOrientation() {
+    const landscape = isLandscapeView();
+    document.body.classList.toggle("zebra-landscape", isZebra && landscape);
+    const hint = document.getElementById("rotateHint");
+    if (hint) hint.hidden = !(isZebra && landscape);
+}
+
+function tryLockPortrait() {
+    if (!isZebra || !screen.orientation || !screen.orientation.lock) return;
+    screen.orientation.lock("portrait-primary").catch(() => {});
+}
+
 function setCornerInfo() {
     const deviceInfo = document.getElementById("deviceInfo");
     const buildInfo  = document.getElementById("buildInfo");
@@ -56,7 +72,7 @@ function setCornerInfo() {
             String(d.getDate()).padStart(2, "0") + "." +
             String(d.getHours()).padStart(2, "0") +
             String(d.getMinutes()).padStart(2, "0");
-        buildInfo.textContent = "Beschichtung · Build " + stamp + " · besc3";
+        buildInfo.textContent = "Beschichtung · Build " + stamp + " · besc4";
     }
 }
 
@@ -68,6 +84,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isZebraTC21) document.body.classList.add("zebra-tc21");
     if (isZebraTC22) document.body.classList.add("zebra-tc22");
+    if (isZebra) document.body.classList.add("zebra-device");
+
+    updateZebraOrientation();
+    tryLockPortrait();
+    window.addEventListener("orientationchange", updateZebraOrientation);
+    window.addEventListener("resize", updateZebraOrientation);
 
     setCornerInfo();
 });

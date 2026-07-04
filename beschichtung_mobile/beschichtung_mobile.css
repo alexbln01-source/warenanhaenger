@@ -222,6 +222,45 @@ body.pc-device {
     z-index: 9;
 }
 
+/* Zebra: Querformat sperren – Hinweis zum Drehen */
+.rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 28px;
+    background: linear-gradient(165deg, #003a73, #0056b3);
+    color: #fff;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.rotate-hint[hidden] {
+    display: none !important;
+}
+
+.rotate-hint-icon {
+    font-size: 64px;
+    line-height: 1;
+    animation: rotateHintPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rotateHintPulse {
+    0%, 100% { transform: rotate(90deg) scale(1); }
+    50%      { transform: rotate(90deg) scale(1.08); }
+}
+
+body.zebra-landscape #card,
+body.zebra-landscape .kb-mini {
+    visibility: hidden;
+    pointer-events: none;
+}
+
 /* Tastatur */
 .kb-mini {
     position: fixed;
@@ -309,35 +348,77 @@ body.pc-device #druckenBtn {
     font-size: 16px;
 }
 
-/* Mobil + Zebra: 2×7-Grid – 14 Beschichter, keine Leerzelle, größere Touch-Ziele */
-body.phone-layout .beschichter-grid {
+/* Mobil (iPhone etc.): 2×7-Grid */
+body.phone-layout:not(.zebra-device) .beschichter-grid {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(7, minmax(44px, 1fr));
     gap: 8px;
 }
 
-body.phone-layout .kunde-btn {
+body.phone-layout:not(.zebra-device) .kunde-btn {
     font-size: 12px;
     min-height: 44px;
     padding: 6px 8px;
     line-height: 1.2;
 }
 
+/* Zebra Hochformat: flexibles 2×7-Grid über volle Höhe */
+body.zebra-device #card {
+    max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+body.zebra-device .page-title {
+    font-size: 24px;
+}
+
+body.zebra-device .page-sub {
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+body.zebra-device .content-row {
+    gap: 6px;
+}
+
+body.zebra-device .input-field {
+    padding: 8px;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+body.zebra-device .eilt-toggle {
+    min-height: 38px;
+    font-size: 13px;
+}
+
+body.zebra-device .build-inline {
+    margin-bottom: 4px;
+}
+
+body.zebra-device .beschichter-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+body.zebra-device .kunde-btn {
+    font-size: 11px;
+    min-height: 0;
+    padding: 4px 6px;
+    line-height: 1.15;
+}
+
+body.zebra-device #backBtn,
+body.zebra-device #druckenBtn {
+    min-height: 44px;
+    font-size: 14px;
+}
+
 /* Zebra TC22 */
 body.zebra-tc22 .page-title {
     font-size: 26px;
-}
-
-body.zebra-tc22 .page-sub {
-    margin-bottom: 8px;
-}
-
-body.zebra-tc22 .content-row {
-    gap: 8px;
-}
-
-body.zebra-tc22 .panel-box {
-    padding: 6px;
 }
 
 body.zebra-tc22 .input-field {
@@ -346,13 +427,12 @@ body.zebra-tc22 .input-field {
 }
 
 body.zebra-tc22 .eilt-toggle {
-    min-height: 44px;
+    min-height: 42px;
     font-size: 14px;
 }
 
 body.zebra-tc22 .kunde-btn {
     font-size: 12px;
-    min-height: 46px;
 }
 
 body.zebra-tc22 #backBtn,
@@ -363,40 +443,11 @@ body.zebra-tc22 #druckenBtn {
 
 /* Zebra TC21 – etwas kompakter */
 body.zebra-tc21 .page-title {
-    font-size: 24px;
-}
-
-body.zebra-tc21 .page-sub {
-    margin-bottom: 6px;
-}
-
-body.zebra-tc21 .content-row {
-    gap: 6px;
-}
-
-body.zebra-tc21 .panel-box {
-    padding: 6px;
-}
-
-body.zebra-tc21 .input-field {
-    padding: 8px;
-    font-size: 14px;
-}
-
-body.zebra-tc21 .eilt-toggle {
-    min-height: 40px;
-    font-size: 13px;
+    font-size: 22px;
 }
 
 body.zebra-tc21 .kunde-btn {
-    font-size: 11px;
-    min-height: 42px;
-}
-
-body.zebra-tc21 #backBtn,
-body.zebra-tc21 #druckenBtn {
-    min-height: 44px;
-    font-size: 14px;
+    font-size: 10px;
 }
 
 /* Querformat nur für Nicht-Zebra-Geräte */
