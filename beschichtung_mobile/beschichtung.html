@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>
 (function () {
-    var BUILD = "besc17";
+    var BUILD = "besc18";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -16,9 +16,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc17">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc18">
 </head>
-<body data-page="beschichtung" data-ver="besc17">
+<body data-page="beschichtung" data-ver="besc18">
 
 <div id="deviceInfo" class="device-info"></div>
 <p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
@@ -70,11 +70,10 @@
 
 <div id="keyboardPopup" class="keyboard-popup">
     <div class="keyboard-content">
-        <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
-
         <div class="keyboard-block">
             <div class="keyboard-header">
                 <h3 id="keyboardTitle">Eingabe</h3>
+                <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
             </div>
 
             <input id="keyboardInput"
@@ -114,8 +113,8 @@
             </div>
 
             <div id="keyboardKeysAlpha" class="keyboard-keys-wrap keyboard-alpha-wrap hidden">
-            <div class="kb-alpha-rows">
-                <div class="kb-row">
+                <div class="kb-alpha-rows">
+                    <div class="kb-row kb-row-1">
                     <button type="button" class="kb-key" data-key="Q">Q</button>
                     <button type="button" class="kb-key" data-key="W">W</button>
                     <button type="button" class="kb-key" data-key="E">E</button>
@@ -126,8 +125,8 @@
                     <button type="button" class="kb-key" data-key="I">I</button>
                     <button type="button" class="kb-key" data-key="O">O</button>
                     <button type="button" class="kb-key" data-key="P">P</button>
-                </div>
-                <div class="kb-row">
+                    </div>
+                    <div class="kb-row kb-row-2">
                     <button type="button" class="kb-key" data-key="A">A</button>
                     <button type="button" class="kb-key" data-key="S">S</button>
                     <button type="button" class="kb-key" data-key="D">D</button>
@@ -137,8 +136,8 @@
                     <button type="button" class="kb-key" data-key="J">J</button>
                     <button type="button" class="kb-key" data-key="K">K</button>
                     <button type="button" class="kb-key" data-key="L">L</button>
-                </div>
-                <div class="kb-row kb-row-shift">
+                    </div>
+                    <div class="kb-row kb-row-3">
                     <button type="button" class="kb-key" data-key="Y">Y</button>
                     <button type="button" class="kb-key" data-key="X">X</button>
                     <button type="button" class="kb-key" data-key="C">C</button>
@@ -146,9 +145,9 @@
                     <button type="button" class="kb-key" data-key="B">B</button>
                     <button type="button" class="kb-key" data-key="N">N</button>
                     <button type="button" class="kb-key" data-key="M">M</button>
+                    </div>
                 </div>
-            </div>
-            <table class="keyboard-grid" role="presentation">
+                <table class="keyboard-grid keyboard-alpha-actions" role="presentation">
                 <tbody>
                     <tr>
                         <td><button type="button" id="keyboardDeleteAlpha" class="kb-key key-delete" aria-label="Löschen">⌫</button></td>
@@ -162,7 +161,7 @@
     </div>
 </div>
 
-<script src="beschichtung_mobile.js?v=20260704besc17" defer></script>
+<script src="beschichtung_mobile.js?v=20260704besc18" defer></script>
 
 </body>
 </html>
