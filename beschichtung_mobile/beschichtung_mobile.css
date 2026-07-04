@@ -267,6 +267,12 @@ body.keyboard-open {
         calc(12px + env(safe-area-inset-bottom, 0px))
         calc(16px + env(safe-area-inset-left, 0px));
     box-sizing: border-box;
+    overflow-y: auto;
+}
+
+body.keyboard-alpha-open .keyboard-content {
+    justify-content: flex-start;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
 }
 
 .keyboard-header {
@@ -347,9 +353,18 @@ body.keyboard-open {
     vertical-align: middle;
 }
 
-.keyboard-grid-5 td {
-    width: 20%;
-    height: 72px;
+#keyboardKeysAlpha .keyboard-grid td {
+    height: 58px;
+}
+
+#keyboardKeysAlpha .kb-key {
+    height: 58px;
+    font-size: 28px;
+}
+
+.kb-empty {
+    background: transparent;
+    border: none;
 }
 
 .kb-key {
@@ -366,10 +381,6 @@ body.keyboard-open {
     color: #111;
     box-shadow: 0 3px 0 #c5c9d0;
     touch-action: manipulation;
-}
-
-.keyboard-grid-5 .kb-key {
-    font-size: 28px;
 }
 
 .kb-key:active {
@@ -426,9 +437,12 @@ body.keyboard-open {
         max-width: min(88vw, 640px);
     }
 
-    .keyboard-grid td,
-    .keyboard-grid-5 td {
+    .keyboard-grid td {
         height: min(18vh, 68px);
+    }
+
+    #keyboardKeysAlpha .keyboard-grid td {
+        height: min(14vh, 54px);
     }
 
     .kb-key {
@@ -436,8 +450,9 @@ body.keyboard-open {
         font-size: clamp(24px, 4.5vh, 32px);
     }
 
-    .keyboard-grid-5 .kb-key {
-        font-size: clamp(22px, 4vh, 28px);
+    #keyboardKeysAlpha .kb-key {
+        height: min(14vh, 54px);
+        font-size: clamp(20px, 3.8vh, 28px);
     }
 
     .kb-key.key-delete {
@@ -487,11 +502,6 @@ body.pc-device .keyboard-input {
 body.pc-device .kb-key {
     height: 48px;
     font-size: 22px;
-}
-
-body.pc-device .keyboard-grid-5 .kb-key {
-    height: 48px;
-    font-size: 20px;
 }
 
 /* PC */

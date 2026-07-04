@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc11";
+const BUILD = "besc12";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -50,6 +50,7 @@ function showKeyboardPanel(mode) {
     keyboardMode = mode;
     if (keyboardKeysNum) keyboardKeysNum.classList.toggle("hidden", mode !== "num");
     if (keyboardKeysAlpha) keyboardKeysAlpha.classList.toggle("hidden", mode !== "alpha");
+    document.body.classList.toggle("keyboard-alpha-open", mode === "alpha");
 }
 
 function openKeyboard(input, mode) {
@@ -73,6 +74,7 @@ function openKeyboard(input, mode) {
 function closeKeyboard() {
     if (keyboardPopup) keyboardPopup.classList.remove("is-open");
     document.body.classList.remove("keyboard-open");
+    document.body.classList.remove("keyboard-alpha-open");
     activeInput = null;
     clearInputHighlight();
 }
