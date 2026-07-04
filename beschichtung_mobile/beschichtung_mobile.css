@@ -577,74 +577,91 @@ body.pc-device .keyboard-popup {
 html.early-pc body {
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 20px;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 16px 20px 28px;
+    overflow-y: auto;
 }
 
 html.early-pc #card {
-    width: 100%;
-    max-width: 380px;
+    width: min(880px, 96vw);
+    max-width: none;
 }
 
 html.early-pc .content-row {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: 20px;
 }
 
 html.early-pc .beschichter-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(7, minmax(44px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, minmax(48px, auto));
     gap: 8px;
 }
 
 body.pc-device {
-    padding: 20px;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 16px 20px 28px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 body.pc-device #card {
-    width: 100%;
-    max-width: 380px;
-    height: min(780px, 94vh);
-    height: min(780px, 94dvh);
+    width: min(880px, 96vw);
+    max-width: none;
+    height: auto;
+    max-height: none;
+    min-height: min(720px, calc(100vh - 48px));
+    overflow: visible;
+    padding: 20px 22px 16px;
 }
 
 body.pc-device .page-title {
-    font-size: 28px;
+    font-size: 32px;
 }
 
 body.pc-device .content-row {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 12px;
 }
 
-body.pc-device .input-block,
-body.pc-device .select-block {
-    width: 100%;
-    flex: none;
+body.pc-device .input-block {
+    width: 260px;
+    flex-shrink: 0;
 }
 
 body.pc-device .select-block {
     flex: 1;
+    min-width: 0;
     min-height: 0;
 }
 
 body.pc-device .beschichter-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(7, minmax(44px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, minmax(48px, 1fr));
     gap: 8px;
 }
 
 body.pc-device .kunde-btn {
-    font-size: 12px;
-    min-height: 44px;
+    font-size: 13px;
+    min-height: 48px;
     padding: 6px 8px;
-    line-height: 1.2;
+    line-height: 1.15;
+}
+
+body.pc-device #actionButtons {
+    flex-shrink: 0;
+    margin-top: 4px;
 }
 
 body.pc-device #backBtn,
 body.pc-device #druckenBtn {
-    min-height: 46px;
-    font-size: 15px;
+    min-height: 50px;
+    font-size: 16px;
 }
 
 /* Mobil (iPhone etc.): 2×7-Grid */
