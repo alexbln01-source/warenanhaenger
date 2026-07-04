@@ -124,8 +124,11 @@ body.pc-device {
     margin-bottom: 6px;
 }
 
-.input-field:focus,
-.mobile-focus {
+.input-field:focus {
+    outline: none;
+}
+
+.input-field.mobile-focus {
     outline: 3px solid var(--accent);
     outline-offset: 2px;
 }

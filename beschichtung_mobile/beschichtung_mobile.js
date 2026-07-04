@@ -12,7 +12,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 
 let activeInput = null;
 
-const BUILD = "besc6";
+const BUILD = "besc7";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -36,6 +36,24 @@ function hideKb(el) {
 function hideAllKb() {
     hideKb(numKb);
     hideKb(alphaKb);
+}
+
+function clearInputHighlight() {
+    beistell.classList.remove("mobile-focus");
+    kundenname.classList.remove("mobile-focus");
+    beistell.blur();
+    kundenname.blur();
+}
+
+function highlightInput(input) {
+    clearInputHighlight();
+    if (input) input.classList.add("mobile-focus");
+}
+
+function closeKeyboard() {
+    hideAllKb();
+    activeInput = null;
+    clearInputHighlight();
 }
 
 function setCornerInfo() {
@@ -82,16 +100,14 @@ if (isMobile || isZebra) {
 
     beistell.addEventListener("click", () => {
         activeInput = beistell;
-        beistell.classList.add("mobile-focus");
-        kundenname.classList.remove("mobile-focus");
+        highlightInput(beistell);
         showKb(numKb);
         hideKb(alphaKb);
     });
 
     kundenname.addEventListener("click", () => {
         activeInput = kundenname;
-        kundenname.classList.add("mobile-focus");
-        beistell.classList.remove("mobile-focus");
+        highlightInput(kundenname);
         hideKb(numKb);
         showKb(alphaKb);
     });
@@ -108,7 +124,7 @@ if (isMobile || isZebra) {
             if (key.id === "numOk") {
                 hideKb(numKb);
                 activeInput = kundenname;
-                kundenname.classList.add("mobile-focus");
+                highlightInput(kundenname);
                 showKb(alphaKb);
                 return;
             }
@@ -132,8 +148,7 @@ if (isMobile || isZebra) {
             }
 
             if (key.id === "alphaOk") {
-                hideKb(alphaKb);
-                activeInput = null;
+                closeKeyboard();
                 return;
             }
 
@@ -147,6 +162,7 @@ if (isMobile || isZebra) {
 }
 
 eiltBtn.onclick = () => {
+    closeKeyboard();
     isEilt = !isEilt;
     if (isEilt) {
         eiltBtn.textContent = "Eilt sehr: An";
@@ -159,17 +175,11 @@ eiltBtn.onclick = () => {
 
 kundenButtons.forEach(btn => {
     btn.onclick = () => {
-        beistell.blur();
-        kundenname.blur();
-        activeInput = null;
-        hideAllKb();
-        beistell.classList.remove("mobile-focus");
-        kundenname.classList.remove("mobile-focus");
+        closeKeyboard();
 
         kundenButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         selectedType = btn.dataset.type;
-        eiltBtn.focus();
     };
 });
 
