@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc19";
+const BUILD = "besc20";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);

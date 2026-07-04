@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>
 (function () {
-    var BUILD = "besc19";
+    var BUILD = "besc20";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -33,7 +33,7 @@
             <p class="section-head">Eingabe</p>
             <div class="panel-box">
                 <input id="beistellInput" class="input-field" type="text" placeholder="Beistellnummer" readonly>
-                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname" readonly>
+                <input id="kundeInput" class="input-field" type="text" placeholder="Kundenname (optional)" readonly>
                 <button type="button" id="eiltBtn" class="eilt-toggle">Eilt sehr: Aus</button>
             </div>
         </div>
