@@ -12,9 +12,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: #d8dee6;
-    background-image: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
-    background-attachment: fixed;
+    background: #dcdcdc;
     font-family: Arial, sans-serif;
     height: 100%;
     overflow: hidden;
@@ -34,8 +32,9 @@ html, body {
 .preview-area {
     width: 148mm;
     height: 105mm;
-    background: white;
-    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    background: #fff;
+    border: 1px solid #bbb;
+    box-shadow: 0 0 12px rgba(0,0,0,0.35);
     transform-origin: center;
 }
 
@@ -92,37 +91,26 @@ html, body {
     height: 105mm;
     padding: 8mm;
     box-sizing: border-box;
-    position: relative;
 }
 
-.etikett-inner {
+.etikett-center {
     width: 100%;
-    height: calc(100% - 25mm);
-    margin-bottom: 25mm;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
 }
 
-.etikett-inner > div {
+.etikett-center div {
     width: 100%;
     font-weight: bold;
 }
 
-.etikett-inner.batch-kanten {
+.etikett-center.batch-kanten {
     justify-content: flex-start;
     padding-top: 2mm;
     padding-bottom: 5mm;
-}
-
-.logo {
-    position: absolute;
-    left: 5mm;
-    bottom: 4mm;
-    width: 40mm;
-    filter: grayscale(100%);
 }
 
 .etikett.batch-etikett {
@@ -149,7 +137,7 @@ html, body {
 }
 
 .back-btn  { background:#444; }
-.print-btn { background:#00963d; }
+.print-btn { background:#15803d; }
 
 /* =======================
    PRINT (A6 HOCH – INHALT GEDREHT)
@@ -218,18 +206,6 @@ html, body {
         transform-origin: center;
     }
 
-    .print-page .etikett-inner {
-        width: 100%;
-        height: calc(100% - 25mm);
-        margin-bottom: 25mm;
-    }
-
-    .print-page .etikett-inner.batch-kanten {
-        justify-content: flex-start;
-        padding-top: 2mm;
-        padding-bottom: 5mm;
-    }
-
     .print-page .etikett.batch-etikett {
         top: 16mm;
         padding: 4mm 8mm 8mm 8mm;
@@ -244,15 +220,14 @@ html, body {
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
-            <div class="etikett-inner" id="previewContent"></div>
-            <img src="langen.png" class="logo" alt="">
+            <div class="etikett-center" id="previewContent"></div>
         </div>
     </div>
 </div>
 
 <div class="warnbox">
     ⚠️ Achtung!<br>
-    (<b>A6 Hochformat</b>)
+    (<b>A6 Hochformat</b><br>
 </div>
 
 <!-- ===== DRUCK ===== -->
@@ -320,8 +295,7 @@ if (isEiltSehr) {
     printArea.innerHTML = `
         <div class="print-page">
             <div class="etikett">
-                <div class="etikett-inner">${html}</div>
-                <img src="langen.png" class="logo" alt="">
+                <div class="etikett-center">${html}</div>
             </div>
         </div>`;
 }
@@ -376,7 +350,7 @@ const schweissenLayouts = {
 "Backhus":[
  { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
  { text:"Schweißen", size:"32pt", marginTop:"8mm", align:"center" },
- { text:"SW-Termin: _____________________", size:"22pt", marginTop:"16mm", align:"left" }
+ { text:"SW-Termin: ___________________", size:"22pt", marginTop:"16mm", align:"left" }
 ],
 "Bücker":[
  { text:"<kunde>", size:"36pt", marginTop:"0mm", align:"center" },
@@ -487,8 +461,7 @@ function buildPrintPages(rows, paletteNumbers, batchKanten){
     printArea.innerHTML = paletteNumbers.map(num => `
         <div class="print-page">
             <div class="etikett${batchKanten ? " batch-etikett" : ""}">
-                <div class="etikett-inner${batchKanten ? " batch-kanten" : ""}">${render(rows, num)}</div>
-                <img src="langen.png" class="logo" alt="">
+                <div class="etikett-center${batchKanten ? " batch-kanten" : ""}">${render(rows, num)}</div>
             </div>
         </div>
     `).join("");
@@ -504,7 +477,7 @@ if (!isEiltSehr) {
     if (isKantenBatch) {
         const paletteNumbers = buildPaletteNumbers(kantenBatch);
 
-        previewContent.className = "etikett-inner batch-kanten";
+        previewContent.className = "etikett-center batch-kanten";
         previewContent.innerHTML = render(rows, paletteNumbers[0]);
         previewContent.parentElement.classList.add("batch-etikett");
 
@@ -512,7 +485,7 @@ if (!isEiltSehr) {
 
         printBtn.textContent = batchButtonLabel(kantenBatch);
     } else {
-        previewContent.className = "etikett-inner";
+        previewContent.className = "etikett-center";
         previewContent.innerHTML = render(rows);
         buildPrintPages(rows, [null], false);
     }
