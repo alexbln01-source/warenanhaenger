@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc23";
+const BUILD = "besc24";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -56,55 +56,24 @@ function showKeyboardPanel(mode) {
     }
 }
 
-function applyPastedText(raw) {
-    if (!keyboardInput) return;
-    let text = String(raw || "");
-    if (keyboardMode === "num") {
-        text = text.replace(/\D/g, "");
-    }
-    keyboardInput.value = text;
-    syncKeyboardToField();
-}
-
-function setupKeyboardInputPaste() {
-    if (!keyboardInput || !isPC) return;
-
-    keyboardInput.addEventListener("mousedown", (e) => {
-        if (e.button === 2) {
-            keyboardInput.readOnly = false;
-        } else {
-            e.preventDefault();
-        }
+function setupPCInputs() {
+    [beistell, kundenname].forEach((inp) => {
+        inp.readOnly = false;
+        inp.setAttribute("autocomplete", "off");
+        inp.setAttribute("autocorrect", "off");
+        inp.setAttribute("autocapitalize", "off");
+        inp.setAttribute("spellcheck", "false");
+        inp.setAttribute("data-lpignore", "true");
     });
-
-    keyboardInput.addEventListener("contextmenu", () => {
-        keyboardInput.readOnly = false;
-    });
-
-    keyboardInput.addEventListener("paste", (e) => {
-        e.preventDefault();
-        applyPastedText(e.clipboardData && e.clipboardData.getData("text/plain"));
-        keyboardInput.readOnly = true;
-        keyboardInput.blur();
-    });
-
-    keyboardInput.addEventListener("blur", () => {
-        keyboardInput.readOnly = true;
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if (!document.body.classList.contains("keyboard-open")) return;
-        if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "v") return;
-        e.preventDefault();
-        if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText()
-                .then(applyPastedText)
-                .catch(() => {});
-        }
-    });
+    if (keyboardPopup) keyboardPopup.classList.remove("is-open");
 }
 
 function bindKeyboardHandlers() {
+    if (isPC) {
+        setupPCInputs();
+        return;
+    }
+
     beistell.readOnly = true;
     kundenname.readOnly = true;
 
@@ -145,12 +114,6 @@ function bindKeyboardHandlers() {
             closeKeyboard();
         };
     }
-
-    [beistell, kundenname].forEach((inp) => {
-        inp.addEventListener("focus", () => inp.blur());
-    });
-
-    setupKeyboardInputPaste();
 }
 
 function openKeyboard(input, mode) {
@@ -226,7 +189,7 @@ function setCornerInfo() {
 document.addEventListener("DOMContentLoaded", () => {
     document.title = "Beschichtung";
 
-    if (isMobile || isZebra) document.body.classList.add("phone-layout");
+    if (isMobile || isZebra || isPC) document.body.classList.add("phone-layout");
     if (isPC) document.body.classList.add("pc-device");
 
     if (isZebraTC21) document.body.classList.add("zebra-tc21");
