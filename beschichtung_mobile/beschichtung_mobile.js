@@ -12,7 +12,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 
 let activeInput = null;
 
-const BUILD = "besc7";
+const BUILD = "besc8";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -66,7 +66,7 @@ function setCornerInfo() {
         else if (isZebraTC21) label = "Gerät: Zebra TC21";
         else if (isZebra) label = "Gerät: Zebra";
         else if (isMobile) label = "Gerät: Mobil";
-        deviceInfo.textContent = label + " · " + BUILD;
+        deviceInfo.textContent = label;
     }
 
     if (buildInfo) {
@@ -77,7 +77,7 @@ function setCornerInfo() {
             String(d.getDate()).padStart(2, "0") + "." +
             String(d.getHours()).padStart(2, "0") +
             String(d.getMinutes()).padStart(2, "0");
-        buildInfo.textContent = "Beschichtung · Build " + stamp + " · " + BUILD;
+        buildInfo.textContent = stamp;
     }
 }
 

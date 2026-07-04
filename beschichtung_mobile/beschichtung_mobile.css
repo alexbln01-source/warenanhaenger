@@ -180,12 +180,16 @@ body.pc-device {
     box-shadow: 0 3px 10px rgba(0, 86, 179, 0.3);
 }
 
-.build-inline {
-    margin: 0 0 6px;
-    text-align: center;
+.build-info {
+    position: fixed;
+    top: 4px;
+    right: 8px;
+    margin: 0;
     font-size: 9px;
-    color: var(--muted);
-    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--brand);
+    opacity: 0.75;
+    z-index: 9;
 }
 
 #actionButtons {
@@ -391,10 +395,6 @@ body.zebra-device .eilt-toggle {
     min-height: 32px;
     font-size: 12px;
     border-radius: 8px;
-}
-
-body.zebra-device .build-inline {
-    display: none;
 }
 
 body.zebra-device .beschichter-grid {

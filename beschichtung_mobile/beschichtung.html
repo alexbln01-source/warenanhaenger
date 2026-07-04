@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>
 (function () {
-    var BUILD = "besc7";
+    var BUILD = "besc8";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -16,11 +16,12 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc6">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc8">
 </head>
-<body data-page="beschichtung" data-ver="besc6">
+<body data-page="beschichtung" data-ver="besc8">
 
 <div id="deviceInfo" class="device-info"></div>
+<p id="buildInfo" class="build-info"></p>
 
 <div id="card">
 
@@ -59,8 +60,6 @@
             </div>
         </div>
     </div>
-
-    <p id="buildInfo" class="build-inline"></p>
 
     <div id="actionButtons">
         <button type="button" id="backBtn">◀ Zurück</button>
@@ -103,7 +102,7 @@
     </div>
 </div>
 
-<script src="beschichtung_mobile.js?v=20260704besc6" defer></script>
+<script src="beschichtung_mobile.js?v=20260704besc8" defer></script>
 
 </body>
 </html>
