@@ -602,15 +602,15 @@ html.early-pc .content-row {
 
 html.early-pc .beschichter-grid {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, minmax(56px, auto));
+    grid-template-rows: repeat(5, minmax(64px, auto));
     gap: 10px;
 }
 
 html.early-pc .kunde-btn {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 800;
-    min-height: 56px;
-    padding: 10px 12px;
+    min-height: 64px;
+    padding: 12px 14px;
     line-height: 1.2;
 }
 
@@ -637,50 +637,50 @@ body.pc-device .page-title {
 }
 
 body.pc-device .content-row {
-    flex-direction: row;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
     flex: 1;
     min-height: 0;
     margin-bottom: 12px;
 }
 
-body.pc-device .input-block {
-    width: 260px;
-    flex-shrink: 0;
+body.pc-device .input-block,
+body.pc-device .select-block {
+    width: 100%;
+    flex: none;
 }
 
 body.pc-device .select-block {
-    flex: 1;
-    min-width: 0;
     min-height: 0;
 }
 
 body.pc-device .beschichter-grid {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, minmax(56px, 1fr));
+    grid-template-rows: repeat(5, minmax(64px, 1fr));
     gap: 10px;
 }
 
+body.pc-device.phone-layout .kunde-btn,
 body.pc-device .kunde-btn {
-    font-size: 18px;
+    font-size: 22px !important;
     font-weight: 800;
-    min-height: 56px;
-    padding: 10px 12px;
+    min-height: 64px !important;
+    padding: 12px 14px !important;
     line-height: 1.2;
 }
 
 body.pc-device .input-field {
-    font-size: 18px;
+    font-size: 20px;
     padding: 14px 12px;
 }
 
 body.pc-device .eilt-toggle {
-    min-height: 48px;
-    font-size: 16px;
+    min-height: 52px;
+    font-size: 18px;
 }
 
 body.pc-device .section-head {
-    font-size: 15px;
+    font-size: 16px;
 }
 
 body.pc-device #actionButtons {
@@ -694,14 +694,14 @@ body.pc-device #druckenBtn {
     font-size: 16px;
 }
 
-/* Mobil (iPhone etc.): 2×7-Grid */
-body.phone-layout:not(.zebra-device) .beschichter-grid {
+/* Mobil (iPhone etc.): 2×7-Grid – gilt nicht für PC */
+body.phone-layout:not(.zebra-device):not(.pc-device) .beschichter-grid {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(7, minmax(44px, 1fr));
     gap: 8px;
 }
 
-body.phone-layout:not(.zebra-device) .kunde-btn {
+body.phone-layout:not(.zebra-device):not(.pc-device) .kunde-btn {
     font-size: 12px;
     min-height: 44px;
     padding: 6px 8px;
