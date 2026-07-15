@@ -569,109 +569,97 @@ body.keyboard-open .build-info {
     display: none;
 }
 
-/* PC: Handy-Design, normale Tastatur (kein Popup) */
-body.pc-device .keyboard-popup {
+/* PC: untereinander, 3 Beschichter nebeneinander, normale Tastatur */
+body.pc-device .keyboard-popup,
+html.early-pc .keyboard-popup {
     display: none !important;
 }
 
-html.early-pc {
+html.early-pc,
+html.early-pc body,
+body.pc-device {
     height: auto;
     min-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }
 
-html.early-pc body {
+html.early-pc body,
+body.pc-device {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh;
-    padding: 16px 20px 28px;
-    overflow-y: auto;
+    padding: 20px 24px 40px;
 }
 
-html.early-pc #card {
-    width: min(880px, 96vw);
-    max-width: none;
-}
-
-html.early-pc .content-row {
-    flex-direction: column;
-    gap: 12px;
-}
-
-html.early-pc .beschichter-grid {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, minmax(64px, auto));
-    gap: 10px;
-}
-
-html.early-pc .kunde-btn {
-    font-size: 22px;
-    font-weight: 800;
-    min-height: 64px;
-    padding: 12px 14px;
-    line-height: 1.2;
-}
-
-body.pc-device {
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 16px 20px 28px;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
+html.early-pc #card,
 body.pc-device #card {
-    width: min(880px, 96vw);
+    width: min(980px, 96vw);
     max-width: none;
     height: auto;
     max-height: none;
-    min-height: min(720px, calc(100vh - 48px));
-    overflow: visible;
-    padding: 20px 22px 16px;
-}
-
-body.pc-device .page-title {
-    font-size: 32px;
-}
-
-body.pc-device .content-row {
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
     min-height: 0;
-    margin-bottom: 12px;
+    overflow: visible;
+    padding: 22px 24px 18px;
+    background: #f7f9fc;
+    border: var(--panel-border);
+    border-radius: 20px;
+    box-shadow: 0 12px 36px rgba(0, 58, 115, 0.12);
 }
 
+html.early-pc .content-row,
+body.pc-device .content-row {
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 14px;
+    min-height: 0;
+}
+
+html.early-pc .input-block,
+html.early-pc .select-block,
 body.pc-device .input-block,
 body.pc-device .select-block {
     width: 100%;
-    flex: none;
+    flex: 0 0 auto;
 }
 
-body.pc-device .select-block {
-    min-height: 0;
-}
-
+html.early-pc .beschichter-grid,
 body.pc-device .beschichter-grid {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, minmax(64px, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 58px;
     gap: 10px;
 }
 
-body.pc-device.phone-layout .kunde-btn,
+html.early-pc .kunde-btn,
 body.pc-device .kunde-btn {
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 800;
-    min-height: 64px !important;
-    padding: 12px 14px !important;
-    line-height: 1.2;
+    min-height: 58px !important;
+    height: 58px !important;
+    padding: 8px 10px !important;
+    line-height: 1.15;
+}
+
+body.pc-device .page-title {
+    font-size: 34px;
+}
+
+body.pc-device .page-sub {
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+body.pc-device .section-head {
+    font-size: 16px;
+    margin-bottom: 8px;
 }
 
 body.pc-device .input-field {
     font-size: 20px;
     padding: 14px 12px;
+    margin-bottom: 8px;
 }
 
 body.pc-device .eilt-toggle {
@@ -679,19 +667,19 @@ body.pc-device .eilt-toggle {
     font-size: 18px;
 }
 
-body.pc-device .section-head {
-    font-size: 16px;
-}
-
 body.pc-device #actionButtons {
     flex-shrink: 0;
-    margin-top: 4px;
+    margin-top: 8px;
+    position: sticky;
+    bottom: 0;
+    background: #f7f9fc;
+    padding-top: 8px;
 }
 
 body.pc-device #backBtn,
 body.pc-device #druckenBtn {
-    min-height: 50px;
-    font-size: 16px;
+    min-height: 54px;
+    font-size: 18px;
 }
 
 /* Mobil (iPhone etc.): 2×7-Grid – gilt nicht für PC */

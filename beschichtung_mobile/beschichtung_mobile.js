@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc29";
+const BUILD = "besc30";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -193,7 +193,7 @@ function setCornerInfo() {
 document.addEventListener("DOMContentLoaded", () => {
     document.title = "Beschichtung";
 
-    if (isMobile || isZebra || isPC) document.body.classList.add("phone-layout");
+    if (isMobile || isZebra) document.body.classList.add("phone-layout");
     if (isPC) {
         document.body.classList.add("pc-device");
         document.documentElement.classList.add("early-pc");
