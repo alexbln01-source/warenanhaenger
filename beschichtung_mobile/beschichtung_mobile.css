@@ -51,6 +51,62 @@ body.phone-layout:not(.pc-device):not(.zebra-device) #card {
     height: 100dvh;
 }
 
+/* Schmale Viewports immer mittig – auch ohne phone-layout-Klasse */
+@media (max-width: 699px) {
+    html.early-pc {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    html.early-pc body,
+    body:not(.pc-device) {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        height: 100% !important;
+        min-height: 100% !important;
+    }
+
+    html.early-pc #card,
+    body:not(.pc-device) #card {
+        width: 100% !important;
+        max-width: 420px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        height: 100% !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    html.early-pc .content-row,
+    body:not(.pc-device) .content-row {
+        flex-direction: column !important;
+    }
+
+    html.early-pc .beschichter-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: repeat(7, minmax(44px, 1fr)) !important;
+        grid-auto-rows: unset !important;
+    }
+
+    html.early-pc .kunde-btn {
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        min-height: 44px !important;
+        height: auto !important;
+        padding: 6px 8px !important;
+    }
+}
+
 .hidden { display: none !important; }
 
 #card {
@@ -778,12 +834,16 @@ body.zebra-device .eilt-toggle {
 }
 
 body.zebra-device .beschichter-grid {
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: stretch;
     gap: 4px;
 }
 
 body.zebra-device .kunde-btn {
+    flex: 1 1 calc((100% - 8px) / 3);
+    max-width: calc((100% - 8px) / 3);
     font-size: 10px;
     min-height: 0;
     padding: 2px 3px;

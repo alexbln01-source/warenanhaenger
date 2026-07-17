@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc31";
+const BUILD = "besc32";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -33,8 +33,10 @@ const isZebraTC21 = ua.includes("android") && (ua.includes("tc21") || (sw === 36
 const isZebraTC22 = ua.includes("android") && (ua.includes("tc22") || (sw === 360 && sh === 720 && dpr === 3));
 const isZebra = isZebraTC21 || isZebraTC22 || ua.includes("zebra");
 const hasFinePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
-const isDesktopWidth = Math.min(window.innerWidth || 0, window.width || 0) >= 700;
+const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+const isDesktopWidth = viewportWidth >= 700;
 const isPC = !isZebra && !isMobile && hasFinePointer && isDesktopWidth;
+const isPhoneView = isMobile || isZebra || !isPC;
 
 function clearInputHighlight() {
     beistell.classList.remove("mobile-focus");
@@ -194,10 +196,16 @@ function setCornerInfo() {
 document.addEventListener("DOMContentLoaded", () => {
     document.title = "Beschichtung";
 
-    if (isMobile || isZebra) document.body.classList.add("phone-layout");
+    if (isPhoneView) {
+        document.body.classList.add("phone-layout");
+        document.documentElement.classList.remove("early-pc");
+    }
     if (isPC) {
         document.body.classList.add("pc-device");
         document.documentElement.classList.add("early-pc");
+    } else {
+        document.body.classList.remove("pc-device");
+        document.documentElement.classList.remove("early-pc");
     }
 
     if (isZebraTC21) document.body.classList.add("zebra-tc21");

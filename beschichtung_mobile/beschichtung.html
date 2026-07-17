@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="../shared_page_bg.css">
 <script>
 (function () {
-    var BUILD = "besc31";
+    var BUILD = "besc32";
     if (location.search.indexOf(BUILD) < 0) {
         location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
     }
@@ -18,9 +18,11 @@
     var ua = navigator.userAgent.toLowerCase();
     var mobile = /android|iphone|ipad|ipod/i.test(ua);
     var zebra = ua.includes("zebra") || ua.includes("tc21") || ua.includes("tc22");
-    var wide = Math.min(window.innerWidth || 0, screen.width || 0) >= 700;
+    var wide = (window.innerWidth || document.documentElement.clientWidth || 0) >= 700;
     if (!mobile && !zebra && wide && window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
         document.documentElement.classList.add("early-pc");
+    } else {
+        document.documentElement.classList.remove("early-pc");
     }
 })();
 </script>
@@ -30,9 +32,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Beschichtung</title>
-<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc31">
+<link rel="stylesheet" href="beschichtung_mobile.css?v=20260704besc32">
 </head>
-<body data-page="beschichtung" data-ver="besc31">
+<body data-page="beschichtung" data-ver="besc32">
 
 <div id="deviceInfo" class="device-info"></div>
 <p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
