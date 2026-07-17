@@ -36,6 +36,21 @@ body.pc-device {
     align-items: center;
 }
 
+/* Handy: Karte mittig, volle Höhe */
+body.phone-layout:not(.pc-device) {
+    width: 100%;
+    align-items: stretch;
+}
+
+body.phone-layout:not(.pc-device):not(.zebra-device) #card {
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 100%;
+    height: 100dvh;
+}
+
 .hidden { display: none !important; }
 
 #card {

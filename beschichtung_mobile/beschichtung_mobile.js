@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc30";
+const BUILD = "besc31";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -33,7 +33,8 @@ const isZebraTC21 = ua.includes("android") && (ua.includes("tc21") || (sw === 36
 const isZebraTC22 = ua.includes("android") && (ua.includes("tc22") || (sw === 360 && sh === 720 && dpr === 3));
 const isZebra = isZebraTC21 || isZebraTC22 || ua.includes("zebra");
 const hasFinePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
-const isPC = !isZebra && !isMobile && hasFinePointer;
+const isDesktopWidth = Math.min(window.innerWidth || 0, window.width || 0) >= 700;
+const isPC = !isZebra && !isMobile && hasFinePointer && isDesktopWidth;
 
 function clearInputHighlight() {
     beistell.classList.remove("mobile-focus");
