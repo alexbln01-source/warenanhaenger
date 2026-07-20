@@ -119,26 +119,53 @@ def nexus_control(action):
 
 def iob_val(state_id, base=None, timeout=1.5):
     base = (base or iobroker_base()).rstrip("/")
-    try:
-        req = Request(f"{base}/getPlainValue/{state_id}", headers={"User-Agent": "xmrig-dash/solix"})
-        with urlopen(req, timeout=timeout) as r:
-            raw = r.read().decode().strip().strip('"')
-            if raw == "" or raw.lower() == "null":
-                return None
-            if raw.lower() in ("true", "false"):
+    # Try getPlainValue (simple-api :8087), then /get/, then web /state/
+    paths = [
+        f"{base}/getPlainValue/{state_id}",
+        f"{base}/get/{state_id}",
+        f"{base}/state/{state_id}",
+    ]
+    last_err = None
+    for url in paths:
+        try:
+            req = Request(url, headers={"User-Agent": "xmrig-dash/solix"})
+            with urlopen(req, timeout=timeout) as r:
+                raw = r.read().decode().strip()
+            if not raw or raw.lower() == "null":
+                continue
+            # /get/ returns JSON object
+            if raw.startswith("{"):
+                try:
+                    obj = json.loads(raw)
+                    if "val" in obj:
+                        raw = obj.get("val")
+                        if raw is None:
+                            continue
+                        if isinstance(raw, bool):
+                            return raw
+                        if isinstance(raw, (int, float)):
+                            return raw
+                        raw = str(raw).strip().strip('"')
+                    elif obj.get("error"):
+                        continue
+                except json.JSONDecodeError:
+                    pass
+            else:
+                raw = str(raw).strip().strip('"')
+            if isinstance(raw, str) and raw.lower() in ("true", "false"):
                 return raw.lower() == "true"
             try:
-                if "." in raw:
+                if isinstance(raw, str) and "." in raw:
                     return float(raw)
-                return int(raw)
-            except ValueError:
+                return int(raw) if isinstance(raw, str) else raw
+            except (ValueError, TypeError):
                 return raw
-    except Exception:
-        pass
-    req = Request(f"{base}/get/{state_id}", headers={"User-Agent": "xmrig-dash/solix"})
-    with urlopen(req, timeout=timeout) as r:
-        obj = json.loads(r.read().decode())
-    return obj.get("val")
+        except Exception as ex:
+            last_err = ex
+            continue
+    if last_err:
+        raise last_err
+    return None
 
 
 def iob_probe(base):
@@ -281,7 +308,7 @@ def solix_info():
 
     candidates = []
     primary = iobroker_base()
-    for u in (primary, "http://192.168.178.47:8082", "http://192.168.178.47:8081"):
+    for u in (primary, "http://192.168.178.47:8087", "http://192.168.178.47:8082", "http://192.168.178.47:8081"):
         u = u.rstrip("/")
         if u not in candidates:
             candidates.append(u)
