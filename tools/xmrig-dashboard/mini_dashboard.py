@@ -24,7 +24,7 @@ def iobroker_base():
         u = IOB_FILE.read_text().strip()
         if u:
             return u.rstrip("/")
-    return os.environ.get("IOBROKER", "http://192.168.178.101:8082").rstrip("/")
+    return os.environ.get("IOBROKER", "http://192.168.178.47:8082").rstrip("/")
 
 
 def temp():
@@ -158,25 +158,130 @@ def iob_probe(base):
             return False
 
 
-def solix_info():
-    from concurrent.futures import ThreadPoolExecutor, as_completed
+def iob_objects(base, pattern):
+    """Return object id list matching pattern via ioBroker web API."""
+    try:
+        req = Request(
+            f"{base}/objects?pattern={pattern}&type=state",
+            headers={"User-Agent": "xmrig-dash/solix"},
+        )
+        with urlopen(req, timeout=4) as r:
+            obj = json.loads(r.read().decode())
+        if isinstance(obj, dict):
+            return list(obj.keys())
+    except Exception:
+        pass
+    # fallback: enumObjects-style
+    try:
+        req = Request(
+            f"{base}/objects?pattern={pattern}",
+            headers={"User-Agent": "xmrig-dash/solix"},
+        )
+        with urlopen(req, timeout=4) as r:
+            obj = json.loads(r.read().decode())
+        if isinstance(obj, dict):
+            return list(obj.keys())
+    except Exception:
+        pass
+    return []
 
-    ids = {
-        "soc": f"{SITE}.solarbank_info.total_battery_power",
-        "pv": f"{SITE}.solarbank_info.total_photovoltaic_power",
-        "import_w": f"{SITE}.grid_info.grid_to_home_power",
-        "export_w": f"{SITE}.grid_info.photovoltaic_to_grid_power",
-        "load_w": f"{SITE}.home_load_power",
-        "charge_w": f"{SITE}.solarbank_info.total_charging_power",
-        "output_w": f"{SITE}.solarbank_info.total_output_power",
+
+def solix_pick_site(ids):
+    """Prefer configured SITE, else first ankersolix2.*.solarbank_info* site."""
+    prefix = SITE + "."
+    if any(i.startswith(prefix) for i in ids):
+        return SITE
+    sites = set()
+    for i in ids:
+        if i.startswith("ankersolix2.") and ".solarbank_info." in i:
+            sites.add(i.split(".solarbank_info.", 1)[0])
+        elif i.startswith("ankersolix2.") and ".homepage." in i:
+            sites.add(i.split(".homepage.", 1)[0])
+    return sorted(sites)[0] if sites else SITE
+
+
+def solix_map_ids(all_ids, site):
+    """Map friendly keys to best matching state ids for this site."""
+    # candidates per key: prefer exact, then contains
+    want = {
+        "soc": [
+            f"{site}.solarbank_info.total_battery_power",
+            f"{site}.solarbank_info.battery_soc",
+            f"{site}.solarbank_info.soc",
+            f"{site}.homepage.battery_soc",
+            f"{site}.homepage.soc",
+        ],
+        "pv": [
+            f"{site}.solarbank_info.total_photovoltaic_power",
+            f"{site}.solarbank_info.photovoltaic_power",
+            f"{site}.homepage.photovoltaic_power",
+            f"{site}.homepage.solar_power",
+        ],
+        "import_w": [
+            f"{site}.grid_info.grid_to_home_power",
+            f"{site}.homepage.grid_to_home_power",
+            f"{site}.homepage.grid_import",
+        ],
+        "export_w": [
+            f"{site}.grid_info.photovoltaic_to_grid_power",
+            f"{site}.homepage.photovoltaic_to_grid_power",
+            f"{site}.homepage.grid_export",
+        ],
+        "load_w": [
+            f"{site}.home_load_power",
+            f"{site}.homepage.home_load_power",
+            f"{site}.homepage.home_power",
+        ],
+        "charge_w": [
+            f"{site}.solarbank_info.total_charging_power",
+            f"{site}.solarbank_info.charging_power",
+            f"{site}.homepage.charging_power",
+        ],
+        "output_w": [
+            f"{site}.solarbank_info.total_output_power",
+            f"{site}.solarbank_info.output_power",
+            f"{site}.homepage.output_power",
+        ],
+    }
+    idset = set(all_ids)
+    # also fuzzy: any id under site containing keywords
+    fuzzy = {
+        "soc": ("battery_power", "battery_soc", "soc"),
+        "pv": ("photovoltaic_power", "solar_power", "pv_power"),
+        "import_w": ("grid_to_home", "grid_import", "to_home_power"),
+        "export_w": ("to_grid_power", "grid_export", "photovoltaic_to_grid"),
+        "load_w": ("home_load", "home_power"),
+        "charge_w": ("charging_power",),
+        "output_w": ("output_power",),
+    }
+    mapped = {
         "miners_enabled": "0_userdata.0.solar_miners.enabled",
         "miners_running": "0_userdata.0.solar_miners.running",
         "miners_last": "0_userdata.0.solar_miners.last_action",
         "miners_reason": "0_userdata.0.solar_miners.reason",
     }
+    for key, cands in want.items():
+        chosen = next((c for c in cands if c in idset), None)
+        if not chosen:
+            keys = fuzzy.get(key, ())
+            for i in sorted(all_ids):
+                if not i.startswith(site + "."):
+                    continue
+                low = i.lower()
+                if any(k in low for k in keys):
+                    chosen = i
+                    break
+        if chosen:
+            mapped[key] = chosen
+    return mapped
+
+
+def solix_info():
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     candidates = []
     primary = iobroker_base()
-    for u in (primary, "http://192.168.178.101:8082", "http://192.168.178.101:8081"):
+    for u in (primary, "http://192.168.178.47:8082", "http://192.168.178.47:8081"):
         u = u.rstrip("/")
         if u not in candidates:
             candidates.append(u)
@@ -190,6 +295,19 @@ def solix_info():
     out = {"iobroker": base or primary, "site": "Kraftwerk"}
     if not base:
         out["error"] = "ioBroker nicht erreichbar (versuche: %s)" % ", ".join(candidates)
+        return out
+
+    all_ids = iob_objects(base, "ankersolix2.*")
+    if not all_ids:
+        all_ids = iob_objects(base, "ankersolix2*")
+    site = solix_pick_site(all_ids)
+    out["site_id"] = site
+    out["ankersolix_states"] = len(all_ids)
+    ids = solix_map_ids(all_ids, site)
+    out["mapped"] = dict(ids)
+
+    if len(ids) <= 4 and not all_ids:
+        out["error"] = "Keine ankersolix2-Objekte in ioBroker gefunden"
         return out
 
     ok_any = False
@@ -214,8 +332,14 @@ def solix_info():
         except Exception as ex:
             out.setdefault("errors", {})["_timeout"] = str(ex)
 
+    # SOC sometimes 0..1
+    if isinstance(out.get("soc"), (int, float)) and 0 <= float(out["soc"]) <= 1.5:
+        out["soc"] = round(float(out["soc"]) * 100, 1)
+
     if not ok_any:
+        sample = sorted(all_ids)[:12]
         out["error"] = "ioBroker antwortet, aber keine Solix-States (%s)" % base
+        out["sample_ids"] = sample
     return out
 
 
