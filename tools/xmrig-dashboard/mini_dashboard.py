@@ -24,7 +24,7 @@ def iobroker_base():
         u = IOB_FILE.read_text().strip()
         if u:
             return u.rstrip("/")
-    return os.environ.get("IOBROKER", "http://192.168.178.47:8082").rstrip("/")
+    return os.environ.get("IOBROKER", "http://192.168.178.47:8087").rstrip("/")
 
 
 def temp():
