@@ -117,12 +117,11 @@ def nexus_control(action):
         return False, str(ex.reason)
 
 
-def iob_val(state_id):
-    base = iobroker_base()
-    # prefer plain value (simple), fallback JSON get
+def iob_val(state_id, base=None, timeout=1.5):
+    base = (base or iobroker_base()).rstrip("/")
     try:
         req = Request(f"{base}/getPlainValue/{state_id}", headers={"User-Agent": "xmrig-dash/solix"})
-        with urlopen(req, timeout=4) as r:
+        with urlopen(req, timeout=timeout) as r:
             raw = r.read().decode().strip().strip('"')
             if raw == "" or raw.lower() == "null":
                 return None
@@ -137,12 +136,31 @@ def iob_val(state_id):
     except Exception:
         pass
     req = Request(f"{base}/get/{state_id}", headers={"User-Agent": "xmrig-dash/solix"})
-    with urlopen(req, timeout=4) as r:
+    with urlopen(req, timeout=timeout) as r:
         obj = json.loads(r.read().decode())
     return obj.get("val")
 
 
+def iob_probe(base):
+    """Fast reachability check — one lightweight call."""
+    try:
+        req = Request(f"{base}/getPlainValue/system.adapter.admin.0.alive", headers={"User-Agent": "xmrig-dash/solix"})
+        with urlopen(req, timeout=1.2) as r:
+            r.read(64)
+        return True
+    except Exception:
+        try:
+            req = Request(f"{base}/", headers={"User-Agent": "xmrig-dash/solix"})
+            with urlopen(req, timeout=1.2) as r:
+                r.read(64)
+            return True
+        except Exception:
+            return False
+
+
 def solix_info():
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     ids = {
         "soc": f"{SITE}.solarbank_info.total_battery_power",
         "pv": f"{SITE}.solarbank_info.total_photovoltaic_power",
@@ -156,13 +174,45 @@ def solix_info():
         "miners_last": "0_userdata.0.solar_miners.last_action",
         "miners_reason": "0_userdata.0.solar_miners.reason",
     }
-    out = {"iobroker": iobroker_base(), "site": "Kraftwerk"}
-    for k, sid in ids.items():
+    candidates = []
+    primary = iobroker_base()
+    for u in (primary, "http://192.168.178.101:8082", "http://192.168.178.101:8081"):
+        u = u.rstrip("/")
+        if u not in candidates:
+            candidates.append(u)
+
+    base = None
+    for u in candidates:
+        if iob_probe(u):
+            base = u
+            break
+
+    out = {"iobroker": base or primary, "site": "Kraftwerk"}
+    if not base:
+        out["error"] = "ioBroker nicht erreichbar (versuche: %s)" % ", ".join(candidates)
+        return out
+
+    ok_any = False
+
+    def one(item):
+        k, sid = item
         try:
-            out[k] = iob_val(sid)
+            return k, iob_val(sid, base=base, timeout=1.5), None
         except Exception as ex:
-            out[k] = None
-            out.setdefault("errors", {})[k] = str(ex)
+            return k, None, str(ex)
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futs = [pool.submit(one, it) for it in ids.items()]
+        for fut in as_completed(futs, timeout=5):
+            k, val, err = fut.result()
+            out[k] = val
+            if val is not None:
+                ok_any = True
+            if err:
+                out.setdefault("errors", {})[k] = err
+
+    if not ok_any:
+        out["error"] = "ioBroker antwortet, aber keine Solix-States (%s)" % base
     return out
 
 
@@ -426,7 +476,16 @@ const fx=n=>{if(n==null||isNaN(n))return"—";if(!n)return"0";return n<0.01?n.to
 const fe=d=>{if(d==null||isNaN(d))return"—";if(d<1)return Math.round(d*24)+" Std";if(d<60)return Math.round(d)+" Tage";if(d<365)return(d/30).toFixed(1)+" Mon";return(d/365).toFixed(1)+" J"};
 const fu=s=>{if(s==null)return"—";const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?h+"h "+m+"m":m+"m"};
 const fn=n=>n==null?"—":Number(n).toLocaleString("de-DE");
-const fth=n=>{if(n==null||isNaN(n))return"—";const th=n/1e12;if(th>=10)return th.toFixed(1);if(th>=1)return th.toFixed(2);return th.toFixed(3)};
+const fth=n=>{
+  if(n==null||isNaN(n))return"—";
+  let th=Number(n);
+  // Nexus API: H/s | GH/s | TH/s automatisch erkennen
+  if(th>=1e9) th=th/1e12;
+  else if(th>=100) th=th/1e3;
+  if(th>=10)return th.toFixed(1);
+  if(th>=1)return th.toFixed(2);
+  return th.toFixed(3);
+};
 const fw=n=>{if(n==null||isNaN(n))return"—";return Math.round(Number(n))+" W"};
 
 function openView(name){
@@ -472,7 +531,7 @@ function setNexus(d){
     return;
   }
   nexusOff=!!d.shutdown;
-  const hr=d.hashRate||0;
+  const hr=d.hashRate!=null?d.hashRate:(d.hashrate!=null?d.hashrate:0);
   const pillTxt=nexusOff?"Shutdown":"Mining";
   const pillCls=nexusOff?"pill off":"pill btc";
   $("nPill").textContent=pillTxt; $("nPill").className=pillCls;
