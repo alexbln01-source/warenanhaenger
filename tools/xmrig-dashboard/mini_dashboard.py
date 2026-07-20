@@ -203,13 +203,16 @@ def solix_info():
 
     with ThreadPoolExecutor(max_workers=6) as pool:
         futs = [pool.submit(one, it) for it in ids.items()]
-        for fut in as_completed(futs, timeout=5):
-            k, val, err = fut.result()
-            out[k] = val
-            if val is not None:
-                ok_any = True
-            if err:
-                out.setdefault("errors", {})[k] = err
+        try:
+            for fut in as_completed(futs, timeout=5):
+                k, val, err = fut.result()
+                out[k] = val
+                if val is not None:
+                    ok_any = True
+                if err:
+                    out.setdefault("errors", {})[k] = err
+        except Exception as ex:
+            out.setdefault("errors", {})["_timeout"] = str(ex)
 
     if not ok_any:
         out["error"] = "ioBroker antwortet, aber keine Solix-States (%s)" % base
