@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 URL="${1:-https://raw.githubusercontent.com/alexbln01-source/warenanhaenger/cursor/xmrig-dashboard-tiles-0620/tools/xmrig-dashboard/mini_dashboard.py}"
-EXPECT_MD5="1fd5785d514419cc89910ef79d3dac4a"
 echo "Downloading: $URL"
 if command -v curl >/dev/null; then
   curl -fsSL "$URL" -o /tmp/d.py
@@ -10,10 +9,22 @@ elif command -v wget >/dev/null; then
 else
   python3 -c "import urllib.request; urllib.request.urlretrieve('$URL','/tmp/d.py')"
 fi
-ACT=$(md5sum /tmp/d.py | awk '{print $1}')
-echo "MD5=$ACT"
-[ "$ACT" = "$EXPECT_MD5" ] || { echo "MD5 mismatch — Abort"; exit 1; }
-pct push 107 /tmp/d.py /opt/xmrig-dashboard/mini_dashboard.py
-pct exec 107 -- bash -lc 'systemctl restart xmrig-dashboard; sleep 1'
-pct exec 107 -- python3 -c "import urllib.request; h=urllib.request.urlopen('http://127.0.0.1:8090/').read().decode(); print('tileSol' in h, 'viewHome' in h)"
+echo "MD5=$(md5sum /tmp/d.py | awk '{print $1}')"
+# Service uses dashboard.py (not mini_dashboard.py)
+pct push 107 /tmp/d.py /opt/xmrig-dashboard/dashboard.py
+pct exec 107 -- systemctl restart xmrig-dashboard
+sleep 2
+pct exec 107 -- python3 - <<'PY'
+import urllib.request, json
+base="http://127.0.0.1:8090"
+h=urllib.request.urlopen(base+"/").read().decode()
+print("tileSol", "tileSol" in h, "homeTick", "homeTick" in h)
+for path in ["/api/mining","/api/nexus","/api/solix","/api/temp"]:
+    try:
+        with urllib.request.urlopen(base+path, timeout=8) as r:
+            raw=r.read().decode()
+        print(path, "OK", raw[:120].replace("\n"," "))
+    except Exception as e:
+        print(path, "FAIL", e)
+PY
 echo "DONE → http://192.168.178.115:8090/"

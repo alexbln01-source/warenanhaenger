@@ -310,6 +310,8 @@ button.stop-btc{background:var(--stop);color:#190606}
           <div class="tile-sub" id="tSSub">Kraftwerk · PV — · Bezug —</div>
         </button>
       </div>
+      <div class="tile-sub" id="homeTick" style="text-align:center;margin-top:8px">lädt…</div>
+      <div id="homeErr" style="color:var(--stop);font-size:11px;text-align:center;min-height:14px;margin-top:4px"></div>
     </section>
 
     <section class="view" id="viewXmr">
@@ -567,31 +569,54 @@ $("copyBtn").onclick=async()=>{
   catch(e){$("err").textContent="Copy fehlgeschlagen"}
 };
 
-async function r(){
+async function jget(url){
+  const ctrl=typeof AbortController!=="undefined"?new AbortController():null;
+  const t=ctrl?setTimeout(()=>ctrl.abort(),6000):null;
   try{
-    const [sr,tr,pr,mr,nr,srx]=await Promise.all([
-      fetch("/api/summary",{cache:"no-store"}),
-      fetch("/api/temp",{cache:"no-store"}).catch(()=>null),
-      fetch("/api/pool",{cache:"no-store"}).catch(()=>null),
-      fetch("/api/mining",{cache:"no-store"}).catch(()=>null),
-      fetch("/api/nexus",{cache:"no-store"}).catch(()=>null),
-      fetch("/api/solix",{cache:"no-store"}).catch(()=>null),
-    ]);
-    const mj=mr&&mr.ok?await mr.json():{};
-    const tj=tr&&tr.ok?await tr.json():{};
-    const pj=pr&&pr.ok?await pr.json():{error:1};
-    const nj=nr&&nr.ok?await nr.json():{error:"offline"};
-    const sj=srx&&srx.ok?await srx.json():{error:"offline"};
-    setNexus(nj);
-    setSolix(sj);
-    $("tick").textContent=new Date().toLocaleTimeString("de-DE");
+    const res=await fetch(url,{cache:"no-store",signal:ctrl?ctrl.signal:undefined});
+    if(!res.ok){
+      let err="HTTP "+res.status;
+      try{const e=await res.json(); if(e&&e.error) err=String(e.error);}catch(_){}
+      return {ok:false, error:err};
+    }
+    return {ok:true, data:await res.json()};
+  }catch(e){
+    return {ok:false, error:e.name==="AbortError"?"Timeout":(e.message||"Netzwerk")};
+  }finally{ if(t) clearTimeout(t); }
+}
 
+function stamp(){
+  const t=new Date().toLocaleTimeString("de-DE");
+  if($("tick")) $("tick").textContent=t;
+  if($("homeTick")) $("homeTick").textContent="Stand "+t;
+}
+
+async function r(){
+  const errs=[];
+  try{
+    const [mining, temp, pool, nexus, solix, summary]=await Promise.all([
+      jget("/api/mining"),
+      jget("/api/temp"),
+      jget("/api/pool"),
+      jget("/api/nexus"),
+      jget("/api/solix"),
+      jget("/api/summary"),
+    ]);
+
+    try{ setNexus(nexus.ok?nexus.data:{error:nexus.error||"offline"}); }
+    catch(e){ errs.push("S1:"+e.message); }
+
+    try{ setSolix(solix.ok?solix.data:{error:solix.error||"offline"}); }
+    catch(e){ errs.push("Solix:"+e.message); }
+
+    const tj=temp.ok?temp.data:{};
     if(tj.celsius!=null){
-      $("temp").textContent=tj.celsius.toFixed(1)+"°";
+      $("temp").textContent=Number(tj.celsius).toFixed(1)+"°";
       $("temp").className="v "+(tj.celsius>=85?"bad":tj.celsius>=75?"warn":"ok");
     }else{$("temp").textContent="n/a";$("temp").className="v"}
 
-    if(pj&&!pj.error){
+    if(pool.ok&&pool.data&&!pool.data.error){
+      const pj=pool.data;
       $("pend").textContent=fx(pj.pending_xmr);
       $("paid").textContent=fx(pj.paid_xmr);
       $("eta").textContent=fe(pj.eta_days);
@@ -600,45 +625,53 @@ async function r(){
       $("prog").textContent=pct.toFixed(2)+"% · "+fx(pj.pending_xmr)+" / 0,1";
     }
 
+    const mj=mining.ok?mining.data:{};
     if(!mj.active){
       setSw(false);
       $("xH").innerHTML='0<small>H/s</small>';
       $("tXH").innerHTML='0<small>H/s</small>';
-      $("xHm").textContent="Mining aus";
-      $("tXSub").textContent="Mining aus · CT 107";
+      $("xHm").textContent=mining.ok?"Mining aus":("Status: "+(mining.error||"?"));
+      $("tXSub").textContent=mining.ok?"Mining aus · CT 107":("Fehler · "+(mining.error||"?"));
       $("acc").textContent="—"; $("rej").textContent="—";
       $("hashes").textContent="—"; $("up").textContent="—"; $("ping").textContent="—";
-      $("err").textContent="";
-      return;
-    }
-    if(!sr.ok){
+    }else if(!summary.ok){
       setSw(true,true);
       $("xH").innerHTML='…<small>H/s</small>';
       $("tXH").innerHTML='…<small>H/s</small>';
-      $("xHm").textContent="Warte auf XMRig…";
-      $("tXSub").textContent="Startet…";
-      return;
+      $("xHm").textContent="XMRig: "+(summary.error||"warte…");
+      $("tXSub").textContent="Startet / API";
+    }else{
+      const d=summary.data||{};
+      const tot=(d.hashrate&&d.hashrate.total)||[];
+      const t=tot[0]!=null?Number(tot[0]):0;
+      setSw(true, t<=0);
+      const hi=d.hashrate&&d.hashrate.highest;
+      const conn=d.connection||{};
+      const a=conn.accepted!=null?conn.accepted:0, rj=conn.rejected!=null?conn.rejected:0;
+      const main=t>=1000?(t/1000).toFixed(2)+"k":String(Math.round(t));
+      $("xH").innerHTML=main+'<small>H/s</small>';
+      $("tXH").innerHTML=main+'<small>H/s</small>';
+      $("xHm").textContent="Max "+fh(hi)+" · "+(d.algo||"rx").toUpperCase();
+      $("tXSub").textContent=(tj.celsius!=null?Number(tj.celsius).toFixed(1)+"° · ":"")+(d.algo||"rx").toUpperCase();
+      $("acc").textContent=fn(a);
+      $("rej").textContent=fn(rj);
+      $("hashes").textContent=fn(d.results&&d.results.hashes_total);
+      $("up").textContent=fu(d.uptime);
+      $("ping").textContent=conn.ping!=null?conn.ping+" ms":"—";
+      $("xSub").textContent="CT 107 · "+(d.algo||"rx").toUpperCase();
     }
-    const d=await sr.json();
-    const t=d.hashrate?.total?.[0]??0;
-    setSw(true, t<=0);
-    const hi=d.hashrate?.highest;
-    const a=d.connection?.accepted??0, rj=d.connection?.rejected??0;
-    const main=t>=1000?(t/1000).toFixed(2)+"k":String(Math.round(t));
-    $("xH").innerHTML=main+'<small>H/s</small>';
-    $("tXH").innerHTML=main+'<small>H/s</small>';
-    $("xHm").textContent="Max "+fh(hi)+" · "+(d.algo||"rx").toUpperCase();
-    $("tXSub").textContent=(tj.celsius!=null?tj.celsius.toFixed(1)+"° · ":"")+(d.algo||"rx").toUpperCase();
-    $("acc").textContent=fn(a);
-    $("rej").textContent=fn(rj);
-    $("hashes").textContent=fn(d.results?.hashes_total);
-    $("up").textContent=fu(d.uptime);
-    $("ping").textContent=d.connection?.ping!=null?d.connection.ping+" ms":"—";
-    $("xSub").textContent="CT 107 · "+(d.algo||"rx").toUpperCase();
-    $("err").textContent="";
+
+    if(!nexus.ok) errs.push("S1:"+(nexus.error||"?"));
+    if(!solix.ok) errs.push("Solix:"+(solix.error||"?"));
+    if(!mining.ok) errs.push("XMR:"+(mining.error||"?"));
+    const msg=errs.join(" · ");
+    if($("err")) $("err").textContent=msg;
+    if($("homeErr")) $("homeErr").textContent=msg;
+    stamp();
   }catch(e){
-    setSw(false);
-    $("err").textContent=e.message;
+    if($("err")) $("err").textContent=e.message;
+    if($("homeErr")) $("homeErr").textContent=e.message;
+    stamp();
   }
 }
 r(); setInterval(r,3000);
