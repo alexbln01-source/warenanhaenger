@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Miner-Dashboard :8090 — XMRig + Nexus S1 + Anker Solix"""
+"""Miner-Dashboard :8090 — XMRig + Nexus S1 + Solo Node + Anker Solix"""
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 from pathlib import Path
+from base64 import b64encode
 import json, time, subprocess, os
 
 XMRIG = "http://127.0.0.1:8080/2/summary"
@@ -12,11 +13,15 @@ PORT = 8090
 SERVICE = "xmrig"
 PAUSE = Path("/opt/xmrig-dashboard/PAUSE")
 IOB_FILE = Path("/opt/xmrig-dashboard/iobroker.url")
+BTC_RPC_FILE = Path("/opt/xmrig-dashboard/bitcoin.rpc")
+CKPOOL_STATUS = os.environ.get("CKPOOL_STATUS", "http://192.168.178.111")
 SITE = "ankersolix2.0.a278fac0-df28-4f92-846d-76e77de23b26"
 W = "47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm"
+BTC_ADDR = "bc1qdjd4rtw6c6at7mmjyq4a9m4lh4s0z5yxf89qnl"
 POOL = f"https://supportxmr.com/api/miner/{W}/stats"
 THR, ATOM = 0.1, 1_000_000_000_000
 cache = {"t": 0.0, "d": None}
+btc_cache = {"t": 0.0, "d": None}
 
 
 def iobroker_base():
@@ -115,6 +120,137 @@ def nexus_control(action):
         return False, f"HTTP {ex.code}"
     except URLError as ex:
         return False, str(ex.reason)
+
+
+def bitcoin_rpc_cfg():
+    """Lädt RPC aus /opt/xmrig-dashboard/bitcoin.rpc (url/user/password Zeilen)."""
+    cfg = {
+        "url": os.environ.get("BITCOIN_RPC_URL", "http://192.168.178.111:8332").rstrip("/"),
+        "user": os.environ.get("BITCOIN_RPC_USER", ""),
+        "password": os.environ.get("BITCOIN_RPC_PASSWORD", ""),
+    }
+    if BTC_RPC_FILE.exists():
+        for line in BTC_RPC_FILE.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip().lower(), v.strip()
+            if k in ("url", "user", "password", "pass"):
+                cfg["password" if k == "pass" else k] = v
+    return cfg
+
+
+def bitcoin_rpc(method, params=None, timeout=4):
+    cfg = bitcoin_rpc_cfg()
+    if not cfg.get("user") or not cfg.get("password"):
+        raise RuntimeError("bitcoin.rpc fehlt (user/password)")
+    payload = json.dumps({
+        "jsonrpc": "1.0",
+        "id": "miner-dash",
+        "method": method,
+        "params": params or [],
+    }).encode()
+    token = b64encode(("%s:%s" % (cfg["user"], cfg["password"])).encode()).decode()
+    req = Request(
+        cfg["url"],
+        data=payload,
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Basic " + token,
+            "User-Agent": "xmrig-dash/solix",
+        },
+    )
+    with urlopen(req, timeout=timeout) as r:
+        out = json.loads(r.read().decode())
+    if out.get("error"):
+        raise RuntimeError(out["error"].get("message") if isinstance(out["error"], dict) else str(out["error"]))
+    return out.get("result")
+
+
+def ckpool_probe():
+    """Optional: ckpool HTTP-Status (falls aktiv)."""
+    base = CKPOOL_STATUS.rstrip("/")
+    for path in ("/pool/pool.status", "/pool.status", "/"):
+        try:
+            req = Request(base + path, headers={"User-Agent": "xmrig-dash/solix"})
+            with urlopen(req, timeout=1.5) as r:
+                body = r.read().decode(errors="replace")
+            if path.endswith("status") or "hashrate" in body.lower() or body.strip().startswith("{"):
+                try:
+                    return {"ok": True, "path": path, "raw": json.loads(body)}
+                except json.JSONDecodeError:
+                    return {"ok": True, "path": path, "text": body[:400]}
+        except (URLError, HTTPError, TimeoutError, OSError):
+            continue
+    return {"ok": False}
+
+
+def bitcoin_node_info():
+    now = time.time()
+    if btc_cache["d"] and now - btc_cache["t"] < 8:
+        return btc_cache["d"]
+    chain = bitcoin_rpc("getblockchaininfo")
+    mining = {}
+    net = {}
+    try:
+        mining = bitcoin_rpc("getmininginfo") or {}
+    except Exception:
+        pass
+    try:
+        net = bitcoin_rpc("getnetworkinfo") or {}
+    except Exception:
+        pass
+    prog = float(chain.get("verificationprogress") or 0)
+    blocks = int(chain.get("blocks") or 0)
+    headers = int(chain.get("headers") or 0)
+    ibd = bool(chain.get("initialblockdownload"))
+    synced = (not ibd) and prog >= 0.99 and blocks > 0 and blocks >= headers - 2
+    ck = ckpool_probe()
+    nexus_pool = {}
+    try:
+        ni = nexus_info()
+        nexus_pool = {
+            "stratumURL": ni.get("stratumURL"),
+            "stratumPort": ni.get("stratumPort"),
+            "hashRate": ni.get("hashRate") or ni.get("hashrate"),
+            "bestDiff": ni.get("bestDiff"),
+            "bestSessionDiff": ni.get("bestSessionDiff"),
+            "foundBlocks": ni.get("foundBlocks"),
+            "totalFoundBlocks": ni.get("totalFoundBlocks"),
+            "sharesAccepted": ni.get("sharesAccepted"),
+            "sharesRejected": ni.get("sharesRejected"),
+            "connected": bool(((ni.get("stratum") or {}).get("pools") or [{}])[0].get("connected"))
+            if (ni.get("stratum") or {}).get("pools")
+            else None,
+        }
+        url = (ni.get("stratumURL") or "").lower()
+        nexus_pool["solo_local"] = "192.168.178.111" in url or url.startswith("192.168.")
+    except Exception:
+        pass
+    out = {
+        "ok": True,
+        "synced": synced,
+        "ibd": ibd,
+        "progress": round(prog * 100, 2),
+        "verificationprogress": prog,
+        "blocks": blocks,
+        "headers": headers,
+        "size_on_disk": chain.get("size_on_disk"),
+        "chain": chain.get("chain"),
+        "difficulty": chain.get("difficulty") or mining.get("difficulty"),
+        "networkhashps": mining.get("networkhashps"),
+        "connections": net.get("connections"),
+        "version": net.get("subversion") or net.get("version"),
+        "coinbase": BTC_ADDR,
+        "ckpool": ck,
+        "stratum": "stratum+tcp://192.168.178.111:3333",
+        "nexus": nexus_pool,
+        "rpc": bitcoin_rpc_cfg()["url"],
+    }
+    btc_cache["t"], btc_cache["d"] = now, out
+    return out
 
 
 def iob_val(state_id, base=None, timeout=1.5):
@@ -385,6 +521,7 @@ HTML = r"""<!doctype html>
   --bg:#0a0f0c; --bg2:#101815; --ink:#e7f2ea; --mute:#7f9688; --line:#1e2c24;
   --xmr:#3dff9a; --xmr-dim:rgba(61,255,154,.14);
   --btc:#f0c24b; --btc-dim:rgba(240,194,75,.12);
+  --node:#c4a5ff; --node-dim:rgba(196,165,255,.12);
   --sol:#5ec8ff; --sol-dim:rgba(94,200,255,.12);
   --stop:#ff5a5a; --warn:#f0c24b;
 }
@@ -425,13 +562,14 @@ body{
 .tile:active{transform:scale(.985)}
 .tile-xmr{border-left:3px solid var(--xmr)}
 .tile-btc{border-left:3px solid var(--btc)}
+.tile-node{border-left:3px solid var(--node)}
 .tile-sol{border-left:3px solid var(--sol)}
 .tile-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
 .tile-name{font:700 11px/1 Sora,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .tile-val{
   font:800 clamp(2rem,9vw,2.6rem)/.95 JetBrains Mono,monospace;letter-spacing:-.04em;
 }
-.tile-val.xmr{color:var(--xmr)}.tile-val.btc{color:var(--btc)}.tile-val.sol{color:var(--sol)}
+.tile-val.xmr{color:var(--xmr)}.tile-val.btc{color:var(--btc)}.tile-val.node{color:var(--node)}.tile-val.sol{color:var(--sol)}
 .tile-val small{font-size:.38em;margin-left:.2rem;color:var(--mute);font-weight:700}
 .tile-sub{margin-top:6px;color:var(--mute);font:500 12px JetBrains Mono,monospace}
 .hero{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
@@ -442,15 +580,18 @@ body{
 }
 .pill.on{color:var(--xmr);border-color:rgba(61,255,154,.45);background:var(--xmr-dim)}
 .pill.off{color:var(--stop);border-color:rgba(255,90,90,.4);background:rgba(255,90,90,.12)}
+.pill.warn{color:var(--warn);border-color:rgba(240,194,75,.45);background:rgba(240,194,75,.12)}
 .pill.btc{color:var(--btc);border-color:rgba(240,194,75,.45);background:var(--btc-dim)}
+.pill.node{color:var(--node);border-color:rgba(196,165,255,.45);background:var(--node-dim)}
 .pill.sol{color:var(--sol);border-color:rgba(94,200,255,.45);background:var(--sol-dim)}
 .hash{
   margin-top:10px;
   font:800 clamp(2.4rem,10vw,3.1rem)/.95 JetBrains Mono,monospace;
   letter-spacing:-.04em;
 }
-.hash.xmr{color:var(--xmr)}.hash.btc{color:var(--btc)}.hash.sol{color:var(--sol)}
+.hash.xmr{color:var(--xmr)}.hash.btc{color:var(--btc)}.hash.node{color:var(--node)}.hash.sol{color:var(--sol)}
 .hash small{font-size:.34em;margin-left:.25rem;color:var(--mute);font-weight:700}
+.track.node i{background:linear-gradient(90deg,#6b4fa8,var(--node))}
 .sub{margin-top:6px;color:var(--mute);font:500 12px JetBrains Mono,monospace}
 .grid{
   display:grid;grid-template-columns:repeat(3,1fr);
@@ -506,7 +647,12 @@ button.stop-btc{background:var(--stop);color:#190606}
         <button class="tile tile-btc" id="tileBtc" type="button">
           <div class="tile-top"><span class="tile-name">Nexus S1</span><span class="pill" id="tNPill">—</span></div>
           <div class="tile-val btc" id="tNH">—<small>TH/s</small></div>
-          <div class="tile-sub" id="tNSub">Bitcoin · Braiins</div>
+          <div class="tile-sub" id="tNSub">Bitcoin · Solo</div>
+        </button>
+        <button class="tile tile-node" id="tileNode" type="button">
+          <div class="tile-top"><span class="tile-name">Solo Node</span><span class="pill" id="tBPill">—</span></div>
+          <div class="tile-val node" id="tBSync">—<small>%</small></div>
+          <div class="tile-sub" id="tBSub">Bitcoin Core · Sync</div>
         </button>
         <button class="tile tile-sol" id="tileSol" type="button">
           <div class="tile-top"><span class="tile-name">Solix Solar</span><span class="pill" id="tSPill">—</span></div>
@@ -568,9 +714,46 @@ button.stop-btc{background:var(--stop);color:#190606}
         <div class="cell"><div class="k">FW</div><div class="v" id="nfw">—</div></div>
       </div>
       <div class="box">
-        <div class="k">Braiins</div>
+        <div class="k">Pool / Solo</div>
+        <div class="nums">
+          <div><span class="k">Best Diff</span><b id="nbest">—</b></div>
+          <div><span class="k">Blöcke</span><b id="nblocks">—</b></div>
+        </div>
         <div class="sub" id="npoolurl" style="margin-top:8px">—</div>
         <div class="sub" id="nuser" style="margin-top:4px">—</div>
+      </div>
+    </section>
+
+    <section class="view" id="viewNode">
+      <div class="hero">
+        <div class="row">
+          <div class="sub" id="bSub">192.168.178.111</div>
+          <div class="pill" id="bPill">—</div>
+        </div>
+        <div class="hash node" id="bSync">—<small>%</small></div>
+        <div class="sub" id="bHm">Bitcoin Core Sync</div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">Blöcke</div><div class="v" id="bBlocks">—</div></div>
+        <div class="cell"><div class="k">Header</div><div class="v" id="bHeaders">—</div></div>
+        <div class="cell"><div class="k">Peers</div><div class="v" id="bPeers">—</div></div>
+        <div class="cell"><div class="k">Netz-Diff</div><div class="v" id="bDiff">—</div></div>
+        <div class="cell"><div class="k">Best Share</div><div class="v" id="bBest">—</div></div>
+        <div class="cell"><div class="k">Gefunden</div><div class="v" id="bFound">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">Solo Fortschritt</div>
+        <div class="track node"><i id="bBar"></i></div>
+        <div class="meta"><span id="bProg">—</span><span id="bChain">—</span></div>
+        <div class="nums">
+          <div><span class="k">ckpool</span><b id="bCk">—</b></div>
+          <div><span class="k">Miner</span><b id="bMiner">—</b></div>
+        </div>
+        <div class="reason" id="bReason">Warte auf Sync ≥ 99 %</div>
+      </div>
+      <div class="box wallet">
+        <div><div class="k">Coinbase</div><code id="bAddr">bc1q…89qnl</code></div>
+        <button class="copy" id="copyBtcBtn" type="button">Copy</button>
       </div>
     </section>
 
@@ -612,6 +795,9 @@ button.stop-btc{background:var(--stop);color:#190606}
       <button class="act go-btc" id="nOn" type="button">Neustart</button>
       <button class="act stop-btc" id="nOff" type="button">Shutdown</button>
     </div>
+    <div class="actions" id="bActions" style="display:none">
+      <div class="tick" style="margin:0;padding:6px 0">Node · ckpool · 0 % Fee Solo</div>
+    </div>
     <div class="actions" id="sActions" style="display:none">
       <div class="tick" style="margin:0;padding:6px 0">Steuerung über ioBroker-Skript</div>
     </div>
@@ -622,8 +808,9 @@ button.stop-btc{background:var(--stop);color:#190606}
 <script>
 const $=id=>document.getElementById(id);
 const W="47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm";
+const BTC_ADDR="bc1qdjd4rtw6c6at7mmjyq4a9m4lh4s0z5yxf89qnl";
 let view="home", miningOn=null, busy=false, nBusy=false, nexusOff=true;
-const titles={home:"<b>MINER</b> · Home",xmr:"<b>XMRig</b> · Monero",btc:"<b>Nexus S1</b> · Bitcoin",sol:"<b>Solix</b> · Solar"};
+const titles={home:"<b>MINER</b> · Home",xmr:"<b>XMRig</b> · Monero",btc:"<b>Nexus S1</b> · Bitcoin",node:"<b>Solo Node</b> · Bitcoin",sol:"<b>Solix</b> · Solar"};
 
 const fh=n=>{if(n==null||isNaN(n))return"—";if(n>=1000)return(n/1000).toFixed(2)+"k";return String(Math.round(n))};
 const fx=n=>{if(n==null||isNaN(n))return"—";if(!n)return"0";return n<0.01?n.toFixed(8):n.toFixed(4)};
@@ -641,22 +828,35 @@ const fth=n=>{
   return th.toFixed(3);
 };
 const fw=n=>{if(n==null||isNaN(n))return"—";return Math.round(Number(n))+" W"};
+const fdiff=n=>{
+  if(n==null||isNaN(n))return"—";
+  const x=Number(n);
+  if(x>=1e15)return(x/1e15).toFixed(2)+" P";
+  if(x>=1e12)return(x/1e12).toFixed(2)+" T";
+  if(x>=1e9)return(x/1e9).toFixed(2)+" G";
+  if(x>=1e6)return(x/1e6).toFixed(2)+" M";
+  if(x>=1e3)return(x/1e3).toFixed(2)+" K";
+  return String(Math.round(x));
+};
 
 function openView(name){
   view=name;
   $("viewHome").classList.toggle("show", name==="home");
   $("viewXmr").classList.toggle("show", name==="xmr");
   $("viewBtc").classList.toggle("show", name==="btc");
+  $("viewNode").classList.toggle("show", name==="node");
   $("viewSol").classList.toggle("show", name==="sol");
   $("backBtn").style.display=name==="home"?"none":"inline-block";
   $("foot").style.display=name==="home"?"none":"";
   $("brandTitle").innerHTML=titles[name]||titles.home;
   $("xActions").style.display=name==="xmr"?"":"none";
   $("nActions").style.display=name==="btc"?"grid":"none";
+  $("bActions").style.display=name==="node"?"":"none";
   $("sActions").style.display=name==="sol"?"":"none";
 }
 $("tileXmr").onclick=()=>openView("xmr");
 $("tileBtc").onclick=()=>openView("btc");
+$("tileNode").onclick=()=>openView("node");
 $("tileSol").onclick=()=>openView("sol");
 $("backBtn").onclick=()=>openView("home");
 
@@ -709,8 +909,64 @@ function setNexus(d){
   $("nfw").textContent=(d.version||"—").replace(/^nexus\./,"");
   $("npoolurl").textContent=(d.stratumURL||"—")+":"+(d.stratumPort||"");
   $("nuser").textContent=d.stratumUser||"—";
+  $("nbest").textContent=fdiff(d.bestSessionDiff!=null?d.bestSessionDiff:d.bestDiff);
+  const found=d.totalFoundBlocks!=null?d.totalFoundBlocks:(d.foundBlocks!=null?d.foundBlocks:0);
+  $("nblocks").textContent=fn(found);
+  const local=String(d.stratumURL||"").includes("192.168.178.111");
+  if(local) $("tNSub").textContent=pw+" · Solo Node";
   $("nOn").disabled=nBusy||!nexusOff;
   $("nOff").disabled=nBusy||nexusOff;
+}
+
+function setBitcoin(d){
+  if(!d||d.error||d.ok===false){
+    $("bPill").textContent="Offline"; $("bPill").className="pill off";
+    $("tBPill").textContent="Offline"; $("tBPill").className="pill off";
+    $("bSync").innerHTML='—<small>%</small>';
+    $("tBSync").innerHTML='—<small>%</small>';
+    const err=d&&d.error?String(d.error):"RPC nicht erreichbar";
+    $("bHm").textContent=err;
+    $("tBSub").textContent=err.length>42?err.slice(0,40)+"…":err;
+    $("bReason").textContent="bitcoin.rpc auf CT 107 prüfen (url/user/password)";
+    return;
+  }
+  const pct=d.progress!=null?Number(d.progress):0;
+  const synced=!!d.synced;
+  const pillTxt=synced?"LIVE":(d.ibd?"Sync":"Node");
+  const pillCls=synced?"pill node":"pill warn";
+  $("bPill").textContent=pillTxt; $("bPill").className=pillCls;
+  $("tBPill").textContent=pillTxt; $("tBPill").className=pillCls;
+  const pctTxt=(pct>=10?pct.toFixed(1):pct.toFixed(2));
+  $("bSync").innerHTML=pctTxt+'<small>%</small>';
+  $("tBSync").innerHTML=pctTxt+'<small>%</small>';
+  $("bHm").textContent=synced?"Solo bereit · 0 % Fee":("Sync · "+fn(d.blocks)+" / "+fn(d.headers));
+  $("tBSub").textContent=synced
+    ?("LIVE · Blöcke "+(d.nexus&&d.nexus.totalFoundBlocks!=null?d.nexus.totalFoundBlocks:(d.nexus&&d.nexus.foundBlocks)||0))
+    :("Sync "+pctTxt+"% · "+fn(d.blocks));
+  $("bSub").textContent=(d.rpc||"192.168.178.111").replace(/^https?:\/\//,"");
+  $("bBlocks").textContent=fn(d.blocks);
+  $("bHeaders").textContent=fn(d.headers);
+  $("bPeers").textContent=fn(d.connections);
+  $("bDiff").textContent=fdiff(d.difficulty);
+  const nx=d.nexus||{};
+  $("bBest").textContent=fdiff(nx.bestSessionDiff!=null?nx.bestSessionDiff:nx.bestDiff);
+  $("bFound").textContent=fn(nx.totalFoundBlocks!=null?nx.totalFoundBlocks:nx.foundBlocks)||"0";
+  $("bFound").className="v "+((nx.totalFoundBlocks||nx.foundBlocks)>0?"ok":"");
+  $("bBar").style.width=Math.max(0,Math.min(100,pct))+"%";
+  $("bProg").textContent=pctTxt+"% · "+(synced?"synced":"IBD");
+  $("bChain").textContent=d.chain||"main";
+  $("bCk").textContent=d.ckpool&&d.ckpool.ok?"OK":"Stratum";
+  $("bCk").style.color=d.ckpool&&d.ckpool.ok?"var(--node)":"var(--mute)";
+  const local=!!nx.solo_local;
+  const minerOn=nx.hashRate!=null&&Number(nx.hashRate)>0;
+  $("bMiner").textContent=local?(minerOn?"Solo AN":"verbunden"):(nx.stratumURL?"extern":"—");
+  $("bMiner").style.color=local&&minerOn?"var(--btc)":"var(--mute)";
+  if(synced&&local&&minerOn) $("bReason").textContent="SOLO MINING LIVE · Rewards → Coinbase";
+  else if(synced&&!local) $("bReason").textContent="Node synced · Miner zeigt noch auf externen Pool";
+  else if(synced) $("bReason").textContent="Node synced · warte auf Nexus → 192.168.178.111:3333";
+  else $("bReason").textContent="ckpool wartet auf Sync ≥ 99 % · ETA je nach Peers";
+  const addr=d.coinbase||BTC_ADDR;
+  $("bAddr").textContent=addr.slice(0,8)+"…"+addr.slice(-6);
 }
 
 function setSolix(d){
@@ -781,6 +1037,10 @@ $("copyBtn").onclick=async()=>{
   try{await navigator.clipboard.writeText(W);$("copyBtn").textContent="OK";setTimeout(()=>$("copyBtn").textContent="Copy",900)}
   catch(e){$("err").textContent="Copy fehlgeschlagen"}
 };
+$("copyBtcBtn").onclick=async()=>{
+  try{await navigator.clipboard.writeText(BTC_ADDR);$("copyBtcBtn").textContent="OK";setTimeout(()=>$("copyBtcBtn").textContent="Copy",900)}
+  catch(e){$("err").textContent="Copy fehlgeschlagen"}
+};
 
 async function jget(url){
   const ctrl=typeof AbortController!=="undefined"?new AbortController():null;
@@ -807,17 +1067,21 @@ function stamp(){
 async function r(){
   const errs=[];
   try{
-    const [mining, temp, pool, nexus, solix, summary]=await Promise.all([
+    const [mining, temp, pool, nexus, bitcoin, solix, summary]=await Promise.all([
       jget("/api/mining"),
       jget("/api/temp"),
       jget("/api/pool"),
       jget("/api/nexus"),
+      jget("/api/bitcoin"),
       jget("/api/solix"),
       jget("/api/summary"),
     ]);
 
     try{ setNexus(nexus.ok?nexus.data:{error:nexus.error||"offline"}); }
     catch(e){ errs.push("S1:"+e.message); }
+
+    try{ setBitcoin(bitcoin.ok?bitcoin.data:{error:bitcoin.error||"offline"}); }
+    catch(e){ errs.push("Node:"+e.message); }
 
     try{ setSolix(solix.ok?solix.data:{error:solix.error||"offline"}); }
     catch(e){ errs.push("Solix:"+e.message); }
@@ -875,6 +1139,7 @@ async function r(){
     }
 
     if(!nexus.ok) errs.push("S1:"+(nexus.error||"?"));
+    if(!bitcoin.ok) errs.push("Node:"+(bitcoin.error||"?"));
     if(!solix.ok) errs.push("Solix:"+(solix.error||"?"));
     if(!mining.ok) errs.push("XMR:"+(mining.error||"?"));
     const msg=errs.join(" · ");
@@ -935,6 +1200,12 @@ class H(BaseHTTPRequestHandler):
                 err = getattr(ex, "reason", None) or str(ex)
                 self.j(502, {"error": str(err)})
             return
+        if self.path.startswith("/api/bitcoin"):
+            try:
+                self.j(200, bitcoin_node_info())
+            except Exception as ex:
+                self.j(502, {"ok": False, "error": str(ex)})
+            return
         if self.path.startswith("/api/solix"):
             try:
                 self.j(200, solix_info())
@@ -977,5 +1248,10 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print("http://0.0.0.0:%s/ iobroker=%s" % (PORT, iobroker_base()), flush=True)
+    rpc = bitcoin_rpc_cfg()
+    print(
+        "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s"
+        % (PORT, iobroker_base(), rpc.get("url"), "yes" if rpc.get("user") else "no"),
+        flush=True,
+    )
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()

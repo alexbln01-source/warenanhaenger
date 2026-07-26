@@ -1,29 +1,50 @@
 #!/bin/bash
+# Auf dem Proxmox-Host per SSH ausführen (nicht in die Web-Konsole pasten).
 set -e
-SHA="ea2d229e7a9f75301c8a09d1765bb5154c40e1fc"
-EXPECT_MD5="e48f37ba31b307dad40dd09e41cce590"
+SHA="${1:-}"
+if [ -z "$SHA" ]; then
+  echo "Usage: $0 <git-sha>"
+  echo "Example: $0 $(git rev-parse HEAD 2>/dev/null || echo HEAD)"
+  exit 1
+fi
 URL="https://raw.githubusercontent.com/alexbln01-source/warenanhaenger/${SHA}/tools/xmrig-dashboard/mini_dashboard.py"
 echo "Downloading: $URL"
 curl -fsSL "$URL" -o /tmp/d.py
-ACT=$(md5sum /tmp/d.py | awk '{print $1}')
-echo "MD5=$ACT"
-[ "$ACT" = "$EXPECT_MD5" ] || { echo "MD5 mismatch"; exit 1; }
+md5sum /tmp/d.py
 pct push 107 /tmp/d.py /opt/xmrig-dashboard/dashboard.py
+
+# RPC-Secrets nur lokal auf CT 107 (nicht im Git)
+pct exec 107 -- bash -lc '
+if [ ! -f /opt/xmrig-dashboard/bitcoin.rpc ]; then
+  cat > /opt/xmrig-dashboard/bitcoin.rpc <<EOF
+url=http://192.168.178.111:8332
+user=bitcoinrpc
+password=CHANGE_ME
+EOF
+  chmod 600 /opt/xmrig-dashboard/bitcoin.rpc
+  echo "CREATED /opt/xmrig-dashboard/bitcoin.rpc — Passwort setzen!"
+else
+  echo "bitcoin.rpc vorhanden"
+fi
+'
+
 pct exec 107 -- systemctl restart xmrig-dashboard
 sleep 2
 pct exec 107 -- python3 - <<'PY'
 import urllib.request, json
 base="http://127.0.0.1:8090"
 h=urllib.request.urlopen(base+"/").read().decode()
-print("homeTick", "homeTick" in h)
-for path in ["/api/nexus","/api/solix"]:
+print("tileNode", "tileNode" in h, "viewNode", "viewNode" in h)
+for path in ["/api/nexus","/api/bitcoin","/api/solix"]:
     try:
         with urllib.request.urlopen(base+path, timeout=10) as r:
             d=json.loads(r.read().decode())
         if path.endswith("nexus"):
-            print("nexus hashRate", d.get("hashRate"), "power", d.get("power"), "err", d.get("error"))
+            print("nexus hashRate", d.get("hashRate"), "pool", d.get("stratumURL"), "err", d.get("error"))
+        elif path.endswith("bitcoin"):
+            print("bitcoin progress", d.get("progress"), "synced", d.get("synced"), "blocks", d.get("blocks"), "err", d.get("error"))
         else:
-            print("solix soc", d.get("soc"), "err", d.get("error"), "iob", d.get("iobroker"))
+            print("solix soc", d.get("soc"), "err", d.get("error"))
     except Exception as e:
         print(path, "FAIL", e)
 PY
