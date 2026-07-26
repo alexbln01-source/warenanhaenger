@@ -141,7 +141,7 @@ def bitcoin_rpc_cfg():
     return cfg
 
 
-def bitcoin_rpc(method, params=None, timeout=4):
+def bitcoin_rpc(method, params=None, timeout=20):
     cfg = bitcoin_rpc_cfg()
     if not cfg.get("user") or not cfg.get("password"):
         raise RuntimeError("bitcoin.rpc fehlt (user/password)")
@@ -189,17 +189,26 @@ def ckpool_probe():
 
 def bitcoin_node_info():
     now = time.time()
-    if btc_cache["d"] and now - btc_cache["t"] < 8:
+    if btc_cache["d"] and now - btc_cache["t"] < 15:
         return btc_cache["d"]
-    chain = bitcoin_rpc("getblockchaininfo")
+    try:
+        chain = bitcoin_rpc("getblockchaininfo", timeout=25)
+    except Exception as ex:
+        # Während IBD oft Timeout — letzten Stand behalten statt Offline
+        if btc_cache["d"]:
+            stale = dict(btc_cache["d"])
+            stale["stale"] = True
+            stale["warning"] = str(ex)
+            return stale
+        raise
     mining = {}
     net = {}
     try:
-        mining = bitcoin_rpc("getmininginfo") or {}
+        mining = bitcoin_rpc("getmininginfo", timeout=8) or {}
     except Exception:
         pass
     try:
-        net = bitcoin_rpc("getnetworkinfo") or {}
+        net = bitcoin_rpc("getnetworkinfo", timeout=8) or {}
     except Exception:
         pass
     prog = float(chain.get("verificationprogress") or 0)
@@ -231,6 +240,7 @@ def bitcoin_node_info():
         pass
     out = {
         "ok": True,
+        "stale": False,
         "synced": synced,
         "ibd": ibd,
         "progress": round(prog * 100, 2),
@@ -932,17 +942,22 @@ function setBitcoin(d){
   }
   const pct=d.progress!=null?Number(d.progress):0;
   const synced=!!d.synced;
-  const pillTxt=synced?"LIVE":(d.ibd?"Sync":"Node");
-  const pillCls=synced?"pill node":"pill warn";
+  const stale=!!d.stale;
+  const pillTxt=stale?"Busy":(synced?"LIVE":(d.ibd?"Sync":"Node"));
+  const pillCls=stale?"pill warn":(synced?"pill node":"pill warn");
   $("bPill").textContent=pillTxt; $("bPill").className=pillCls;
   $("tBPill").textContent=pillTxt; $("tBPill").className=pillCls;
   const pctTxt=(pct>=10?pct.toFixed(1):pct.toFixed(2));
   $("bSync").innerHTML=pctTxt+'<small>%</small>';
   $("tBSync").innerHTML=pctTxt+'<small>%</small>';
-  $("bHm").textContent=synced?"Solo bereit · 0 % Fee":("Sync · "+fn(d.blocks)+" / "+fn(d.headers));
-  $("tBSub").textContent=synced
-    ?("LIVE · Blöcke "+(d.nexus&&d.nexus.totalFoundBlocks!=null?d.nexus.totalFoundBlocks:(d.nexus&&d.nexus.foundBlocks)||0))
-    :("Sync "+pctTxt+"% · "+fn(d.blocks));
+  $("bHm").textContent=stale
+    ?("RPC busy · letzter Stand · "+fn(d.blocks))
+    :(synced?"Solo bereit · 0 % Fee":("Sync · "+fn(d.blocks)+" / "+fn(d.headers)));
+  $("tBSub").textContent=stale
+    ?("Busy · "+fn(d.blocks)+" Blöcke")
+    :(synced
+      ?("LIVE · Blöcke "+(d.nexus&&d.nexus.totalFoundBlocks!=null?d.nexus.totalFoundBlocks:(d.nexus&&d.nexus.foundBlocks)||0))
+      :("Sync "+pctTxt+"% · "+fn(d.blocks)));
   $("bSub").textContent=(d.rpc||"192.168.178.111").replace(/^https?:\/\//,"");
   $("bBlocks").textContent=fn(d.blocks);
   $("bHeaders").textContent=fn(d.headers);
@@ -961,7 +976,8 @@ function setBitcoin(d){
   const minerOn=nx.hashRate!=null&&Number(nx.hashRate)>0;
   $("bMiner").textContent=local?(minerOn?"Solo AN":"verbunden"):(nx.stratumURL?"extern":"—");
   $("bMiner").style.color=local&&minerOn?"var(--btc)":"var(--mute)";
-  if(synced&&local&&minerOn) $("bReason").textContent="SOLO MINING LIVE · Rewards → Coinbase";
+  if(stale) $("bReason").textContent="Node busy (Sync) · RPC Timeout — Werte vom letzten Abruf";
+  else if(synced&&local&&minerOn) $("bReason").textContent="SOLO MINING LIVE · Rewards → Coinbase";
   else if(synced&&!local) $("bReason").textContent="Node synced · Miner zeigt noch auf externen Pool";
   else if(synced) $("bReason").textContent="Node synced · warte auf Nexus → 192.168.178.111:3333";
   else $("bReason").textContent="ckpool wartet auf Sync ≥ 99 % · ETA je nach Peers";
@@ -1042,9 +1058,10 @@ $("copyBtcBtn").onclick=async()=>{
   catch(e){$("err").textContent="Copy fehlgeschlagen"}
 };
 
-async function jget(url){
+async function jget(url, ms){
+  const wait=ms!=null?ms:(url.indexOf("/api/bitcoin")>=0?30000:6000);
   const ctrl=typeof AbortController!=="undefined"?new AbortController():null;
-  const t=ctrl?setTimeout(()=>ctrl.abort(),6000):null;
+  const t=ctrl?setTimeout(()=>ctrl.abort(),wait):null;
   try{
     const res=await fetch(url,{cache:"no-store",signal:ctrl?ctrl.signal:undefined});
     if(!res.ok){
