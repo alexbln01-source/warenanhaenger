@@ -23,6 +23,8 @@ PAUSE = STATE_DIR / "PAUSE"
 IOB_FILE = STATE_DIR / "iobroker.url"
 BTC_RPC_FILE = STATE_DIR / "bitcoin.rpc"
 S1_POWER_FILE = STATE_DIR / "s1_power.json"
+S1_POWER_LOG = STATE_DIR / "s1_power.log"
+S1_POWER_JSONL = STATE_DIR / "s1_power.jsonl"
 CKPOOL_STATUS = os.environ.get("CKPOOL_STATUS", "http://192.168.178.111")
 SITE = "ankersolix2.0.a278fac0-df28-4f92-846d-76e77de23b26"
 W = "47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm"
@@ -51,8 +53,29 @@ def _ts_local(ts=None):
     return dt.strftime("%d.%m. %H:%M:%S")
 
 
+def _ts_iso(ts=None):
+    dt = datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL)
+    return dt.isoformat(timespec="seconds")
+
+
 def _day_key(ts=None):
     return datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL).strftime("%Y-%m-%d")
+
+
+def _fmt_dur(sec):
+    if sec is None:
+        return None
+    try:
+        sec = int(sec)
+    except (TypeError, ValueError):
+        return None
+    if sec < 0:
+        sec = 0
+    if sec < 60:
+        return "%ds" % sec
+    if sec < 3600:
+        return "%dm" % (sec // 60)
+    return "%dh %dm" % (sec // 3600, (sec % 3600) // 60)
 
 
 def _s1_default():
@@ -94,6 +117,79 @@ def s1_save(data):
         pass
 
 
+def s1_append_log(event, prev_state=None, prev_sec=None):
+    """Append human + JSONL log lines for multi-day evaluation."""
+    try:
+        S1_POWER_LOG.parent.mkdir(parents=True, exist_ok=True)
+        ts = event.get("ts") or time.time()
+        ev = event.get("event")
+        label = "AN" if ev == "on" else ("AUS" if ev == "off" else str(ev).upper())
+        parts = [
+            _ts_iso(ts),
+            label,
+            "reason=%s" % (event.get("reason") or "?"),
+        ]
+        if prev_state and prev_state != "unknown":
+            parts.append("vorher=%s" % ("AN" if prev_state == "on" else "AUS"))
+        dur = _fmt_dur(prev_sec)
+        if dur:
+            parts.append("dauer=%s" % dur)
+        if event.get("pv") is not None:
+            try:
+                parts.append("pv=%sW" % int(round(float(event["pv"]))))
+            except (TypeError, ValueError):
+                parts.append("pv=%s" % event["pv"])
+        if event.get("soc") is not None:
+            try:
+                parts.append("soc=%s%%" % int(round(float(event["soc"]))))
+            except (TypeError, ValueError):
+                parts.append("soc=%s" % event["soc"])
+        if event.get("import_w") is not None:
+            try:
+                parts.append("bezug=%sW" % int(round(float(event["import_w"]))))
+            except (TypeError, ValueError):
+                parts.append("bezug=%s" % event["import_w"])
+        if event.get("miners_running") is not None:
+            parts.append("solar_soll=%s" % ("AN" if event["miners_running"] else "AUS"))
+        if event.get("miners_reason"):
+            parts.append("solar=\"%s\"" % str(event["miners_reason"]).replace('"', "'"))
+        line = "  ".join(parts) + "\n"
+        with S1_POWER_LOG.open("a", encoding="utf-8") as f:
+            f.write(line)
+        row = {
+            "ts": ts,
+            "iso": _ts_iso(ts),
+            "event": ev,
+            "reason": event.get("reason"),
+            "prev_state": prev_state,
+            "prev_sec": int(prev_sec) if prev_sec is not None else None,
+            "prev_human": dur,
+            "pv": event.get("pv"),
+            "soc": event.get("soc"),
+            "import_w": event.get("import_w"),
+            "miners_running": event.get("miners_running"),
+            "miners_reason": event.get("miners_reason"),
+        }
+        with S1_POWER_JSONL.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        # soft rotate if huge (keep last ~2 MB of .log via rename)
+        try:
+            if S1_POWER_LOG.stat().st_size > 2_000_000:
+                bak = S1_POWER_LOG.with_suffix(".log.1")
+                if bak.exists():
+                    bak.unlink()
+                S1_POWER_LOG.replace(bak)
+            if S1_POWER_JSONL.stat().st_size > 2_000_000:
+                bak = S1_POWER_JSONL.with_suffix(".jsonl.1")
+                if bak.exists():
+                    bak.unlink()
+                S1_POWER_JSONL.replace(bak)
+        except OSError:
+            pass
+    except OSError:
+        pass
+
+
 def s1_update_context(solix):
     if not isinstance(solix, dict):
         return
@@ -121,11 +217,7 @@ def s1_public(data=None):
         "since": since,
         "since_txt": _ts_local(since) if since else None,
         "since_sec": age,
-        "since_human": (
-            ("%dh %dm" % (age // 3600, (age % 3600) // 60)) if age is not None and age >= 3600
-            else ("%dm" % (age // 60) if age is not None and age >= 60
-                  else ("%ds" % age if age is not None else None))
-        ),
+        "since_human": _fmt_dur(age),
         "last_on": d.get("last_on"),
         "last_on_txt": _ts_local(d["last_on"]) if d.get("last_on") else None,
         "last_on_reason": d.get("last_on_reason"),
@@ -134,6 +226,8 @@ def s1_public(data=None):
         "last_off_reason": d.get("last_off_reason"),
         "cycles_today": d.get("cycles_today") or 0,
         "history": list(reversed(hist)),
+        "log_file": str(S1_POWER_LOG),
+        "jsonl_file": str(S1_POWER_JSONL),
     }
 
 
@@ -161,6 +255,7 @@ def s1_observe(want, reason):
             return s1_public(data)
         # commit transition
         ctx = dict(_s1_ctx)
+        prev_sec = (now - data["since"]) if data.get("since") else None
         event = {
             "ts": now,
             "event": want,
@@ -168,6 +263,7 @@ def s1_observe(want, reason):
             "pv": ctx.get("pv"),
             "soc": ctx.get("soc"),
             "import_w": ctx.get("import_w"),
+            "miners_running": ctx.get("miners_running"),
             "miners_reason": ctx.get("miners_reason"),
         }
         hist = list(data.get("history") or [])
@@ -184,6 +280,7 @@ def s1_observe(want, reason):
             data["last_off"] = now
             data["last_off_reason"] = reason
         s1_save(data)
+        s1_append_log(event, prev_state=cur, prev_sec=prev_sec)
         _s1_pending["want"] = None
         _s1_pending["count"] = 0
         return s1_public(data)
@@ -1236,7 +1333,8 @@ function setS1Power(p){
   if($("pPowerHint")){
     const onR=p.last_on_reason?("AN: "+p.last_on_reason):"";
     const offR=p.last_off_reason?("AUS: "+p.last_off_reason):"";
-    $("pPowerHint").textContent=[onR,offR].filter(Boolean).join(" · ")||"Tracking · MESZ · 2 Polls Bestätigung";
+    const log=p.log_file?("Log: "+p.log_file):"Log: /opt/xmrig-dashboard/s1_power.log";
+    $("pPowerHint").textContent=([onR,offR].filter(Boolean).join(" · ")||"Tracking · MESZ")+" · "+log;
   }
   if($("tPSub") && p.last_off_txt){
     // keep solix text; append short cycle hint on home via tPMain area only if setSolix already ran — handled there
@@ -1656,6 +1754,30 @@ class H(BaseHTTPRequestHandler):
             except (URLError, HTTPError, TimeoutError, json.JSONDecodeError, ValueError) as ex:
                 err = getattr(ex, "reason", None) or str(ex)
                 self.j(502, {"error": str(err), "s1_power": s1_from_nexus({"error": str(err)})})
+            return
+        if self.path.startswith("/api/s1-power/log"):
+            n = 80
+            try:
+                q = self.path.split("?", 1)
+                if len(q) > 1:
+                    for part in q[1].split("&"):
+                        if part.startswith("n="):
+                            n = max(1, min(500, int(part.split("=", 1)[1])))
+            except ValueError:
+                n = 80
+            lines = []
+            try:
+                if S1_POWER_LOG.exists():
+                    lines = S1_POWER_LOG.read_text(encoding="utf-8").splitlines()[-n:]
+            except OSError as ex:
+                self.j(500, {"error": str(ex), "log_file": str(S1_POWER_LOG)})
+                return
+            self.j(200, {
+                "log_file": str(S1_POWER_LOG),
+                "jsonl_file": str(S1_POWER_JSONL),
+                "lines": lines,
+                "count": len(lines),
+            })
             return
         if self.path.startswith("/api/s1-power"):
             self.j(200, s1_public())
