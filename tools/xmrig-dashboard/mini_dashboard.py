@@ -113,25 +113,38 @@ def s1_save(data):
         tmp = S1_POWER_FILE.with_suffix(".tmp")
         tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
         tmp.replace(S1_POWER_FILE)
-    except OSError:
-        pass
+    except OSError as ex:
+        print("s1_save failed:", ex, S1_POWER_FILE, flush=True)
 
 
-def s1_ensure_log():
+def s1_ensure_log(boot=False):
     """Create log files immediately so paths exist before the first switch."""
     try:
         S1_POWER_LOG.parent.mkdir(parents=True, exist_ok=True)
-        if not S1_POWER_LOG.exists():
-            with S1_POWER_LOG.open("a", encoding="utf-8") as f:
+        created = not S1_POWER_LOG.exists()
+        # Always touch/create the human log; append START on boot or first create
+        with open(str(S1_POWER_LOG), "a", encoding="utf-8") as f:
+            if created:
                 f.write("# S1 An/Aus-Log (Europe/Berlin) — AN/AUS + reason + PV/SOC/Bezug\n")
-                f.write(
-                    "%s  START  tracking=ok  dir=%s\n"
-                    % (_ts_iso(), S1_POWER_LOG.parent)
-                )
+            if boot or created:
+                try:
+                    stamp = _ts_iso()
+                except Exception:
+                    stamp = time.strftime("%Y-%m-%dT%H:%M:%S")
+                f.write("%s  START  tracking=ok  log=%s\n" % (stamp, S1_POWER_LOG))
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError:
+                pass
         if not S1_POWER_JSONL.exists():
-            S1_POWER_JSONL.write_text("", encoding="utf-8")
-    except OSError:
-        pass
+            with open(str(S1_POWER_JSONL), "a", encoding="utf-8") as f:
+                f.write("")
+                f.flush()
+        return True
+    except Exception as ex:
+        print("s1_ensure_log failed:", ex, "path=", S1_POWER_LOG, flush=True)
+        return False
 
 
 def s1_append_log(event, prev_state=None, prev_sec=None):
@@ -141,8 +154,12 @@ def s1_append_log(event, prev_state=None, prev_sec=None):
         ts = event.get("ts") or time.time()
         ev = event.get("event")
         label = "AN" if ev == "on" else ("AUS" if ev == "off" else str(ev).upper())
+        try:
+            stamp = _ts_iso(ts)
+        except Exception:
+            stamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(ts))
         parts = [
-            _ts_iso(ts),
+            stamp,
             label,
             "reason=%s" % (event.get("reason") or "?"),
         ]
@@ -171,11 +188,16 @@ def s1_append_log(event, prev_state=None, prev_sec=None):
         if event.get("miners_reason"):
             parts.append("solar=\"%s\"" % str(event["miners_reason"]).replace('"', "'"))
         line = "  ".join(parts) + "\n"
-        with S1_POWER_LOG.open("a", encoding="utf-8") as f:
+        with open(str(S1_POWER_LOG), "a", encoding="utf-8") as f:
             f.write(line)
+            f.flush()
+        try:
+            iso = _ts_iso(ts)
+        except Exception:
+            iso = stamp
         row = {
             "ts": ts,
-            "iso": _ts_iso(ts),
+            "iso": iso,
             "event": ev,
             "reason": event.get("reason"),
             "prev_state": prev_state,
@@ -187,26 +209,27 @@ def s1_append_log(event, prev_state=None, prev_sec=None):
             "miners_running": event.get("miners_running"),
             "miners_reason": event.get("miners_reason"),
         }
-        with S1_POWER_JSONL.open("a", encoding="utf-8") as f:
+        with open(str(S1_POWER_JSONL), "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
-        # soft rotate if huge (keep last ~2 MB of .log via rename)
+            f.flush()
+        # soft rotate if huge
         try:
-            if S1_POWER_LOG.stat().st_size > 2_000_000:
-                bak = S1_POWER_LOG.with_suffix(".log.1")
+            if S1_POWER_LOG.exists() and S1_POWER_LOG.stat().st_size > 2_000_000:
+                bak = Path(str(S1_POWER_LOG) + ".1")
                 if bak.exists():
                     bak.unlink()
                 S1_POWER_LOG.replace(bak)
                 s1_ensure_log()
             if S1_POWER_JSONL.exists() and S1_POWER_JSONL.stat().st_size > 2_000_000:
-                bak = S1_POWER_JSONL.with_suffix(".jsonl.1")
+                bak = Path(str(S1_POWER_JSONL) + ".1")
                 if bak.exists():
                     bak.unlink()
                 S1_POWER_JSONL.replace(bak)
                 s1_ensure_log()
-        except OSError:
-            pass
-    except OSError:
-        pass
+        except OSError as ex:
+            print("s1 log rotate failed:", ex, flush=True)
+    except Exception as ex:
+        print("s1_append_log failed:", ex, "path=", S1_POWER_LOG, flush=True)
 
 
 def s1_update_context(solix):
@@ -219,6 +242,7 @@ def s1_update_context(solix):
 
 
 def s1_public(data=None):
+    s1_ensure_log()
     d = data if data is not None else s1_load()
     now = time.time()
     since = d.get("since")
@@ -1852,16 +1876,17 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    s1_ensure_log()
+    s1_ensure_log(boot=True)
     rpc = bitcoin_rpc_cfg()
     print(
-        "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s s1_log=%s"
+        "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s s1_log=%s exists=%s"
         % (
             PORT,
             iobroker_base(),
             rpc.get("url"),
             "yes" if rpc.get("user") else "no",
             S1_POWER_LOG,
+            S1_POWER_LOG.exists(),
         ),
         flush=True,
     )
