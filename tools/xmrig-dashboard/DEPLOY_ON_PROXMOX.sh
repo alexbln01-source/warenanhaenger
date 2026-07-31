@@ -34,7 +34,7 @@ pct exec 107 -- python3 - <<'PY'
 import urllib.request, json
 base="http://127.0.0.1:8090"
 h=urllib.request.urlopen(base+"/").read().decode()
-print("tileNode", "tileNode" in h, "viewNode", "viewNode" in h)
+print("tilePwr", "tilePwr" in h, "viewPwr", "viewPwr" in h, "tileNode", "tileNode" in h)
 for path in ["/api/nexus","/api/bitcoin","/api/solix"]:
     try:
         with urllib.request.urlopen(base+path, timeout=10) as r:

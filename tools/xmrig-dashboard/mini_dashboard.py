@@ -415,17 +415,45 @@ def solix_map_ids(all_ids, site):
             f"{site}.solarbank_info.output_power",
             f"{site}.homepage.output_power",
         ],
+        "discharge_w": [
+            f"{site}.solarbank_info.battery_discharge_power",
+        ],
+        "bat_charge_w": [],  # fuzzy: bat_charge_power
+        "grid_to_bat_w": [
+            f"{site}.solarbank_info.grid_to_battery_power",
+        ],
+        "to_home_w": [
+            f"{site}.solarbank_info.to_home_load",
+        ],
+        "micro_w": [
+            f"{site}.solarbank_info.micro_inverter_power",
+        ],
+        "pv1": [f"{site}.solarbank_info.solar_power_1"],
+        "pv2": [f"{site}.solarbank_info.solar_power_2"],
+        "pv3": [f"{site}.solarbank_info.solar_power_3"],
+        "pv4": [f"{site}.solarbank_info.solar_power_4"],
+        "battery_wh": [],  # fuzzy battery_energy
+        "device_name": [],  # fuzzy device_name under solarbank_list
+        "updated": [f"{site}.solarbank_info.updated_time"],
     }
     idset = set(all_ids)
     # also fuzzy: any id under site containing keywords
     fuzzy = {
-        "soc": ("battery_power", "battery_soc", "soc"),
-        "pv": ("photovoltaic_power", "solar_power", "pv_power"),
-        "import_w": ("grid_to_home", "grid_import", "to_home_power"),
-        "export_w": ("to_grid_power", "grid_export", "photovoltaic_to_grid"),
-        "load_w": ("home_load", "home_power"),
-        "charge_w": ("charging_power",),
-        "output_w": ("output_power",),
+        "soc": ("total_battery_power", "battery_soc"),
+        "pv": ("total_photovoltaic_power", "photovoltaic_power"),
+        "import_w": ("grid_to_home_power", "grid_import"),
+        "export_w": ("photovoltaic_to_grid_power", "grid_export"),
+        "load_w": ("home_load_power", "home_power"),
+        "charge_w": ("total_charging_power",),
+        "output_w": ("total_output_power",),
+        "discharge_w": ("battery_discharge_power",),
+        "bat_charge_w": ("bat_charge_power",),
+        "grid_to_bat_w": ("grid_to_battery_power",),
+        "to_home_w": ("to_home_load",),
+        "micro_w": ("micro_inverter_power",),
+        "battery_wh": ("battery_energy",),
+        "device_name": ("device_name",),
+        "updated": ("updated_time",),
     }
     mapped = {
         "miners_enabled": "0_userdata.0.solar_miners.enabled",
@@ -440,7 +468,14 @@ def solix_map_ids(all_ids, site):
             for i in sorted(all_ids):
                 if not i.startswith(site + "."):
                     continue
+                # skip energyanalysis aggregates
+                if ".energyanalysis." in i:
+                    continue
                 low = i.lower()
+                if key == "device_name" and "solarbank_list" not in low:
+                    continue
+                if key == "battery_wh" and "solarbank_list" not in low:
+                    continue
                 if any(k in low for k in keys):
                     chosen = i
                     break
@@ -492,10 +527,10 @@ def solix_info():
         except Exception as ex:
             return k, None, str(ex)
 
-    with ThreadPoolExecutor(max_workers=6) as pool:
+    with ThreadPoolExecutor(max_workers=10) as pool:
         futs = [pool.submit(one, it) for it in ids.items()]
         try:
-            for fut in as_completed(futs, timeout=5):
+            for fut in as_completed(futs, timeout=6):
                 k, val, err = fut.result()
                 out[k] = val
                 if val is not None:
@@ -505,9 +540,29 @@ def solix_info():
         except Exception as ex:
             out.setdefault("errors", {})["_timeout"] = str(ex)
 
+    # Coerce numeric-looking strings (e.g. to_home_load="507")
+    for k, v in list(out.items()):
+        if k in ("mapped", "errors", "sample_ids", "site", "site_id", "iobroker",
+                 "device_name", "updated", "miners_last", "miners_reason", "error"):
+            continue
+        if isinstance(v, str) and v.strip() != "":
+            try:
+                out[k] = float(v) if "." in v else int(v)
+            except ValueError:
+                pass
+
     # SOC sometimes 0..1
     if isinstance(out.get("soc"), (int, float)) and 0 <= float(out["soc"]) <= 1.5:
         out["soc"] = round(float(out["soc"]) * 100, 1)
+
+    # Surplus hint for UI
+    try:
+        pv = float(out["pv"]) if out.get("pv") is not None else None
+        load = float(out["load_w"]) if out.get("load_w") is not None else None
+        if pv is not None and load is not None:
+            out["surplus_w"] = round(pv - load, 0)
+    except (TypeError, ValueError):
+        pass
 
     if not ok_any:
         sample = sorted(all_ids)[:12]
@@ -574,6 +629,29 @@ body{
 .tile-btc{border-left:3px solid var(--btc)}
 .tile-node{border-left:3px solid var(--node)}
 .tile-sol{border-left:3px solid var(--sol)}
+.tile-pwr{border-left:3px solid #7dffb3;background:linear-gradient(135deg,rgba(240,194,75,.06),rgba(94,200,255,.08))}
+.tile-val.pwr{color:#9fe8c4}
+.dual{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;
+}
+.dual .panel{
+  border:1px solid var(--line);background:var(--bg2);padding:12px;
+}
+.dual .panel.btc{border-top:2px solid var(--btc)}
+.dual .panel.sol{border-top:2px solid var(--sol)}
+.dual .lab{font:700 10px/1 Sora,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.dual .big{
+  font:800 clamp(1.5rem,7vw,2rem)/.95 JetBrains Mono,monospace;letter-spacing:-.04em;
+}
+.dual .big.btc{color:var(--btc)}.dual .big.sol{color:var(--sol)}
+.dual .big small{font-size:.38em;margin-left:.15rem;color:var(--mute)}
+.dual .mini{margin-top:6px;color:var(--mute);font:500 11px JetBrains Mono,monospace}
+.pvbars{display:grid;gap:6px;margin-top:8px}
+.pvrow{display:grid;grid-template-columns:42px 1fr 52px;gap:8px;align-items:center}
+.pvrow span{font:600 11px JetBrains Mono,monospace;color:var(--mute)}
+.pvrow b{font:700 11px JetBrains Mono,monospace;text-align:right}
+.pvtrack{height:6px;background:#152019;overflow:hidden}
+.pvtrack i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2a8fc4,var(--sol))}
 .tile-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
 .tile-name{font:700 11px/1 Sora,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
 .tile-val{
@@ -649,25 +727,30 @@ button.stop-btc{background:var(--stop);color:#190606}
   <div class="main">
     <section class="view show" id="viewHome">
       <div class="tiles">
-        <button class="tile tile-xmr" id="tileXmr" type="button">
-          <div class="tile-top"><span class="tile-name">XMRig</span><span class="pill" id="tXPill">—</span></div>
-          <div class="tile-val xmr" id="tXH">—<small>H/s</small></div>
-          <div class="tile-sub" id="tXSub">Monero · CT 107</div>
+        <button class="tile tile-pwr" id="tilePwr" type="button">
+          <div class="tile-top"><span class="tile-name">S1 · Anker</span><span class="pill" id="tPPill">—</span></div>
+          <div class="tile-val pwr" id="tPMain">—</div>
+          <div class="tile-sub" id="tPSub">Nexus + Solarbank</div>
         </button>
         <button class="tile tile-btc" id="tileBtc" type="button">
           <div class="tile-top"><span class="tile-name">Nexus S1</span><span class="pill" id="tNPill">—</span></div>
           <div class="tile-val btc" id="tNH">—<small>TH/s</small></div>
           <div class="tile-sub" id="tNSub">Bitcoin · Solo</div>
         </button>
+        <button class="tile tile-sol" id="tileSol" type="button">
+          <div class="tile-top"><span class="tile-name">Solix Solar</span><span class="pill" id="tSPill">—</span></div>
+          <div class="tile-val sol" id="tSSoc">—<small>%</small></div>
+          <div class="tile-sub" id="tSSub">Kraftwerk · PV — · Bezug —</div>
+        </button>
         <button class="tile tile-node" id="tileNode" type="button">
           <div class="tile-top"><span class="tile-name">Solo Node</span><span class="pill" id="tBPill">—</span></div>
           <div class="tile-val node" id="tBSync">—<small>%</small></div>
           <div class="tile-sub" id="tBSub">Bitcoin Core · Sync</div>
         </button>
-        <button class="tile tile-sol" id="tileSol" type="button">
-          <div class="tile-top"><span class="tile-name">Solix Solar</span><span class="pill" id="tSPill">—</span></div>
-          <div class="tile-val sol" id="tSSoc">—<small>%</small></div>
-          <div class="tile-sub" id="tSSub">Kraftwerk · PV — · Bezug —</div>
+        <button class="tile tile-xmr" id="tileXmr" type="button">
+          <div class="tile-top"><span class="tile-name">XMRig</span><span class="pill" id="tXPill">—</span></div>
+          <div class="tile-val xmr" id="tXH">—<small>H/s</small></div>
+          <div class="tile-sub" id="tXSub">Monero · CT 107</div>
         </button>
       </div>
       <div class="tile-sub" id="homeTick" style="text-align:center;margin-top:8px">lädt…</div>
@@ -770,29 +853,74 @@ button.stop-btc{background:var(--stop);color:#190606}
     <section class="view" id="viewSol">
       <div class="hero">
         <div class="row">
-          <div class="sub">Kraftwerk</div>
+          <div class="sub" id="sDev">Kraftwerk · Solarbank 2</div>
           <div class="pill" id="sPill">—</div>
         </div>
         <div class="hash sol" id="sSoc">—<small>%</small></div>
         <div class="sub" id="sHm">Akku SOC</div>
       </div>
       <div class="grid">
-        <div class="cell"><div class="k">PV</div><div class="v sol" id="sPv">—</div></div>
-        <div class="cell"><div class="k">Last</div><div class="v" id="sLoad">—</div></div>
+        <div class="cell"><div class="k">PV gesamt</div><div class="v sol" id="sPv">—</div></div>
+        <div class="cell"><div class="k">Hauslast</div><div class="v" id="sLoad">—</div></div>
         <div class="cell"><div class="k">Bezug</div><div class="v" id="sImp">—</div></div>
         <div class="cell"><div class="k">Export</div><div class="v" id="sExp">—</div></div>
         <div class="cell"><div class="k">Laden</div><div class="v" id="sChg">—</div></div>
+        <div class="cell"><div class="k">Entladen</div><div class="v" id="sDis">—</div></div>
         <div class="cell"><div class="k">Ausgang</div><div class="v" id="sOut">—</div></div>
+        <div class="cell"><div class="k">→ Haus</div><div class="v" id="sHome">—</div></div>
+        <div class="cell"><div class="k">Mikro-WR</div><div class="v" id="sMicro">—</div></div>
+        <div class="cell"><div class="k">Akku Wh</div><div class="v" id="sWh">—</div></div>
+        <div class="cell"><div class="k">Überschuss</div><div class="v" id="sSur">—</div></div>
+        <div class="cell"><div class="k">Netz→Akku</div><div class="v" id="sG2b">—</div></div>
       </div>
       <div class="box">
-        <div class="k">Solar-Miner Steuerung</div>
+        <div class="k">PV-Strings</div>
+        <div class="pvbars">
+          <div class="pvrow"><span>PV1</span><div class="pvtrack"><i id="sPv1b"></i></div><b id="sPv1">—</b></div>
+          <div class="pvrow"><span>PV2</span><div class="pvtrack"><i id="sPv2b"></i></div><b id="sPv2">—</b></div>
+          <div class="pvrow"><span>PV3</span><div class="pvtrack"><i id="sPv3b"></i></div><b id="sPv3">—</b></div>
+          <div class="pvrow"><span>PV4</span><div class="pvtrack"><i id="sPv4b"></i></div><b id="sPv4">—</b></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="k">Solar-Miner (Nexus)</div>
         <div class="nums">
           <div><span class="k">Soll</span><b id="sRun">—</b></div>
           <div><span class="k">Auto</span><b id="sEn">—</b></div>
         </div>
         <div class="track sol"><i id="sBar"></i></div>
-        <div class="meta"><span>SOC / 20 % Schwelle</span><span id="sLast">—</span></div>
+        <div class="meta"><span>An ≥10 % + PV≥300 W · Aus &lt;25 % ohne Sonne</span><span id="sLast">—</span></div>
         <div class="reason" id="sReason">—</div>
+      </div>
+    </section>
+
+    <section class="view" id="viewPwr">
+      <div class="dual">
+        <div class="panel btc">
+          <div class="lab">Nexus S1</div>
+          <div class="big btc" id="pNH">—<small>TH/s</small></div>
+          <div class="mini" id="pNSub">—</div>
+        </div>
+        <div class="panel sol">
+          <div class="lab">Anker Solix</div>
+          <div class="big sol" id="pSSoc">—<small>%</small></div>
+          <div class="mini" id="pSSub">—</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">S1 Power</div><div class="v" id="pNPw">—</div></div>
+        <div class="cell"><div class="k">S1 Temp</div><div class="v" id="pNTemp">—</div></div>
+        <div class="cell"><div class="k">PV</div><div class="v sol" id="pPv">—</div></div>
+        <div class="cell"><div class="k">Hauslast</div><div class="v" id="pLoad">—</div></div>
+        <div class="cell"><div class="k">Bezug</div><div class="v" id="pImp">—</div></div>
+        <div class="cell"><div class="k">Laden</div><div class="v" id="pChg">—</div></div>
+        <div class="cell"><div class="k">Überschuss</div><div class="v" id="pSur">—</div></div>
+        <div class="cell"><div class="k">Miner-Soll</div><div class="v" id="pRun">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">Solar-Steuerung</div>
+        <div class="reason" id="pReason">—</div>
+        <div class="sub" id="pHint" style="margin-top:8px">Nexus nur bei Sonne / genug Akku (ioBroker)</div>
       </div>
     </section>
   </div>
@@ -811,6 +939,10 @@ button.stop-btc{background:var(--stop);color:#190606}
     <div class="actions" id="sActions" style="display:none">
       <div class="tick" style="margin:0;padding:6px 0">Steuerung über ioBroker-Skript</div>
     </div>
+    <div class="actions two" id="pActions" style="display:none">
+      <button class="act go-btc" id="pOn" type="button">S1 Neustart</button>
+      <button class="act stop-btc" id="pOff" type="button">S1 Shutdown</button>
+    </div>
     <div id="err"></div>
     <div class="tick" id="tick">—</div>
   </footer>
@@ -820,7 +952,7 @@ const $=id=>document.getElementById(id);
 const W="47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm";
 const BTC_ADDR="bc1qdjd4rtw6c6at7mmjyq4a9m4lh4s0z5yxf89qnl";
 let view="home", miningOn=null, busy=false, nBusy=false, nexusOff=true;
-const titles={home:"<b>MINER</b> · Home",xmr:"<b>XMRig</b> · Monero",btc:"<b>Nexus S1</b> · Bitcoin",node:"<b>Solo Node</b> · Bitcoin",sol:"<b>Solix</b> · Solar"};
+const titles={home:"<b>MINER</b> · Home",xmr:"<b>XMRig</b> · Monero",btc:"<b>Nexus S1</b> · Bitcoin",node:"<b>Solo Node</b> · Bitcoin",sol:"<b>Solix</b> · Solar",pwr:"<b>S1 · Anker</b> · Power"};
 
 const fh=n=>{if(n==null||isNaN(n))return"—";if(n>=1000)return(n/1000).toFixed(2)+"k";return String(Math.round(n))};
 const fx=n=>{if(n==null||isNaN(n))return"—";if(!n)return"0";return n<0.01?n.toFixed(8):n.toFixed(4)};
@@ -838,6 +970,7 @@ const fth=n=>{
   return th.toFixed(3);
 };
 const fw=n=>{if(n==null||isNaN(n))return"—";return Math.round(Number(n))+" W"};
+const fwh=n=>{if(n==null||isNaN(n))return"—";const x=Number(n);if(x>=1000)return(x/1000).toFixed(2)+" kWh";return Math.round(x)+" Wh"};
 const fdiff=n=>{
   if(n==null||isNaN(n))return"—";
   const x=Number(n);
@@ -856,6 +989,7 @@ function openView(name){
   $("viewBtc").classList.toggle("show", name==="btc");
   $("viewNode").classList.toggle("show", name==="node");
   $("viewSol").classList.toggle("show", name==="sol");
+  $("viewPwr").classList.toggle("show", name==="pwr");
   $("backBtn").style.display=name==="home"?"none":"inline-block";
   $("foot").style.display=name==="home"?"none":"";
   $("brandTitle").innerHTML=titles[name]||titles.home;
@@ -863,11 +997,13 @@ function openView(name){
   $("nActions").style.display=name==="btc"?"grid":"none";
   $("bActions").style.display=name==="node"?"":"none";
   $("sActions").style.display=name==="sol"?"":"none";
+  $("pActions").style.display=name==="pwr"?"grid":"none";
 }
 $("tileXmr").onclick=()=>openView("xmr");
 $("tileBtc").onclick=()=>openView("btc");
 $("tileNode").onclick=()=>openView("node");
 $("tileSol").onclick=()=>openView("sol");
+$("tilePwr").onclick=()=>openView("pwr");
 $("backBtn").onclick=()=>openView("home");
 
 function setSw(on,boot){
@@ -892,6 +1028,14 @@ function setNexus(d){
     $("nHm").textContent=d&&d.error?String(d.error):"Nicht erreichbar";
     $("tNSub").textContent="Nicht erreichbar";
     $("nOn").disabled=true; $("nOff").disabled=true;
+    if($("pNH")){
+      $("pNH").innerHTML='—<small>TH/s</small>';
+      $("pNSub").textContent="S1 offline";
+      $("pNPw").textContent="—";
+      $("pNTemp").textContent="—";
+      if($("pOn")) $("pOn").disabled=true;
+      if($("pOff")) $("pOff").disabled=true;
+    }
     return;
   }
   nexusOff=!!d.shutdown;
@@ -926,6 +1070,14 @@ function setNexus(d){
   if(local) $("tNSub").textContent=pw+" · Solo Node";
   $("nOn").disabled=nBusy||!nexusOff;
   $("nOff").disabled=nBusy||nexusOff;
+  if($("pNH")){
+    $("pNH").innerHTML=fth(hr)+'<small>TH/s</small>';
+    $("pNSub").textContent=pillTxt+" · "+pw;
+    $("pNPw").textContent=pw;
+    $("pNTemp").textContent=d.temp!=null?Number(d.temp).toFixed(0)+"°":"—";
+    if($("pOn")) $("pOn").disabled=nBusy||!nexusOff;
+    if($("pOff")) $("pOff").disabled=nBusy||nexusOff;
+  }
 }
 
 function setBitcoin(d){
@@ -986,6 +1138,12 @@ function setBitcoin(d){
 }
 
 function setSolix(d){
+  const setPvBar=(id,bid,val,maxv)=>{
+    const n=val!=null&&!isNaN(val)?Number(val):null;
+    $(id).textContent=fw(n);
+    const pct=n!=null&&maxv>0?Math.max(0,Math.min(100,(n/maxv)*100)):0;
+    $(bid).style.width=pct+"%";
+  };
   if(!d||d.error){
     $("sPill").textContent="Offline"; $("sPill").className="pill off";
     $("tSPill").textContent="Offline"; $("tSPill").className="pill off";
@@ -993,6 +1151,9 @@ function setSolix(d){
     $("tSSoc").innerHTML='—<small>%</small>';
     $("sHm").textContent=d&&d.error?String(d.error):"ioBroker nicht erreichbar";
     $("tSSub").textContent="ioBroker nicht erreichbar";
+    if($("tPPill")){ $("tPPill").textContent="Solix?"; $("tPPill").className="pill warn"; }
+    if($("tPMain")) $("tPMain").textContent="—";
+    if($("tPSub")) $("tPSub").textContent="Anker offline";
     return;
   }
   const soc=d.soc!=null?Number(d.soc):null;
@@ -1005,15 +1166,29 @@ function setSolix(d){
   const socTxt=soc!=null?Math.round(soc):"—";
   $("sSoc").innerHTML=socTxt+'<small>%</small>';
   $("tSSoc").innerHTML=socTxt+'<small>%</small>';
-  $("sHm").textContent="Akku · Schwelle 20% · "+(en?"Auto an":"Auto aus");
+  const dev=d.device_name?String(d.device_name):"Solarbank 2";
+  if($("sDev")) $("sDev").textContent="Kraftwerk · "+dev;
+  $("sHm").textContent="Akku · "+fwh(d.battery_wh)+" · "+(en?"Auto an":"Auto aus");
   $("tSSub").textContent="PV "+fw(d.pv)+" · Bezug "+fw(d.import_w);
   $("sPv").textContent=fw(d.pv);
   $("sLoad").textContent=fw(d.load_w);
   $("sImp").textContent=fw(d.import_w);
   $("sImp").className="v "+(d.import_w>=50?"bad":"ok");
   $("sExp").textContent=fw(d.export_w);
-  $("sChg").textContent=fw(d.charge_w);
+  $("sChg").textContent=fw(d.charge_w!=null?d.charge_w:d.bat_charge_w);
+  $("sDis").textContent=fw(d.discharge_w);
   $("sOut").textContent=fw(d.output_w);
+  $("sHome").textContent=fw(d.to_home_w);
+  $("sMicro").textContent=fw(d.micro_w);
+  $("sWh").textContent=fwh(d.battery_wh);
+  $("sSur").textContent=fw(d.surplus_w);
+  $("sSur").className="v "+(d.surplus_w!=null&&d.surplus_w>0?"ok":"");
+  $("sG2b").textContent=fw(d.grid_to_bat_w);
+  const pvMax=Math.max(400, Number(d.pv)||0, Number(d.pv1)||0, Number(d.pv2)||0, Number(d.pv3)||0, Number(d.pv4)||0);
+  setPvBar("sPv1","sPv1b",d.pv1,pvMax);
+  setPvBar("sPv2","sPv2b",d.pv2,pvMax);
+  setPvBar("sPv3","sPv3b",d.pv3,pvMax);
+  setPvBar("sPv4","sPv4b",d.pv4,pvMax);
   $("sRun").textContent=run?"ON":"OFF";
   $("sRun").style.color=run?"var(--xmr)":"var(--stop)";
   $("sEn").textContent=en?"Ja":"Nein";
@@ -1021,6 +1196,27 @@ function setSolix(d){
   $("sBar").style.width=pct+"%";
   $("sLast").textContent=d.miners_last||"—";
   $("sReason").textContent=d.miners_reason||"Keine letzte Aktion";
+  // Combo page + home tile
+  if($("pSSoc")){
+    $("pSSoc").innerHTML=socTxt+'<small>%</small>';
+    $("pSSub").textContent="PV "+fw(d.pv)+" · "+pillTxt;
+    $("pPv").textContent=fw(d.pv);
+    $("pLoad").textContent=fw(d.load_w);
+    $("pImp").textContent=fw(d.import_w);
+    $("pImp").className="v "+(d.import_w>=50?"bad":"ok");
+    $("pChg").textContent=fw(d.charge_w!=null?d.charge_w:d.bat_charge_w);
+    $("pSur").textContent=fw(d.surplus_w);
+    $("pRun").textContent=run?"ON":"OFF";
+    $("pRun").style.color=run?"var(--xmr)":"var(--stop)";
+    $("pReason").textContent=d.miners_reason||"Keine letzte Aktion";
+  }
+  if($("tPMain")){
+    const hrTxt=$("tNH")?$("tNH").textContent.replace(/\s+/g," ").trim():"—";
+    $("tPMain").textContent=hrTxt+" · "+socTxt+"%";
+    $("tPSub").textContent="PV "+fw(d.pv)+" · Bezug "+fw(d.import_w)+" · "+pillTxt;
+    $("tPPill").textContent=run?"Solar AN":"Solar AUS";
+    $("tPPill").className=run?"pill on":"pill off";
+  }
 }
 
 $("xBtn").onclick=async()=>{
@@ -1037,7 +1233,9 @@ $("xBtn").onclick=async()=>{
 };
 
 async function nexusAct(action){
-  if(nBusy)return; nBusy=true; $("nOn").disabled=true; $("nOff").disabled=true; $("err").textContent="";
+  if(nBusy)return; nBusy=true;
+  ["nOn","nOff","pOn","pOff"].forEach(id=>{if($(id)) $(id).disabled=true;});
+  $("err").textContent="";
   try{
     const res=await fetch("/api/nexus",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action})});
     const j=await res.json();
@@ -1048,6 +1246,8 @@ async function nexusAct(action){
 }
 $("nOn").onclick=()=>nexusAct("restart");
 $("nOff").onclick=()=>nexusAct("shutdown");
+if($("pOn")) $("pOn").onclick=()=>nexusAct("restart");
+if($("pOff")) $("pOff").onclick=()=>nexusAct("shutdown");
 
 $("copyBtn").onclick=async()=>{
   try{await navigator.clipboard.writeText(W);$("copyBtn").textContent="OK";setTimeout(()=>$("copyBtn").textContent="Copy",900)}
