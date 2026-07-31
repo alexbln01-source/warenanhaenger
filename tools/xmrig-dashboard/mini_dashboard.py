@@ -117,10 +117,27 @@ def s1_save(data):
         pass
 
 
+def s1_ensure_log():
+    """Create log files immediately so paths exist before the first switch."""
+    try:
+        S1_POWER_LOG.parent.mkdir(parents=True, exist_ok=True)
+        if not S1_POWER_LOG.exists():
+            with S1_POWER_LOG.open("a", encoding="utf-8") as f:
+                f.write("# S1 An/Aus-Log (Europe/Berlin) — AN/AUS + reason + PV/SOC/Bezug\n")
+                f.write(
+                    "%s  START  tracking=ok  dir=%s\n"
+                    % (_ts_iso(), S1_POWER_LOG.parent)
+                )
+        if not S1_POWER_JSONL.exists():
+            S1_POWER_JSONL.write_text("", encoding="utf-8")
+    except OSError:
+        pass
+
+
 def s1_append_log(event, prev_state=None, prev_sec=None):
     """Append human + JSONL log lines for multi-day evaluation."""
     try:
-        S1_POWER_LOG.parent.mkdir(parents=True, exist_ok=True)
+        s1_ensure_log()
         ts = event.get("ts") or time.time()
         ev = event.get("event")
         label = "AN" if ev == "on" else ("AUS" if ev == "off" else str(ev).upper())
@@ -179,11 +196,13 @@ def s1_append_log(event, prev_state=None, prev_sec=None):
                 if bak.exists():
                     bak.unlink()
                 S1_POWER_LOG.replace(bak)
-            if S1_POWER_JSONL.stat().st_size > 2_000_000:
+                s1_ensure_log()
+            if S1_POWER_JSONL.exists() and S1_POWER_JSONL.stat().st_size > 2_000_000:
                 bak = S1_POWER_JSONL.with_suffix(".jsonl.1")
                 if bak.exists():
                     bak.unlink()
                 S1_POWER_JSONL.replace(bak)
+                s1_ensure_log()
         except OSError:
             pass
     except OSError:
@@ -288,6 +307,7 @@ def s1_observe(want, reason):
 
 def s1_from_nexus(data):
     """Derive on/off from Nexus API payload."""
+    s1_ensure_log()
     if not data or data.get("error"):
         return s1_observe("off", "offline")
     if data.get("shutdown"):
@@ -1832,10 +1852,17 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    s1_ensure_log()
     rpc = bitcoin_rpc_cfg()
     print(
-        "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s"
-        % (PORT, iobroker_base(), rpc.get("url"), "yes" if rpc.get("user") else "no"),
+        "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s s1_log=%s"
+        % (
+            PORT,
+            iobroker_base(),
+            rpc.get("url"),
+            "yes" if rpc.get("user") else "no",
+            S1_POWER_LOG,
+        ),
         flush=True,
     )
     ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()
