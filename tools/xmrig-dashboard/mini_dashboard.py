@@ -5,23 +5,37 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 from pathlib import Path
 from base64 import b64encode
-import json, time, subprocess, os
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+import json, time, subprocess, os, threading
 
 XMRIG = "http://127.0.0.1:8080/2/summary"
 NEXUS = "http://192.168.178.116"
 PORT = 8090
 SERVICE = "xmrig"
-PAUSE = Path("/opt/xmrig-dashboard/PAUSE")
-IOB_FILE = Path("/opt/xmrig-dashboard/iobroker.url")
-BTC_RPC_FILE = Path("/opt/xmrig-dashboard/bitcoin.rpc")
+_STATE_CANDIDATES = (
+    Path(os.environ["DASH_STATE"]) if os.environ.get("DASH_STATE") else None,
+    Path("/opt/xmrig-dashboard"),
+    Path(__file__).resolve().parent,
+)
+STATE_DIR = next((p for p in _STATE_CANDIDATES if p and (p.exists() or p == _STATE_CANDIDATES[-1])), Path("."))
+PAUSE = STATE_DIR / "PAUSE"
+IOB_FILE = STATE_DIR / "iobroker.url"
+BTC_RPC_FILE = STATE_DIR / "bitcoin.rpc"
+S1_POWER_FILE = STATE_DIR / "s1_power.json"
 CKPOOL_STATUS = os.environ.get("CKPOOL_STATUS", "http://192.168.178.111")
 SITE = "ankersolix2.0.a278fac0-df28-4f92-846d-76e77de23b26"
 W = "47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm"
 BTC_ADDR = "bc1qdjd4rtw6c6at7mmjyq4a9m4lh4s0z5yxf89qnl"
 POOL = f"https://supportxmr.com/api/miner/{W}/stats"
 THR, ATOM = 0.1, 1_000_000_000_000
+TZ_LOCAL = ZoneInfo("Europe/Berlin")
+S1_CONFIRM = 2  # consecutive polls before recording on/off
 cache = {"t": 0.0, "d": None}
 btc_cache = {"t": 0.0, "d": None}
+_s1_lock = threading.Lock()
+_s1_pending = {"want": None, "count": 0}
+_s1_ctx = {"pv": None, "soc": None, "import_w": None, "miners_reason": None, "miners_running": None}
 
 
 def iobroker_base():
@@ -30,6 +44,168 @@ def iobroker_base():
         if u:
             return u.rstrip("/")
     return os.environ.get("IOBROKER", "http://192.168.178.47:8087").rstrip("/")
+
+
+def _ts_local(ts=None):
+    dt = datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL)
+    return dt.strftime("%d.%m. %H:%M:%S")
+
+
+def _day_key(ts=None):
+    return datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL).strftime("%Y-%m-%d")
+
+
+def _s1_default():
+    return {
+        "state": "unknown",
+        "since": None,
+        "last_on": None,
+        "last_off": None,
+        "last_on_reason": None,
+        "last_off_reason": None,
+        "cycles_day": _day_key(),
+        "cycles_today": 0,
+        "history": [],
+    }
+
+
+def s1_load():
+    try:
+        if S1_POWER_FILE.exists():
+            data = json.loads(S1_POWER_FILE.read_text())
+            if isinstance(data, dict):
+                base = _s1_default()
+                base.update(data)
+                if not isinstance(base.get("history"), list):
+                    base["history"] = []
+                return base
+    except (OSError, json.JSONDecodeError, ValueError):
+        pass
+    return _s1_default()
+
+
+def s1_save(data):
+    try:
+        S1_POWER_FILE.parent.mkdir(parents=True, exist_ok=True)
+        tmp = S1_POWER_FILE.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+        tmp.replace(S1_POWER_FILE)
+    except OSError:
+        pass
+
+
+def s1_update_context(solix):
+    if not isinstance(solix, dict):
+        return
+    with _s1_lock:
+        for k in ("pv", "soc", "import_w", "miners_reason", "miners_running"):
+            if k in solix and solix[k] is not None:
+                _s1_ctx[k] = solix[k]
+
+
+def s1_public(data=None):
+    d = data if data is not None else s1_load()
+    now = time.time()
+    since = d.get("since")
+    age = int(now - since) if since else None
+    hist = []
+    for h in (d.get("history") or [])[-8:]:
+        if not isinstance(h, dict):
+            continue
+        hist.append({
+            **h,
+            "when": _ts_local(h.get("ts")) if h.get("ts") else None,
+        })
+    return {
+        "state": d.get("state") or "unknown",
+        "since": since,
+        "since_txt": _ts_local(since) if since else None,
+        "since_sec": age,
+        "since_human": (
+            ("%dh %dm" % (age // 3600, (age % 3600) // 60)) if age is not None and age >= 3600
+            else ("%dm" % (age // 60) if age is not None and age >= 60
+                  else ("%ds" % age if age is not None else None))
+        ),
+        "last_on": d.get("last_on"),
+        "last_on_txt": _ts_local(d["last_on"]) if d.get("last_on") else None,
+        "last_on_reason": d.get("last_on_reason"),
+        "last_off": d.get("last_off"),
+        "last_off_txt": _ts_local(d["last_off"]) if d.get("last_off") else None,
+        "last_off_reason": d.get("last_off_reason"),
+        "cycles_today": d.get("cycles_today") or 0,
+        "history": list(reversed(hist)),
+    }
+
+
+def s1_observe(want, reason):
+    """Record S1 on/off after S1_CONFIRM consecutive identical observations."""
+    if want not in ("on", "off"):
+        return s1_public()
+    now = time.time()
+    with _s1_lock:
+        data = s1_load()
+        if data.get("cycles_day") != _day_key(now):
+            data["cycles_day"] = _day_key(now)
+            data["cycles_today"] = 0
+        cur = data.get("state") or "unknown"
+        if want == cur:
+            _s1_pending["want"] = None
+            _s1_pending["count"] = 0
+            return s1_public(data)
+        if _s1_pending.get("want") == want:
+            _s1_pending["count"] = int(_s1_pending.get("count") or 0) + 1
+        else:
+            _s1_pending["want"] = want
+            _s1_pending["count"] = 1
+        if _s1_pending["count"] < S1_CONFIRM and cur != "unknown":
+            return s1_public(data)
+        # commit transition
+        ctx = dict(_s1_ctx)
+        event = {
+            "ts": now,
+            "event": want,
+            "reason": reason,
+            "pv": ctx.get("pv"),
+            "soc": ctx.get("soc"),
+            "import_w": ctx.get("import_w"),
+            "miners_reason": ctx.get("miners_reason"),
+        }
+        hist = list(data.get("history") or [])
+        hist.append(event)
+        data["history"] = hist[-40:]
+        data["state"] = want
+        data["since"] = now
+        if want == "on":
+            data["last_on"] = now
+            data["last_on_reason"] = reason
+            if cur == "off":
+                data["cycles_today"] = int(data.get("cycles_today") or 0) + 1
+        else:
+            data["last_off"] = now
+            data["last_off_reason"] = reason
+        s1_save(data)
+        _s1_pending["want"] = None
+        _s1_pending["count"] = 0
+        return s1_public(data)
+
+
+def s1_from_nexus(data):
+    """Derive on/off from Nexus API payload."""
+    if not data or data.get("error"):
+        return s1_observe("off", "offline")
+    if data.get("shutdown"):
+        return s1_observe("off", "shutdown")
+    hr = data.get("hashRate")
+    if hr is None:
+        hr = data.get("hashrate")
+    try:
+        hr = float(hr or 0)
+    except (TypeError, ValueError):
+        hr = 0.0
+    # Nexus may report H/s, GH/s or TH/s — anything clearly hashing counts as on
+    if hr > 0:
+        return s1_observe("on", "hashing")
+    return s1_observe("off", "idle_0hs")
 
 
 def temp():
@@ -568,6 +744,8 @@ def solix_info():
         sample = sorted(all_ids)[:12]
         out["error"] = "ioBroker antwortet, aber keine Solix-States (%s)" % base
         out["sample_ids"] = sample
+    s1_update_context(out)
+    out["s1_power"] = s1_public()
     return out
 
 
@@ -918,6 +1096,19 @@ button.stop-btc{background:var(--stop);color:#190606}
         <div class="cell"><div class="k">Miner-Soll</div><div class="v" id="pRun">—</div></div>
       </div>
       <div class="box">
+        <div class="k">S1 An / Aus (Messung)</div>
+        <div class="nums">
+          <div><span class="k">Zuletzt AN</span><b id="pOnAt">—</b></div>
+          <div><span class="k">Zuletzt AUS</span><b id="pOffAt">—</b></div>
+        </div>
+        <div class="nums" style="margin-top:8px">
+          <div><span class="k">Jetzt</span><b id="pSince">—</b></div>
+          <div><span class="k">Schaltungen heute</span><b id="pCycles">—</b></div>
+        </div>
+        <div class="reason" id="pHist" style="margin-top:8px">Noch keine Schaltungen erfasst</div>
+        <div class="sub" id="pPowerHint" style="margin-top:6px">Tracking startet mit dem Dashboard · MESZ</div>
+      </div>
+      <div class="box">
         <div class="k">Solar-Steuerung</div>
         <div class="reason" id="pReason">—</div>
         <div class="sub" id="pHint" style="margin-top:8px">Nexus nur bei Sonne / genug Akku (ioBroker)</div>
@@ -1018,7 +1209,45 @@ function setSw(on,boot){
   b.className="act "+(on||boot?"stop-xmr":"go-xmr");
 }
 
+function setS1Power(p){
+  if(!p) return;
+  const st=p.state==="on"?"AN":(p.state==="off"?"AUS":"?");
+  if($("pOnAt")) $("pOnAt").textContent=p.last_on_txt||"—";
+  if($("pOffAt")) $("pOffAt").textContent=p.last_off_txt||"—";
+  if($("pSince")){
+    const since=p.since_txt?(st+" seit "+p.since_human):"—";
+    $("pSince").textContent=since;
+    $("pSince").style.color=p.state==="on"?"var(--xmr)":(p.state==="off"?"var(--stop)":"var(--mute)");
+  }
+  if($("pCycles")) $("pCycles").textContent=p.cycles_today!=null?String(p.cycles_today):"—";
+  if($("pHist")){
+    const rows=(p.history||[]).slice(0,6).map(h=>{
+      const ev=h.event==="on"?"AN":"AUS";
+      const why=h.reason||"";
+      const ctx=[];
+      if(h.pv!=null) ctx.push("PV "+Math.round(Number(h.pv))+"W");
+      if(h.soc!=null) ctx.push("SOC "+Math.round(Number(h.soc))+"%");
+      if(h.import_w!=null) ctx.push("Bezug "+Math.round(Number(h.import_w))+"W");
+      return (h.when||"?")+" · "+ev+" · "+why+(ctx.length?" · "+ctx.join(" · "):"");
+    });
+    $("pHist").textContent=rows.length?rows.join("\n"):"Noch keine Schaltungen erfasst";
+    $("pHist").style.whiteSpace="pre-line";
+  }
+  if($("pPowerHint")){
+    const onR=p.last_on_reason?("AN: "+p.last_on_reason):"";
+    const offR=p.last_off_reason?("AUS: "+p.last_off_reason):"";
+    $("pPowerHint").textContent=[onR,offR].filter(Boolean).join(" · ")||"Tracking · MESZ · 2 Polls Bestätigung";
+  }
+  if($("tPSub") && p.last_off_txt){
+    // keep solix text; append short cycle hint on home via tPMain area only if setSolix already ran — handled there
+  }
+  if($("nHm") && p.since_human && (p.state==="on"||p.state==="off")){
+    // leave nHm to setNexus; show on power page only
+  }
+}
+
 function setNexus(d){
+  if(d&&d.s1_power) setS1Power(d.s1_power);
   if(!d||d.error){
     nexusOff=true;
     $("nPill").textContent="Offline"; $("nPill").className="pill off";
@@ -1213,10 +1442,15 @@ function setSolix(d){
   if($("tPMain")){
     const hrTxt=$("tNH")?$("tNH").textContent.replace(/\s+/g," ").trim():"—";
     $("tPMain").textContent=hrTxt+" · "+socTxt+"%";
-    $("tPSub").textContent="PV "+fw(d.pv)+" · Bezug "+fw(d.import_w)+" · "+pillTxt;
+    const p=d.s1_power||{};
+    const sw=p.state==="on"
+      ?("AN "+(p.since_human||""))
+      :(p.state==="off"?("AUS "+(p.since_human||"")):pillTxt);
+    $("tPSub").textContent="PV "+fw(d.pv)+" · Bezug "+fw(d.import_w)+" · "+sw.trim();
     $("tPPill").textContent=run?"Solar AN":"Solar AUS";
     $("tPPill").className=run?"pill on":"pill off";
   }
+  if(d.s1_power) setS1Power(d.s1_power);
 }
 
 $("xBtn").onclick=async()=>{
@@ -1264,14 +1498,15 @@ async function jget(url, ms){
   const t=ctrl?setTimeout(()=>ctrl.abort(),wait):null;
   try{
     const res=await fetch(url,{cache:"no-store",signal:ctrl?ctrl.signal:undefined});
+    let body=null;
+    try{ body=await res.json(); }catch(_){ body=null; }
     if(!res.ok){
-      let err="HTTP "+res.status;
-      try{const e=await res.json(); if(e&&e.error) err=String(e.error);}catch(_){}
-      return {ok:false, error:err};
+      const err=(body&&body.error)!=null?String(body.error):("HTTP "+res.status);
+      return {ok:false, error:err, data:body||{}};
     }
-    return {ok:true, data:await res.json()};
+    return {ok:true, data:body};
   }catch(e){
-    return {ok:false, error:e.name==="AbortError"?"Timeout":(e.message||"Netzwerk")};
+    return {ok:false, error:e.name==="AbortError"?"Timeout":(e.message||"Netzwerk"), data:{}};
   }finally{ if(t) clearTimeout(t); }
 }
 
@@ -1294,7 +1529,10 @@ async function r(){
       jget("/api/summary"),
     ]);
 
-    try{ setNexus(nexus.ok?nexus.data:{error:nexus.error||"offline"}); }
+    try{
+      const nd=nexus.ok?nexus.data:Object.assign({error:nexus.error||"offline"}, nexus.data||{});
+      setNexus(nd);
+    }
     catch(e){ errs.push("S1:"+e.message); }
 
     try{ setBitcoin(bitcoin.ok?bitcoin.data:{error:bitcoin.error||"offline"}); }
@@ -1412,10 +1650,15 @@ class H(BaseHTTPRequestHandler):
             return
         if self.path.startswith("/api/nexus"):
             try:
-                self.j(200, nexus_info())
+                data = nexus_info()
+                data["s1_power"] = s1_from_nexus(data)
+                self.j(200, data)
             except (URLError, HTTPError, TimeoutError, json.JSONDecodeError, ValueError) as ex:
                 err = getattr(ex, "reason", None) or str(ex)
-                self.j(502, {"error": str(err)})
+                self.j(502, {"error": str(err), "s1_power": s1_from_nexus({"error": str(err)})})
+            return
+        if self.path.startswith("/api/s1-power"):
+            self.j(200, s1_public())
             return
         if self.path.startswith("/api/bitcoin"):
             try:
@@ -1453,9 +1696,11 @@ class H(BaseHTTPRequestHandler):
             ok, msg = nexus_control(data.get("action", ""))
             payload = {"ok": ok, "message": msg}
             try:
-                payload.update(nexus_info())
-            except Exception:
-                pass
+                info = nexus_info()
+                payload.update(info)
+                payload["s1_power"] = s1_from_nexus(info)
+            except Exception as ex:
+                payload["s1_power"] = s1_from_nexus({"error": str(ex)})
             self.j(200 if ok else 500, payload)
             return
         self.j(404, {"error": "not found"})
