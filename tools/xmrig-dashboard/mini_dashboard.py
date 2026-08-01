@@ -33,11 +33,13 @@ POOL = f"https://supportxmr.com/api/miner/{W}/stats"
 THR, ATOM = 0.1, 1_000_000_000_000
 TZ_LOCAL = ZoneInfo("Europe/Berlin")
 S1_CONFIRM = 2  # consecutive polls before recording on/off
+S1_WATCH_SEC = 20  # background poll — unabhängig vom Browser
 cache = {"t": 0.0, "d": None}
 btc_cache = {"t": 0.0, "d": None}
 _s1_lock = threading.Lock()
 _s1_pending = {"want": None, "count": 0}
 _s1_ctx = {"pv": None, "soc": None, "import_w": None, "miners_reason": None, "miners_running": None}
+_s1_watch_started = False
 
 
 def iobroker_base():
@@ -274,7 +276,28 @@ def s1_public(data=None):
     }
 
 
-def s1_observe(want, reason):
+def _nexus_uptime_sec(data):
+    """Betriebszeit aus Nexus-API (Sekunden), falls vorhanden."""
+    if not isinstance(data, dict):
+        return None
+    for k in (
+        "uptime", "uptimeSec", "uptimeSecs", "uptime_sec",
+        "runtime", "runTime", "elapsed", "elapsedSec",
+    ):
+        if data.get(k) is None:
+            continue
+        try:
+            v = float(data[k])
+        except (TypeError, ValueError):
+            continue
+        if v > 1e6:  # ms
+            v = v / 1000.0
+        if 5 < v < 86400 * 90:
+            return v
+    return None
+
+
+def s1_observe(want, reason, uptime_sec=None):
     """Record S1 on/off after S1_CONFIRM consecutive identical observations."""
     if want not in ("on", "off"):
         return s1_public()
@@ -288,6 +311,14 @@ def s1_observe(want, reason):
         if want == cur:
             _s1_pending["want"] = None
             _s1_pending["count"] = 0
+            # Korrektur: Nexus-Betriebszeit > unsere „seit“ → Startzeit nachziehen
+            if want == "on" and uptime_sec:
+                expected = now - float(uptime_sec)
+                since = data.get("since")
+                if since is None or (since - expected) > 90:
+                    data["since"] = expected
+                    data["last_on"] = expected
+                    s1_save(data)
             return s1_public(data)
         if _s1_pending.get("want") == want:
             _s1_pending["count"] = int(_s1_pending.get("count") or 0) + 1
@@ -299,6 +330,9 @@ def s1_observe(want, reason):
         # commit transition
         ctx = dict(_s1_ctx)
         prev_sec = (now - data["since"]) if data.get("since") else None
+        start_ts = now
+        if want == "on" and uptime_sec:
+            start_ts = now - float(uptime_sec)
         event = {
             "ts": now,
             "event": want,
@@ -308,14 +342,15 @@ def s1_observe(want, reason):
             "import_w": ctx.get("import_w"),
             "miners_running": ctx.get("miners_running"),
             "miners_reason": ctx.get("miners_reason"),
+            "uptime_sec": uptime_sec,
         }
         hist = list(data.get("history") or [])
         hist.append(event)
         data["history"] = hist[-40:]
         data["state"] = want
-        data["since"] = now
+        data["since"] = start_ts
         if want == "on":
-            data["last_on"] = now
+            data["last_on"] = start_ts
             data["last_on_reason"] = reason
             if cur == "off":
                 data["cycles_today"] = int(data.get("cycles_today") or 0) + 1
@@ -343,10 +378,42 @@ def s1_from_nexus(data):
         hr = float(hr or 0)
     except (TypeError, ValueError):
         hr = 0.0
+    uptime = _nexus_uptime_sec(data)
     # Nexus may report H/s, GH/s or TH/s — anything clearly hashing counts as on
     if hr > 0:
-        return s1_observe("on", "hashing")
+        return s1_observe("on", "hashing", uptime_sec=uptime)
     return s1_observe("off", "idle_0hs")
+
+
+def s1_watch_loop():
+    """Pollt Nexus im Hintergrund — AN/AUS auch ohne offenes Dashboard."""
+    n = 0
+    while True:
+        try:
+            try:
+                data = nexus_info()
+            except Exception as ex:
+                data = {"error": str(getattr(ex, "reason", None) or ex)}
+            s1_from_nexus(data)
+            n += 1
+            # Solix-Kontext alle ~2 Min (nicht jeden Tick — zu schwer)
+            if n % 6 == 1:
+                try:
+                    s1_update_context(solix_info())
+                except Exception:
+                    pass
+        except Exception as ex:
+            print("s1_watch_loop:", ex, flush=True)
+        time.sleep(S1_WATCH_SEC)
+
+
+def s1_start_watch():
+    global _s1_watch_started
+    if _s1_watch_started:
+        return
+    _s1_watch_started = True
+    threading.Thread(target=s1_watch_loop, name="s1-watch", daemon=True).start()
+    print("s1 background watch every %ss" % S1_WATCH_SEC, flush=True)
 
 
 def temp():
@@ -1877,6 +1944,7 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     s1_ensure_log(boot=True)
+    s1_start_watch()
     rpc = bitcoin_rpc_cfg()
     print(
         "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s s1_log=%s exists=%s"
