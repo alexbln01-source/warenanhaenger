@@ -276,29 +276,11 @@ def s1_public(data=None):
     }
 
 
-def _nexus_uptime_sec(data):
-    """Betriebszeit aus Nexus-API (Sekunden), falls vorhanden."""
-    if not isinstance(data, dict):
-        return None
-    for k in (
-        "uptime", "uptimeSec", "uptimeSecs", "uptime_sec",
-        "runtime", "runTime", "elapsed", "elapsedSec",
-    ):
-        if data.get(k) is None:
-            continue
-        try:
-            v = float(data[k])
-        except (TypeError, ValueError):
-            continue
-        if v > 1e6:  # ms
-            v = v / 1000.0
-        if 5 < v < 86400 * 90:
-            return v
-    return None
+def s1_observe(want, reason, force=False):
+    """Record S1 on/off after S1_CONFIRM consecutive identical observations.
 
-
-def s1_observe(want, reason, uptime_sec=None):
-    """Record S1 on/off after S1_CONFIRM consecutive identical observations."""
+    force=True: sofort buchen (z.B. nach unserem Shutdown/Neustart-Befehl).
+    """
     if want not in ("on", "off"):
         return s1_public()
     now = time.time()
@@ -311,28 +293,18 @@ def s1_observe(want, reason, uptime_sec=None):
         if want == cur:
             _s1_pending["want"] = None
             _s1_pending["count"] = 0
-            # Korrektur: Nexus-Betriebszeit > unsere „seit“ → Startzeit nachziehen
-            if want == "on" and uptime_sec:
-                expected = now - float(uptime_sec)
-                since = data.get("since")
-                if since is None or (since - expected) > 90:
-                    data["since"] = expected
-                    data["last_on"] = expected
-                    s1_save(data)
             return s1_public(data)
-        if _s1_pending.get("want") == want:
-            _s1_pending["count"] = int(_s1_pending.get("count") or 0) + 1
-        else:
-            _s1_pending["want"] = want
-            _s1_pending["count"] = 1
-        if _s1_pending["count"] < S1_CONFIRM and cur != "unknown":
-            return s1_public(data)
-        # commit transition
+        if not force:
+            if _s1_pending.get("want") == want:
+                _s1_pending["count"] = int(_s1_pending.get("count") or 0) + 1
+            else:
+                _s1_pending["want"] = want
+                _s1_pending["count"] = 1
+            if _s1_pending["count"] < S1_CONFIRM and cur != "unknown":
+                return s1_public(data)
+        # commit transition — Zeitstempel = unser Schaltmoment
         ctx = dict(_s1_ctx)
         prev_sec = (now - data["since"]) if data.get("since") else None
-        start_ts = now
-        if want == "on" and uptime_sec:
-            start_ts = now - float(uptime_sec)
         event = {
             "ts": now,
             "event": want,
@@ -342,15 +314,14 @@ def s1_observe(want, reason, uptime_sec=None):
             "import_w": ctx.get("import_w"),
             "miners_running": ctx.get("miners_running"),
             "miners_reason": ctx.get("miners_reason"),
-            "uptime_sec": uptime_sec,
         }
         hist = list(data.get("history") or [])
         hist.append(event)
         data["history"] = hist[-40:]
         data["state"] = want
-        data["since"] = start_ts
+        data["since"] = now
         if want == "on":
-            data["last_on"] = start_ts
+            data["last_on"] = now
             data["last_on_reason"] = reason
             if cur == "off":
                 data["cycles_today"] = int(data.get("cycles_today") or 0) + 1
@@ -365,7 +336,7 @@ def s1_observe(want, reason, uptime_sec=None):
 
 
 def s1_from_nexus(data):
-    """Derive on/off from Nexus API payload."""
+    """Beobachteter Zustand (Hintergrund + API) — ohne Nexus-Betriebszeit."""
     s1_ensure_log()
     if not data or data.get("error"):
         return s1_observe("off", "offline")
@@ -378,11 +349,23 @@ def s1_from_nexus(data):
         hr = float(hr or 0)
     except (TypeError, ValueError):
         hr = 0.0
-    uptime = _nexus_uptime_sec(data)
-    # Nexus may report H/s, GH/s or TH/s — anything clearly hashing counts as on
     if hr > 0:
-        return s1_observe("on", "hashing", uptime_sec=uptime)
+        return s1_observe("on", "hashing")
     return s1_observe("off", "idle_0hs")
+
+
+def s1_from_solar_intent(solix):
+    """Schaltungen aus ioBroker solar_miners.running (unser Skript) — nur bei Wechsel."""
+    if not isinstance(solix, dict) or solix.get("miners_running") is None:
+        return
+    running = bool(solix.get("miners_running"))
+    with _s1_lock:
+        prev = _s1_ctx.get("_solar_running")
+        if prev is not None and bool(prev) == running:
+            return
+        _s1_ctx["_solar_running"] = running
+    reason = solix.get("miners_reason") or ("solar_on" if running else "solar_off")
+    s1_observe("on" if running else "off", "solar: " + str(reason)[:120], force=True)
 
 
 def s1_watch_loop():
@@ -396,10 +379,12 @@ def s1_watch_loop():
                 data = {"error": str(getattr(ex, "reason", None) or ex)}
             s1_from_nexus(data)
             n += 1
-            # Solix-Kontext alle ~2 Min (nicht jeden Tick — zu schwer)
-            if n % 6 == 1:
+            # Solix / Solar-Schaltungen alle ~40s (unser Skript = Wahrheit für AN/AUS-Zeit)
+            if n % 2 == 0:
                 try:
-                    s1_update_context(solix_info())
+                    sx = solix_info()
+                    s1_update_context(sx)
+                    s1_from_solar_intent(sx)
                 except Exception:
                     pass
         except Exception as ex:
@@ -953,6 +938,7 @@ def solix_info():
         out["error"] = "ioBroker antwortet, aber keine Solix-States (%s)" % base
         out["sample_ids"] = sample
     s1_update_context(out)
+    s1_from_solar_intent(out)
     out["s1_power"] = s1_public()
     return out
 
@@ -1928,12 +1914,19 @@ class H(BaseHTTPRequestHandler):
         if self.path.startswith("/api/nexus"):
             ok, msg = nexus_control(data.get("action", ""))
             payload = {"ok": ok, "message": msg}
+            action = data.get("action", "")
+            if ok and action == "shutdown":
+                payload["s1_power"] = s1_observe("off", "cmd:shutdown", force=True)
+            elif ok and action == "restart":
+                payload["s1_power"] = s1_observe("on", "cmd:restart", force=True)
             try:
                 info = nexus_info()
                 payload.update(info)
-                payload["s1_power"] = s1_from_nexus(info)
+                if "s1_power" not in payload:
+                    payload["s1_power"] = s1_from_nexus(info)
             except Exception as ex:
-                payload["s1_power"] = s1_from_nexus({"error": str(ex)})
+                if "s1_power" not in payload:
+                    payload["s1_power"] = s1_from_nexus({"error": str(ex)})
             self.j(200 if ok else 500, payload)
             return
         self.j(404, {"error": "not found"})
