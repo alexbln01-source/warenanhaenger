@@ -8,7 +8,7 @@ Auf dem Host (`pve`):
 
 ```bash
 # 1) Forensik vom letzten Crash (previous boot)
-curl -fsSL "https://raw.githubusercontent.com/alexbln01-source/warenanhaenger/cursor/xmrig-dashboard-tiles-0620/tools/pve-hang-watch/pve-hang-forensics.sh" -o /tmp/pve-hang-forensics.sh
+curl -fsSL "https://raw.githubusercontent.com/alexbln01-source/warenanhaenger/0326a1d/tools/pve-hang-watch/pve-hang-forensics.sh" -o /tmp/pve-hang-forensics.sh
 chmod +x /tmp/pve-hang-forensics.sh
 bash /tmp/pve-hang-forensics.sh
 ```
@@ -19,7 +19,7 @@ Oder ganzes Paket installieren (Forensik + 60s-Watch):
 cd /tmp
 rm -rf pve-hang-watch
 mkdir pve-hang-watch && cd pve-hang-watch
-BASE="https://raw.githubusercontent.com/alexbln01-source/warenanhaenger/cursor/xmrig-dashboard-tiles-0620/tools/pve-hang-watch"
+BASE="https://raw.githubusercontent.com/alexbln01-source/warenanhaenger/0326a1d/tools/pve-hang-watch"
 curl -fsSL "$BASE/pve-hang-watch.sh" -o pve-hang-watch.sh
 curl -fsSL "$BASE/pve-hang-forensics.sh" -o pve-hang-forensics.sh
 curl -fsSL "$BASE/install-on-pve.sh" -o install-on-pve.sh
