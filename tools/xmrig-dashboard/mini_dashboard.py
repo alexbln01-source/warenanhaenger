@@ -1,0 +1,1954 @@
+#!/usr/bin/env python3
+"""Miner-Dashboard :8090 — XMRig + Nexus S1 + Solo Node + Anker Solix"""
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
+from pathlib import Path
+from base64 import b64encode
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+import json, time, subprocess, os, threading
+
+XMRIG = "http://127.0.0.1:8080/2/summary"
+NEXUS = "http://192.168.178.116"
+PORT = 8090
+SERVICE = "xmrig"
+_STATE_CANDIDATES = (
+    Path(os.environ["DASH_STATE"]) if os.environ.get("DASH_STATE") else None,
+    Path("/opt/xmrig-dashboard"),
+    Path(__file__).resolve().parent,
+)
+STATE_DIR = next((p for p in _STATE_CANDIDATES if p and (p.exists() or p == _STATE_CANDIDATES[-1])), Path("."))
+PAUSE = STATE_DIR / "PAUSE"
+IOB_FILE = STATE_DIR / "iobroker.url"
+BTC_RPC_FILE = STATE_DIR / "bitcoin.rpc"
+S1_POWER_FILE = STATE_DIR / "s1_power.json"
+S1_POWER_LOG = STATE_DIR / "s1_power.log"
+S1_POWER_JSONL = STATE_DIR / "s1_power.jsonl"
+CKPOOL_STATUS = os.environ.get("CKPOOL_STATUS", "http://192.168.178.111")
+SITE = "ankersolix2.0.a278fac0-df28-4f92-846d-76e77de23b26"
+W = "47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm"
+BTC_ADDR = "bc1qdjd4rtw6c6at7mmjyq4a9m4lh4s0z5yxf89qnl"
+POOL = f"https://supportxmr.com/api/miner/{W}/stats"
+THR, ATOM = 0.1, 1_000_000_000_000
+TZ_LOCAL = ZoneInfo("Europe/Berlin")
+S1_CONFIRM = 2  # consecutive polls before recording on/off
+S1_WATCH_SEC = 20  # background poll — unabhängig vom Browser
+cache = {"t": 0.0, "d": None}
+btc_cache = {"t": 0.0, "d": None}
+_s1_lock = threading.Lock()
+_s1_pending = {"want": None, "count": 0}
+_s1_ctx = {"pv": None, "soc": None, "import_w": None, "miners_reason": None, "miners_running": None}
+_s1_watch_started = False
+
+
+def iobroker_base():
+    if IOB_FILE.exists():
+        u = IOB_FILE.read_text().strip()
+        if u:
+            return u.rstrip("/")
+    return os.environ.get("IOBROKER", "http://192.168.178.47:8087").rstrip("/")
+
+
+def _ts_local(ts=None):
+    dt = datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL)
+    return dt.strftime("%d.%m. %H:%M:%S")
+
+
+def _ts_iso(ts=None):
+    dt = datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL)
+    return dt.isoformat(timespec="seconds")
+
+
+def _day_key(ts=None):
+    return datetime.fromtimestamp(ts if ts is not None else time.time(), TZ_LOCAL).strftime("%Y-%m-%d")
+
+
+def _fmt_dur(sec):
+    if sec is None:
+        return None
+    try:
+        sec = int(sec)
+    except (TypeError, ValueError):
+        return None
+    if sec < 0:
+        sec = 0
+    if sec < 60:
+        return "%ds" % sec
+    if sec < 3600:
+        return "%dm" % (sec // 60)
+    return "%dh %dm" % (sec // 3600, (sec % 3600) // 60)
+
+
+def _s1_default():
+    return {
+        "state": "unknown",
+        "since": None,
+        "last_on": None,
+        "last_off": None,
+        "last_on_reason": None,
+        "last_off_reason": None,
+        "cycles_day": _day_key(),
+        "cycles_today": 0,
+        "history": [],
+    }
+
+
+def s1_load():
+    try:
+        if S1_POWER_FILE.exists():
+            data = json.loads(S1_POWER_FILE.read_text())
+            if isinstance(data, dict):
+                base = _s1_default()
+                base.update(data)
+                if not isinstance(base.get("history"), list):
+                    base["history"] = []
+                return base
+    except (OSError, json.JSONDecodeError, ValueError):
+        pass
+    return _s1_default()
+
+
+def s1_save(data):
+    try:
+        S1_POWER_FILE.parent.mkdir(parents=True, exist_ok=True)
+        tmp = S1_POWER_FILE.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+        tmp.replace(S1_POWER_FILE)
+    except OSError as ex:
+        print("s1_save failed:", ex, S1_POWER_FILE, flush=True)
+
+
+def s1_ensure_log(boot=False):
+    """Create log files immediately so paths exist before the first switch."""
+    try:
+        S1_POWER_LOG.parent.mkdir(parents=True, exist_ok=True)
+        created = not S1_POWER_LOG.exists()
+        # Always touch/create the human log; append START on boot or first create
+        with open(str(S1_POWER_LOG), "a", encoding="utf-8") as f:
+            if created:
+                f.write("# S1 An/Aus-Log (Europe/Berlin) — AN/AUS + reason + PV/SOC/Bezug\n")
+            if boot or created:
+                try:
+                    stamp = _ts_iso()
+                except Exception:
+                    stamp = time.strftime("%Y-%m-%dT%H:%M:%S")
+                f.write("%s  START  tracking=ok  log=%s\n" % (stamp, S1_POWER_LOG))
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError:
+                pass
+        if not S1_POWER_JSONL.exists():
+            with open(str(S1_POWER_JSONL), "a", encoding="utf-8") as f:
+                f.write("")
+                f.flush()
+        return True
+    except Exception as ex:
+        print("s1_ensure_log failed:", ex, "path=", S1_POWER_LOG, flush=True)
+        return False
+
+
+def s1_append_log(event, prev_state=None, prev_sec=None):
+    """Append human + JSONL log lines for multi-day evaluation."""
+    try:
+        s1_ensure_log()
+        ts = event.get("ts") or time.time()
+        ev = event.get("event")
+        label = "AN" if ev == "on" else ("AUS" if ev == "off" else str(ev).upper())
+        try:
+            stamp = _ts_iso(ts)
+        except Exception:
+            stamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(ts))
+        parts = [
+            stamp,
+            label,
+            "reason=%s" % (event.get("reason") or "?"),
+        ]
+        if prev_state and prev_state != "unknown":
+            parts.append("vorher=%s" % ("AN" if prev_state == "on" else "AUS"))
+        dur = _fmt_dur(prev_sec)
+        if dur:
+            parts.append("dauer=%s" % dur)
+        if event.get("pv") is not None:
+            try:
+                parts.append("pv=%sW" % int(round(float(event["pv"]))))
+            except (TypeError, ValueError):
+                parts.append("pv=%s" % event["pv"])
+        if event.get("soc") is not None:
+            try:
+                parts.append("soc=%s%%" % int(round(float(event["soc"]))))
+            except (TypeError, ValueError):
+                parts.append("soc=%s" % event["soc"])
+        if event.get("import_w") is not None:
+            try:
+                parts.append("bezug=%sW" % int(round(float(event["import_w"]))))
+            except (TypeError, ValueError):
+                parts.append("bezug=%s" % event["import_w"])
+        if event.get("miners_running") is not None:
+            parts.append("solar_soll=%s" % ("AN" if event["miners_running"] else "AUS"))
+        if event.get("miners_reason"):
+            parts.append("solar=\"%s\"" % str(event["miners_reason"]).replace('"', "'"))
+        line = "  ".join(parts) + "\n"
+        with open(str(S1_POWER_LOG), "a", encoding="utf-8") as f:
+            f.write(line)
+            f.flush()
+        try:
+            iso = _ts_iso(ts)
+        except Exception:
+            iso = stamp
+        row = {
+            "ts": ts,
+            "iso": iso,
+            "event": ev,
+            "reason": event.get("reason"),
+            "prev_state": prev_state,
+            "prev_sec": int(prev_sec) if prev_sec is not None else None,
+            "prev_human": dur,
+            "pv": event.get("pv"),
+            "soc": event.get("soc"),
+            "import_w": event.get("import_w"),
+            "miners_running": event.get("miners_running"),
+            "miners_reason": event.get("miners_reason"),
+        }
+        with open(str(S1_POWER_JSONL), "a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            f.flush()
+        # soft rotate if huge
+        try:
+            if S1_POWER_LOG.exists() and S1_POWER_LOG.stat().st_size > 2_000_000:
+                bak = Path(str(S1_POWER_LOG) + ".1")
+                if bak.exists():
+                    bak.unlink()
+                S1_POWER_LOG.replace(bak)
+                s1_ensure_log()
+            if S1_POWER_JSONL.exists() and S1_POWER_JSONL.stat().st_size > 2_000_000:
+                bak = Path(str(S1_POWER_JSONL) + ".1")
+                if bak.exists():
+                    bak.unlink()
+                S1_POWER_JSONL.replace(bak)
+                s1_ensure_log()
+        except OSError as ex:
+            print("s1 log rotate failed:", ex, flush=True)
+    except Exception as ex:
+        print("s1_append_log failed:", ex, "path=", S1_POWER_LOG, flush=True)
+
+
+def s1_update_context(solix):
+    if not isinstance(solix, dict):
+        return
+    with _s1_lock:
+        for k in ("pv", "soc", "import_w", "miners_reason", "miners_running"):
+            if k in solix and solix[k] is not None:
+                _s1_ctx[k] = solix[k]
+
+
+def s1_public(data=None):
+    s1_ensure_log()
+    d = data if data is not None else s1_load()
+    now = time.time()
+    since = d.get("since")
+    age = int(now - since) if since else None
+    hist = []
+    for h in (d.get("history") or [])[-8:]:
+        if not isinstance(h, dict):
+            continue
+        hist.append({
+            **h,
+            "when": _ts_local(h.get("ts")) if h.get("ts") else None,
+        })
+    return {
+        "state": d.get("state") or "unknown",
+        "since": since,
+        "since_txt": _ts_local(since) if since else None,
+        "since_sec": age,
+        "since_human": _fmt_dur(age),
+        "last_on": d.get("last_on"),
+        "last_on_txt": _ts_local(d["last_on"]) if d.get("last_on") else None,
+        "last_on_reason": d.get("last_on_reason"),
+        "last_off": d.get("last_off"),
+        "last_off_txt": _ts_local(d["last_off"]) if d.get("last_off") else None,
+        "last_off_reason": d.get("last_off_reason"),
+        "cycles_today": d.get("cycles_today") or 0,
+        "history": list(reversed(hist)),
+        "log_file": str(S1_POWER_LOG),
+        "jsonl_file": str(S1_POWER_JSONL),
+    }
+
+
+def s1_observe(want, reason, force=False):
+    """Record S1 on/off after S1_CONFIRM consecutive identical observations.
+
+    force=True: sofort buchen (z.B. nach unserem Shutdown/Neustart-Befehl).
+    """
+    if want not in ("on", "off"):
+        return s1_public()
+    now = time.time()
+    with _s1_lock:
+        data = s1_load()
+        if data.get("cycles_day") != _day_key(now):
+            data["cycles_day"] = _day_key(now)
+            data["cycles_today"] = 0
+        cur = data.get("state") or "unknown"
+        if want == cur:
+            _s1_pending["want"] = None
+            _s1_pending["count"] = 0
+            return s1_public(data)
+        if not force:
+            if _s1_pending.get("want") == want:
+                _s1_pending["count"] = int(_s1_pending.get("count") or 0) + 1
+            else:
+                _s1_pending["want"] = want
+                _s1_pending["count"] = 1
+            if _s1_pending["count"] < S1_CONFIRM and cur != "unknown":
+                return s1_public(data)
+        # commit transition — Zeitstempel = unser Schaltmoment
+        ctx = dict(_s1_ctx)
+        prev_sec = (now - data["since"]) if data.get("since") else None
+        event = {
+            "ts": now,
+            "event": want,
+            "reason": reason,
+            "pv": ctx.get("pv"),
+            "soc": ctx.get("soc"),
+            "import_w": ctx.get("import_w"),
+            "miners_running": ctx.get("miners_running"),
+            "miners_reason": ctx.get("miners_reason"),
+        }
+        hist = list(data.get("history") or [])
+        hist.append(event)
+        data["history"] = hist[-40:]
+        data["state"] = want
+        data["since"] = now
+        if want == "on":
+            data["last_on"] = now
+            data["last_on_reason"] = reason
+            if cur == "off":
+                data["cycles_today"] = int(data.get("cycles_today") or 0) + 1
+        else:
+            data["last_off"] = now
+            data["last_off_reason"] = reason
+        s1_save(data)
+        s1_append_log(event, prev_state=cur, prev_sec=prev_sec)
+        _s1_pending["want"] = None
+        _s1_pending["count"] = 0
+        return s1_public(data)
+
+
+def s1_from_nexus(data):
+    """Beobachteter Zustand (Hintergrund + API) — ohne Nexus-Betriebszeit."""
+    s1_ensure_log()
+    if not data or data.get("error"):
+        return s1_observe("off", "offline")
+    if data.get("shutdown"):
+        return s1_observe("off", "shutdown")
+    hr = data.get("hashRate")
+    if hr is None:
+        hr = data.get("hashrate")
+    try:
+        hr = float(hr or 0)
+    except (TypeError, ValueError):
+        hr = 0.0
+    if hr > 0:
+        return s1_observe("on", "hashing")
+    return s1_observe("off", "idle_0hs")
+
+
+def s1_from_solar_intent(solix):
+    """Schaltungen aus ioBroker solar_miners.running (unser Skript) — nur bei Wechsel."""
+    if not isinstance(solix, dict) or solix.get("miners_running") is None:
+        return
+    running = bool(solix.get("miners_running"))
+    with _s1_lock:
+        prev = _s1_ctx.get("_solar_running")
+        if prev is not None and bool(prev) == running:
+            return
+        _s1_ctx["_solar_running"] = running
+    reason = solix.get("miners_reason") or ("solar_on" if running else "solar_off")
+    s1_observe("on" if running else "off", "solar: " + str(reason)[:120], force=True)
+
+
+def s1_watch_loop():
+    """Pollt Nexus im Hintergrund — AN/AUS auch ohne offenes Dashboard."""
+    n = 0
+    while True:
+        try:
+            try:
+                data = nexus_info()
+            except Exception as ex:
+                data = {"error": str(getattr(ex, "reason", None) or ex)}
+            s1_from_nexus(data)
+            n += 1
+            # Solix / Solar-Schaltungen alle ~40s (unser Skript = Wahrheit für AN/AUS-Zeit)
+            if n % 2 == 0:
+                try:
+                    sx = solix_info()
+                    s1_update_context(sx)
+                    s1_from_solar_intent(sx)
+                except Exception:
+                    pass
+        except Exception as ex:
+            print("s1_watch_loop:", ex, flush=True)
+        time.sleep(S1_WATCH_SEC)
+
+
+def s1_start_watch():
+    global _s1_watch_started
+    if _s1_watch_started:
+        return
+    _s1_watch_started = True
+    threading.Thread(target=s1_watch_loop, name="s1-watch", daemon=True).start()
+    print("s1 background watch every %ss" % S1_WATCH_SEC, flush=True)
+
+
+def temp():
+    best = None
+    p = Path("/sys/class/thermal")
+    if p.is_dir():
+        for z in sorted(p.glob("thermal_zone*")):
+            try:
+                typ = (z / "type").read_text().strip()
+                raw = int((z / "temp").read_text().strip())
+                c = raw / 1000 if raw > 1000 else float(raw)
+                if best is None or "pkg" in typ.lower() or typ in ("x86_pkg_temp", "TCPU"):
+                    best = {"celsius": round(c, 1), "source": typ}
+            except (OSError, ValueError):
+                pass
+    return best
+
+
+def pool():
+    now = time.time()
+    if cache["d"] and now - cache["t"] < 30:
+        return cache["d"]
+    req = Request(POOL, headers={"User-Agent": "xmrig-dash/solix"})
+    with urlopen(req, timeout=8) as r:
+        raw = json.loads(r.read().decode())
+    due = float(raw.get("amtDue") or 0) / ATOM
+    paid = float(raw.get("amtPaid") or 0) / ATOM
+    hs = raw.get("hash") or 0
+    daily = (hs / 5.6e9) * 720 * 0.6 if hs else None
+    eta = ((THR - due) / daily) if daily and daily > 0 else None
+    d = {
+        "pending_xmr": due, "paid_xmr": paid,
+        "pool_hashrate": hs, "threshold_xmr": THR,
+        "progress_pct": round(min(100.0, due / THR * 100), 4),
+        "eta_days": eta,
+    }
+    cache["t"], cache["d"] = now, d
+    return d
+
+
+def mining_status():
+    try:
+        r = subprocess.run(
+            ["systemctl", "is-active", SERVICE],
+            capture_output=True, text=True, timeout=5,
+        )
+        state = r.stdout.strip()
+        return {"active": state == "active", "state": state or "unknown", "paused": PAUSE.exists()}
+    except (subprocess.TimeoutExpired, OSError) as ex:
+        return {"active": False, "state": "error", "paused": PAUSE.exists(), "error": str(ex)}
+
+
+def mining_control(action):
+    if action not in ("start", "stop"):
+        return False, "Ungültige Aktion"
+    try:
+        if action == "stop":
+            PAUSE.parent.mkdir(parents=True, exist_ok=True)
+            PAUSE.write_text("1\n")
+        else:
+            if PAUSE.exists():
+                PAUSE.unlink()
+        r = subprocess.run(
+            ["systemctl", action, SERVICE],
+            capture_output=True, text=True, timeout=30,
+        )
+        msg = (r.stderr or r.stdout or "").strip()
+        return r.returncode == 0, msg or ("ok" if r.returncode == 0 else "fehlgeschlagen")
+    except (subprocess.TimeoutExpired, OSError) as ex:
+        return False, str(ex)
+
+
+def nexus_info():
+    req = Request(NEXUS + "/api/system/info", headers={"User-Agent": "xmrig-dash/solix"})
+    with urlopen(req, timeout=5) as r:
+        return json.loads(r.read().decode())
+
+
+def nexus_control(action):
+    if action not in ("shutdown", "restart"):
+        return False, "Ungültige Aktion"
+    path = "/api/system/shutdown" if action == "shutdown" else "/api/system/restart"
+    req = Request(NEXUS + path, data=b"", method="POST", headers={"User-Agent": "xmrig-dash/solix"})
+    try:
+        with urlopen(req, timeout=15) as r:
+            return True, r.read().decode() or "ok"
+    except HTTPError as ex:
+        return False, f"HTTP {ex.code}"
+    except URLError as ex:
+        return False, str(ex.reason)
+
+
+def bitcoin_rpc_cfg():
+    """Lädt RPC aus /opt/xmrig-dashboard/bitcoin.rpc (url/user/password Zeilen)."""
+    cfg = {
+        "url": os.environ.get("BITCOIN_RPC_URL", "http://192.168.178.111:8332").rstrip("/"),
+        "user": os.environ.get("BITCOIN_RPC_USER", ""),
+        "password": os.environ.get("BITCOIN_RPC_PASSWORD", ""),
+    }
+    if BTC_RPC_FILE.exists():
+        for line in BTC_RPC_FILE.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip().lower(), v.strip()
+            if k in ("url", "user", "password", "pass"):
+                cfg["password" if k == "pass" else k] = v
+    return cfg
+
+
+def bitcoin_rpc(method, params=None, timeout=20):
+    cfg = bitcoin_rpc_cfg()
+    if not cfg.get("user") or not cfg.get("password"):
+        raise RuntimeError("bitcoin.rpc fehlt (user/password)")
+    payload = json.dumps({
+        "jsonrpc": "1.0",
+        "id": "miner-dash",
+        "method": method,
+        "params": params or [],
+    }).encode()
+    token = b64encode(("%s:%s" % (cfg["user"], cfg["password"])).encode()).decode()
+    req = Request(
+        cfg["url"],
+        data=payload,
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Basic " + token,
+            "User-Agent": "xmrig-dash/solix",
+        },
+    )
+    with urlopen(req, timeout=timeout) as r:
+        out = json.loads(r.read().decode())
+    if out.get("error"):
+        raise RuntimeError(out["error"].get("message") if isinstance(out["error"], dict) else str(out["error"]))
+    return out.get("result")
+
+
+def ckpool_probe():
+    """Optional: ckpool HTTP-Status (falls aktiv)."""
+    base = CKPOOL_STATUS.rstrip("/")
+    for path in ("/pool/pool.status", "/pool.status", "/"):
+        try:
+            req = Request(base + path, headers={"User-Agent": "xmrig-dash/solix"})
+            with urlopen(req, timeout=1.5) as r:
+                body = r.read().decode(errors="replace")
+            if path.endswith("status") or "hashrate" in body.lower() or body.strip().startswith("{"):
+                try:
+                    return {"ok": True, "path": path, "raw": json.loads(body)}
+                except json.JSONDecodeError:
+                    return {"ok": True, "path": path, "text": body[:400]}
+        except (URLError, HTTPError, TimeoutError, OSError):
+            continue
+    return {"ok": False}
+
+
+def bitcoin_node_info():
+    now = time.time()
+    if btc_cache["d"] and now - btc_cache["t"] < 15:
+        return btc_cache["d"]
+    try:
+        chain = bitcoin_rpc("getblockchaininfo", timeout=25)
+    except Exception as ex:
+        # Während IBD oft Timeout — letzten Stand behalten statt Offline
+        if btc_cache["d"]:
+            stale = dict(btc_cache["d"])
+            stale["stale"] = True
+            stale["warning"] = str(ex)
+            return stale
+        raise
+    mining = {}
+    net = {}
+    try:
+        mining = bitcoin_rpc("getmininginfo", timeout=8) or {}
+    except Exception:
+        pass
+    try:
+        net = bitcoin_rpc("getnetworkinfo", timeout=8) or {}
+    except Exception:
+        pass
+    prog = float(chain.get("verificationprogress") or 0)
+    blocks = int(chain.get("blocks") or 0)
+    headers = int(chain.get("headers") or 0)
+    ibd = bool(chain.get("initialblockdownload"))
+    synced = (not ibd) and prog >= 0.99 and blocks > 0 and blocks >= headers - 2
+    ck = ckpool_probe()
+    nexus_pool = {}
+    try:
+        ni = nexus_info()
+        nexus_pool = {
+            "stratumURL": ni.get("stratumURL"),
+            "stratumPort": ni.get("stratumPort"),
+            "hashRate": ni.get("hashRate") or ni.get("hashrate"),
+            "bestDiff": ni.get("bestDiff"),
+            "bestSessionDiff": ni.get("bestSessionDiff"),
+            "foundBlocks": ni.get("foundBlocks"),
+            "totalFoundBlocks": ni.get("totalFoundBlocks"),
+            "sharesAccepted": ni.get("sharesAccepted"),
+            "sharesRejected": ni.get("sharesRejected"),
+            "connected": bool(((ni.get("stratum") or {}).get("pools") or [{}])[0].get("connected"))
+            if (ni.get("stratum") or {}).get("pools")
+            else None,
+        }
+        url = (ni.get("stratumURL") or "").lower()
+        nexus_pool["solo_local"] = "192.168.178.111" in url or url.startswith("192.168.")
+    except Exception:
+        pass
+    out = {
+        "ok": True,
+        "stale": False,
+        "synced": synced,
+        "ibd": ibd,
+        "progress": round(prog * 100, 2),
+        "verificationprogress": prog,
+        "blocks": blocks,
+        "headers": headers,
+        "size_on_disk": chain.get("size_on_disk"),
+        "chain": chain.get("chain"),
+        "difficulty": chain.get("difficulty") or mining.get("difficulty"),
+        "networkhashps": mining.get("networkhashps"),
+        "connections": net.get("connections"),
+        "version": net.get("subversion") or net.get("version"),
+        "coinbase": BTC_ADDR,
+        "ckpool": ck,
+        "stratum": "stratum+tcp://192.168.178.111:3333",
+        "nexus": nexus_pool,
+        "rpc": bitcoin_rpc_cfg()["url"],
+    }
+    btc_cache["t"], btc_cache["d"] = now, out
+    return out
+
+
+def iob_val(state_id, base=None, timeout=1.5):
+    base = (base or iobroker_base()).rstrip("/")
+    # Try getPlainValue (simple-api :8087), then /get/, then web /state/
+    paths = [
+        f"{base}/getPlainValue/{state_id}",
+        f"{base}/get/{state_id}",
+        f"{base}/state/{state_id}",
+    ]
+    last_err = None
+    for url in paths:
+        try:
+            req = Request(url, headers={"User-Agent": "xmrig-dash/solix"})
+            with urlopen(req, timeout=timeout) as r:
+                raw = r.read().decode().strip()
+            if not raw or raw.lower() == "null":
+                continue
+            # /get/ returns JSON object
+            if raw.startswith("{"):
+                try:
+                    obj = json.loads(raw)
+                    if "val" in obj:
+                        raw = obj.get("val")
+                        if raw is None:
+                            continue
+                        if isinstance(raw, bool):
+                            return raw
+                        if isinstance(raw, (int, float)):
+                            return raw
+                        raw = str(raw).strip().strip('"')
+                    elif obj.get("error"):
+                        continue
+                except json.JSONDecodeError:
+                    pass
+            else:
+                raw = str(raw).strip().strip('"')
+            if isinstance(raw, str) and raw.lower() in ("true", "false"):
+                return raw.lower() == "true"
+            try:
+                if isinstance(raw, str) and "." in raw:
+                    return float(raw)
+                return int(raw) if isinstance(raw, str) else raw
+            except (ValueError, TypeError):
+                return raw
+        except Exception as ex:
+            last_err = ex
+            continue
+    if last_err:
+        raise last_err
+    return None
+
+
+def iob_probe(base):
+    """Fast reachability check — one lightweight call."""
+    try:
+        req = Request(f"{base}/getPlainValue/system.adapter.admin.0.alive", headers={"User-Agent": "xmrig-dash/solix"})
+        with urlopen(req, timeout=1.2) as r:
+            r.read(64)
+        return True
+    except Exception:
+        try:
+            req = Request(f"{base}/", headers={"User-Agent": "xmrig-dash/solix"})
+            with urlopen(req, timeout=1.2) as r:
+                r.read(64)
+            return True
+        except Exception:
+            return False
+
+
+def iob_objects(base, pattern):
+    """Return object id list matching pattern via ioBroker web API."""
+    try:
+        req = Request(
+            f"{base}/objects?pattern={pattern}&type=state",
+            headers={"User-Agent": "xmrig-dash/solix"},
+        )
+        with urlopen(req, timeout=4) as r:
+            obj = json.loads(r.read().decode())
+        if isinstance(obj, dict):
+            return list(obj.keys())
+    except Exception:
+        pass
+    # fallback: enumObjects-style
+    try:
+        req = Request(
+            f"{base}/objects?pattern={pattern}",
+            headers={"User-Agent": "xmrig-dash/solix"},
+        )
+        with urlopen(req, timeout=4) as r:
+            obj = json.loads(r.read().decode())
+        if isinstance(obj, dict):
+            return list(obj.keys())
+    except Exception:
+        pass
+    return []
+
+
+def solix_pick_site(ids):
+    """Prefer configured SITE, else first ankersolix2.*.solarbank_info* site."""
+    prefix = SITE + "."
+    if any(i.startswith(prefix) for i in ids):
+        return SITE
+    sites = set()
+    for i in ids:
+        if i.startswith("ankersolix2.") and ".solarbank_info." in i:
+            sites.add(i.split(".solarbank_info.", 1)[0])
+        elif i.startswith("ankersolix2.") and ".homepage." in i:
+            sites.add(i.split(".homepage.", 1)[0])
+    return sorted(sites)[0] if sites else SITE
+
+
+def solix_map_ids(all_ids, site):
+    """Map friendly keys to best matching state ids for this site."""
+    # candidates per key: prefer exact, then contains
+    want = {
+        "soc": [
+            f"{site}.solarbank_info.total_battery_power",
+            f"{site}.solarbank_info.battery_soc",
+            f"{site}.solarbank_info.soc",
+            f"{site}.homepage.battery_soc",
+            f"{site}.homepage.soc",
+        ],
+        "pv": [
+            f"{site}.solarbank_info.total_photovoltaic_power",
+            f"{site}.solarbank_info.photovoltaic_power",
+            f"{site}.homepage.photovoltaic_power",
+            f"{site}.homepage.solar_power",
+        ],
+        "import_w": [
+            f"{site}.grid_info.grid_to_home_power",
+            f"{site}.homepage.grid_to_home_power",
+            f"{site}.homepage.grid_import",
+        ],
+        "export_w": [
+            f"{site}.grid_info.photovoltaic_to_grid_power",
+            f"{site}.homepage.photovoltaic_to_grid_power",
+            f"{site}.homepage.grid_export",
+        ],
+        "load_w": [
+            f"{site}.home_load_power",
+            f"{site}.homepage.home_load_power",
+            f"{site}.homepage.home_power",
+        ],
+        "charge_w": [
+            f"{site}.solarbank_info.total_charging_power",
+            f"{site}.solarbank_info.charging_power",
+            f"{site}.homepage.charging_power",
+        ],
+        "output_w": [
+            f"{site}.solarbank_info.total_output_power",
+            f"{site}.solarbank_info.output_power",
+            f"{site}.homepage.output_power",
+        ],
+        "discharge_w": [
+            f"{site}.solarbank_info.battery_discharge_power",
+        ],
+        "bat_charge_w": [],  # fuzzy: bat_charge_power
+        "grid_to_bat_w": [
+            f"{site}.solarbank_info.grid_to_battery_power",
+        ],
+        "to_home_w": [
+            f"{site}.solarbank_info.to_home_load",
+        ],
+        "micro_w": [
+            f"{site}.solarbank_info.micro_inverter_power",
+        ],
+        "pv1": [f"{site}.solarbank_info.solar_power_1"],
+        "pv2": [f"{site}.solarbank_info.solar_power_2"],
+        "pv3": [f"{site}.solarbank_info.solar_power_3"],
+        "pv4": [f"{site}.solarbank_info.solar_power_4"],
+        "battery_wh": [],  # fuzzy battery_energy
+        "device_name": [],  # fuzzy device_name under solarbank_list
+        "updated": [f"{site}.solarbank_info.updated_time"],
+    }
+    idset = set(all_ids)
+    # also fuzzy: any id under site containing keywords
+    fuzzy = {
+        "soc": ("total_battery_power", "battery_soc"),
+        "pv": ("total_photovoltaic_power", "photovoltaic_power"),
+        "import_w": ("grid_to_home_power", "grid_import"),
+        "export_w": ("photovoltaic_to_grid_power", "grid_export"),
+        "load_w": ("home_load_power", "home_power"),
+        "charge_w": ("total_charging_power",),
+        "output_w": ("total_output_power",),
+        "discharge_w": ("battery_discharge_power",),
+        "bat_charge_w": ("bat_charge_power",),
+        "grid_to_bat_w": ("grid_to_battery_power",),
+        "to_home_w": ("to_home_load",),
+        "micro_w": ("micro_inverter_power",),
+        "battery_wh": ("battery_energy",),
+        "device_name": ("device_name",),
+        "updated": ("updated_time",),
+    }
+    mapped = {
+        "miners_enabled": "0_userdata.0.solar_miners.enabled",
+        "miners_running": "0_userdata.0.solar_miners.running",
+        "miners_last": "0_userdata.0.solar_miners.last_action",
+        "miners_reason": "0_userdata.0.solar_miners.reason",
+    }
+    for key, cands in want.items():
+        chosen = next((c for c in cands if c in idset), None)
+        if not chosen:
+            keys = fuzzy.get(key, ())
+            for i in sorted(all_ids):
+                if not i.startswith(site + "."):
+                    continue
+                # skip energyanalysis aggregates
+                if ".energyanalysis." in i:
+                    continue
+                low = i.lower()
+                if key == "device_name" and "solarbank_list" not in low:
+                    continue
+                if key == "battery_wh" and "solarbank_list" not in low:
+                    continue
+                if any(k in low for k in keys):
+                    chosen = i
+                    break
+        if chosen:
+            mapped[key] = chosen
+    return mapped
+
+
+def solix_info():
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    candidates = []
+    primary = iobroker_base()
+    for u in (primary, "http://192.168.178.47:8087", "http://192.168.178.47:8082", "http://192.168.178.47:8081"):
+        u = u.rstrip("/")
+        if u not in candidates:
+            candidates.append(u)
+
+    base = None
+    for u in candidates:
+        if iob_probe(u):
+            base = u
+            break
+
+    out = {"iobroker": base or primary, "site": "Kraftwerk"}
+    if not base:
+        out["error"] = "ioBroker nicht erreichbar (versuche: %s)" % ", ".join(candidates)
+        return out
+
+    all_ids = iob_objects(base, "ankersolix2.*")
+    if not all_ids:
+        all_ids = iob_objects(base, "ankersolix2*")
+    site = solix_pick_site(all_ids)
+    out["site_id"] = site
+    out["ankersolix_states"] = len(all_ids)
+    ids = solix_map_ids(all_ids, site)
+    out["mapped"] = dict(ids)
+
+    if len(ids) <= 4 and not all_ids:
+        out["error"] = "Keine ankersolix2-Objekte in ioBroker gefunden"
+        return out
+
+    ok_any = False
+
+    def one(item):
+        k, sid = item
+        try:
+            return k, iob_val(sid, base=base, timeout=1.5), None
+        except Exception as ex:
+            return k, None, str(ex)
+
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        futs = [pool.submit(one, it) for it in ids.items()]
+        try:
+            for fut in as_completed(futs, timeout=6):
+                k, val, err = fut.result()
+                out[k] = val
+                if val is not None:
+                    ok_any = True
+                if err:
+                    out.setdefault("errors", {})[k] = err
+        except Exception as ex:
+            out.setdefault("errors", {})["_timeout"] = str(ex)
+
+    # Coerce numeric-looking strings (e.g. to_home_load="507")
+    for k, v in list(out.items()):
+        if k in ("mapped", "errors", "sample_ids", "site", "site_id", "iobroker",
+                 "device_name", "updated", "miners_last", "miners_reason", "error"):
+            continue
+        if isinstance(v, str) and v.strip() != "":
+            try:
+                out[k] = float(v) if "." in v else int(v)
+            except ValueError:
+                pass
+
+    # SOC sometimes 0..1
+    if isinstance(out.get("soc"), (int, float)) and 0 <= float(out["soc"]) <= 1.5:
+        out["soc"] = round(float(out["soc"]) * 100, 1)
+
+    # Surplus hint for UI
+    try:
+        pv = float(out["pv"]) if out.get("pv") is not None else None
+        load = float(out["load_w"]) if out.get("load_w") is not None else None
+        if pv is not None and load is not None:
+            out["surplus_w"] = round(pv - load, 0)
+    except (TypeError, ValueError):
+        pass
+
+    if not ok_any:
+        sample = sorted(all_ids)[:12]
+        out["error"] = "ioBroker antwortet, aber keine Solix-States (%s)" % base
+        out["sample_ids"] = sample
+    s1_update_context(out)
+    s1_from_solar_intent(out)
+    out["s1_power"] = s1_public()
+    return out
+
+
+HTML = r"""<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0f0c">
+<title>Miner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f0c; --bg2:#101815; --ink:#e7f2ea; --mute:#7f9688; --line:#1e2c24;
+  --xmr:#3dff9a; --xmr-dim:rgba(61,255,154,.14);
+  --btc:#f0c24b; --btc-dim:rgba(240,194,75,.12);
+  --node:#c4a5ff; --node-dim:rgba(196,165,255,.12);
+  --sol:#5ec8ff; --sol-dim:rgba(94,200,255,.12);
+  --stop:#ff5a5a; --warn:#f0c24b;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font:600 13px/1.25 Sora,system-ui,sans-serif}
+body{
+  background:
+    radial-gradient(80% 50% at 50% -8%,rgba(61,255,154,.08),transparent 55%),
+    linear-gradient(180deg,#0d1611 0%,var(--bg) 45%,#070b09 100%);
+}
+.app{
+  width:min(430px,100%);
+  height:100dvh;
+  margin:0 auto;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  padding:0 0 env(safe-area-inset-bottom);
+}
+.top{
+  display:flex;align-items:center;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+}
+.back{
+  display:none;border:1px solid var(--line);background:var(--bg2);color:var(--ink);
+  font:700 11px Sora,sans-serif;padding:8px 10px;min-height:36px;cursor:pointer;
+}
+.brand{font:700 10px/1 JetBrains Mono,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.brand b{color:var(--ink)}
+.main{min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 14px 12px}
+.view{display:none}.view.show{display:block}
+.tiles{display:grid;gap:10px;padding:4px 0 8px}
+.tile{
+  width:100%;text-align:left;border:1px solid var(--line);background:var(--bg2);
+  padding:14px 14px 13px;cursor:pointer;min-height:108px;
+  transition:border-color .15s,transform .1s;
+}
+.tile:active{transform:scale(.985)}
+.tile-xmr{border-left:3px solid var(--xmr)}
+.tile-btc{border-left:3px solid var(--btc)}
+.tile-node{border-left:3px solid var(--node)}
+.tile-sol{border-left:3px solid var(--sol)}
+.tile-pwr{border-left:3px solid #7dffb3;background:linear-gradient(135deg,rgba(240,194,75,.06),rgba(94,200,255,.08))}
+.tile-val.pwr{color:#9fe8c4}
+.dual{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;
+}
+.dual .panel{
+  border:1px solid var(--line);background:var(--bg2);padding:12px;
+}
+.dual .panel.btc{border-top:2px solid var(--btc)}
+.dual .panel.sol{border-top:2px solid var(--sol)}
+.dual .lab{font:700 10px/1 Sora,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.dual .big{
+  font:800 clamp(1.5rem,7vw,2rem)/.95 JetBrains Mono,monospace;letter-spacing:-.04em;
+}
+.dual .big.btc{color:var(--btc)}.dual .big.sol{color:var(--sol)}
+.dual .big small{font-size:.38em;margin-left:.15rem;color:var(--mute)}
+.dual .mini{margin-top:6px;color:var(--mute);font:500 11px JetBrains Mono,monospace}
+.pvbars{display:grid;gap:6px;margin-top:8px}
+.pvrow{display:grid;grid-template-columns:42px 1fr 52px;gap:8px;align-items:center}
+.pvrow span{font:600 11px JetBrains Mono,monospace;color:var(--mute)}
+.pvrow b{font:700 11px JetBrains Mono,monospace;text-align:right}
+.pvtrack{height:6px;background:#152019;overflow:hidden}
+.pvtrack i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2a8fc4,var(--sol))}
+.tile-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.tile-name{font:700 11px/1 Sora,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.tile-val{
+  font:800 clamp(2rem,9vw,2.6rem)/.95 JetBrains Mono,monospace;letter-spacing:-.04em;
+}
+.tile-val.xmr{color:var(--xmr)}.tile-val.btc{color:var(--btc)}.tile-val.node{color:var(--node)}.tile-val.sol{color:var(--sol)}
+.tile-val small{font-size:.38em;margin-left:.2rem;color:var(--mute);font-weight:700}
+.tile-sub{margin-top:6px;color:var(--mute);font:500 12px JetBrains Mono,monospace}
+.hero{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.pill{
+  font:700 10px/1 JetBrains Mono,monospace;letter-spacing:.1em;text-transform:uppercase;
+  padding:.35rem .55rem;border:1px solid var(--line);color:var(--mute);
+}
+.pill.on{color:var(--xmr);border-color:rgba(61,255,154,.45);background:var(--xmr-dim)}
+.pill.off{color:var(--stop);border-color:rgba(255,90,90,.4);background:rgba(255,90,90,.12)}
+.pill.warn{color:var(--warn);border-color:rgba(240,194,75,.45);background:rgba(240,194,75,.12)}
+.pill.btc{color:var(--btc);border-color:rgba(240,194,75,.45);background:var(--btc-dim)}
+.pill.node{color:var(--node);border-color:rgba(196,165,255,.45);background:var(--node-dim)}
+.pill.sol{color:var(--sol);border-color:rgba(94,200,255,.45);background:var(--sol-dim)}
+.hash{
+  margin-top:10px;
+  font:800 clamp(2.4rem,10vw,3.1rem)/.95 JetBrains Mono,monospace;
+  letter-spacing:-.04em;
+}
+.hash.xmr{color:var(--xmr)}.hash.btc{color:var(--btc)}.hash.node{color:var(--node)}.hash.sol{color:var(--sol)}
+.hash small{font-size:.34em;margin-left:.25rem;color:var(--mute);font-weight:700}
+.track.node i{background:linear-gradient(90deg,#6b4fa8,var(--node))}
+.sub{margin-top:6px;color:var(--mute);font:500 12px JetBrains Mono,monospace}
+.grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border:1px solid var(--line);background:var(--bg2);margin-bottom:12px;
+}
+.cell{padding:11px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cell:nth-child(3n){border-right:0}
+.k{font:700 9px/1 Sora,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
+.v{font:700 1.02rem/1.1 JetBrains Mono,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v.ok{color:var(--xmr)}.v.warn{color:var(--warn)}.v.bad{color:var(--stop)}.v.sol{color:var(--sol)}
+.box{background:var(--bg2);border:1px solid var(--line);padding:12px;margin-bottom:12px}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.nums b{display:block;font:700 1.05rem/1.15 JetBrains Mono,monospace;margin-top:4px}
+.track{height:10px;background:#152019;border:1px solid var(--line);overflow:hidden;margin-top:10px}
+.track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1fa861,var(--xmr));transition:width .35s}
+.track.sol i{background:linear-gradient(90deg,#2a7fad,var(--sol))}
+.meta{margin-top:8px;color:var(--mute);font:500 12px JetBrains Mono,monospace;display:flex;justify-content:space-between;gap:8px}
+.wallet{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.wallet code{font:600 12px JetBrains Mono,monospace}
+.copy{
+  border:1px solid var(--line);background:#152019;color:var(--ink);
+  font:700 11px Sora,sans-serif;padding:8px 10px;min-height:34px;cursor:pointer;
+}
+.reason{margin-top:8px;font:500 12px/1.35 JetBrains Mono,monospace;color:var(--ink);word-break:break-word}
+.foot{padding:10px 14px 12px;border-top:1px solid var(--line);background:rgba(0,0,0,.28)}
+.actions{display:grid;gap:8px}
+.actions.two{grid-template-columns:1fr 1fr}
+button.act{width:100%;min-height:48px;border:0;cursor:pointer;font:700 14px/1 Sora,sans-serif}
+button.act:disabled{opacity:.4}
+button.go-xmr{background:var(--xmr);color:#04140c}
+button.stop-xmr{background:var(--stop);color:#190606}
+button.go-btc{background:var(--btc);color:#1a1404}
+button.stop-btc{background:var(--stop);color:#190606}
+#err{color:var(--stop);font-size:11px;min-height:14px;text-align:center;margin-top:6px}
+.tick{text-align:center;font:500 10px JetBrains Mono,monospace;color:var(--mute);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <button class="back" id="backBtn" type="button">← Zurück</button>
+    <div class="brand" id="brandTitle"><b>MINER</b> · Home</div>
+  </div>
+
+  <div class="main">
+    <section class="view show" id="viewHome">
+      <div class="tiles">
+        <button class="tile tile-pwr" id="tilePwr" type="button">
+          <div class="tile-top"><span class="tile-name">S1 · Anker</span><span class="pill" id="tPPill">—</span></div>
+          <div class="tile-val pwr" id="tPMain">—</div>
+          <div class="tile-sub" id="tPSub">Nexus + Solarbank</div>
+        </button>
+        <button class="tile tile-btc" id="tileBtc" type="button">
+          <div class="tile-top"><span class="tile-name">Nexus S1</span><span class="pill" id="tNPill">—</span></div>
+          <div class="tile-val btc" id="tNH">—<small>TH/s</small></div>
+          <div class="tile-sub" id="tNSub">Bitcoin · Solo</div>
+        </button>
+        <button class="tile tile-sol" id="tileSol" type="button">
+          <div class="tile-top"><span class="tile-name">Solix Solar</span><span class="pill" id="tSPill">—</span></div>
+          <div class="tile-val sol" id="tSSoc">—<small>%</small></div>
+          <div class="tile-sub" id="tSSub">Kraftwerk · PV — · Bezug —</div>
+        </button>
+        <button class="tile tile-node" id="tileNode" type="button">
+          <div class="tile-top"><span class="tile-name">Solo Node</span><span class="pill" id="tBPill">—</span></div>
+          <div class="tile-val node" id="tBSync">—<small>%</small></div>
+          <div class="tile-sub" id="tBSub">Bitcoin Core · Sync</div>
+        </button>
+        <button class="tile tile-xmr" id="tileXmr" type="button">
+          <div class="tile-top"><span class="tile-name">XMRig</span><span class="pill" id="tXPill">—</span></div>
+          <div class="tile-val xmr" id="tXH">—<small>H/s</small></div>
+          <div class="tile-sub" id="tXSub">Monero · CT 107</div>
+        </button>
+      </div>
+      <div class="tile-sub" id="homeTick" style="text-align:center;margin-top:8px">lädt…</div>
+      <div id="homeErr" style="color:var(--stop);font-size:11px;text-align:center;min-height:14px;margin-top:4px"></div>
+    </section>
+
+    <section class="view" id="viewXmr">
+      <div class="hero">
+        <div class="row">
+          <div class="sub" id="xSub">CT 107</div>
+          <div class="pill" id="xPill">—</div>
+        </div>
+        <div class="hash xmr" id="xH">—<small>H/s</small></div>
+        <div class="sub" id="xHm">—</div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">Temp</div><div class="v" id="temp">—</div></div>
+        <div class="cell"><div class="k">Accepted</div><div class="v" id="acc">—</div></div>
+        <div class="cell"><div class="k">Rejected</div><div class="v" id="rej">—</div></div>
+        <div class="cell"><div class="k">Uptime</div><div class="v" id="up">—</div></div>
+        <div class="cell"><div class="k">Hashes</div><div class="v" id="hashes">—</div></div>
+        <div class="cell"><div class="k">Ping</div><div class="v" id="ping">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">SupportXMR</div>
+        <div class="nums">
+          <div><span class="k">Pending</span><b id="pend">—</b></div>
+          <div><span class="k">Paid</span><b id="paid">—</b></div>
+        </div>
+        <div class="track"><i id="bar"></i></div>
+        <div class="meta"><span id="prog">—</span><span id="eta">—</span></div>
+      </div>
+      <div class="box wallet">
+        <div><div class="k">Wallet</div><code>47A5Ts…48EZbTm</code></div>
+        <button class="copy" id="copyBtn" type="button">Copy</button>
+      </div>
+    </section>
+
+    <section class="view" id="viewBtc">
+      <div class="hero">
+        <div class="row">
+          <div class="sub" id="nSub">192.168.178.116</div>
+          <div class="pill" id="nPill">—</div>
+        </div>
+        <div class="hash btc" id="nH">—<small>TH/s</small></div>
+        <div class="sub" id="nHm">—</div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">Power</div><div class="v" id="npw">—</div></div>
+        <div class="cell"><div class="k">Temp</div><div class="v" id="nt">—</div></div>
+        <div class="cell"><div class="k">Fan</div><div class="v" id="nf">—</div></div>
+        <div class="cell"><div class="k">Pool</div><div class="v" id="npool">—</div></div>
+        <div class="cell"><div class="k">Accepted</div><div class="v" id="nacc">—</div></div>
+        <div class="cell"><div class="k">FW</div><div class="v" id="nfw">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">Pool / Solo</div>
+        <div class="nums">
+          <div><span class="k">Best Diff</span><b id="nbest">—</b></div>
+          <div><span class="k">Blöcke</span><b id="nblocks">—</b></div>
+        </div>
+        <div class="sub" id="npoolurl" style="margin-top:8px">—</div>
+        <div class="sub" id="nuser" style="margin-top:4px">—</div>
+      </div>
+    </section>
+
+    <section class="view" id="viewNode">
+      <div class="hero">
+        <div class="row">
+          <div class="sub" id="bSub">192.168.178.111</div>
+          <div class="pill" id="bPill">—</div>
+        </div>
+        <div class="hash node" id="bSync">—<small>%</small></div>
+        <div class="sub" id="bHm">Bitcoin Core Sync</div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">Blöcke</div><div class="v" id="bBlocks">—</div></div>
+        <div class="cell"><div class="k">Header</div><div class="v" id="bHeaders">—</div></div>
+        <div class="cell"><div class="k">Peers</div><div class="v" id="bPeers">—</div></div>
+        <div class="cell"><div class="k">Netz-Diff</div><div class="v" id="bDiff">—</div></div>
+        <div class="cell"><div class="k">Best Share</div><div class="v" id="bBest">—</div></div>
+        <div class="cell"><div class="k">Gefunden</div><div class="v" id="bFound">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">Solo Fortschritt</div>
+        <div class="track node"><i id="bBar"></i></div>
+        <div class="meta"><span id="bProg">—</span><span id="bChain">—</span></div>
+        <div class="nums">
+          <div><span class="k">ckpool</span><b id="bCk">—</b></div>
+          <div><span class="k">Miner</span><b id="bMiner">—</b></div>
+        </div>
+        <div class="reason" id="bReason">Warte auf Sync ≥ 99 %</div>
+      </div>
+      <div class="box wallet">
+        <div><div class="k">Coinbase</div><code id="bAddr">bc1q…89qnl</code></div>
+        <button class="copy" id="copyBtcBtn" type="button">Copy</button>
+      </div>
+    </section>
+
+    <section class="view" id="viewSol">
+      <div class="hero">
+        <div class="row">
+          <div class="sub" id="sDev">Kraftwerk · Solarbank 2</div>
+          <div class="pill" id="sPill">—</div>
+        </div>
+        <div class="hash sol" id="sSoc">—<small>%</small></div>
+        <div class="sub" id="sHm">Akku SOC</div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">PV gesamt</div><div class="v sol" id="sPv">—</div></div>
+        <div class="cell"><div class="k">Hauslast</div><div class="v" id="sLoad">—</div></div>
+        <div class="cell"><div class="k">Bezug</div><div class="v" id="sImp">—</div></div>
+        <div class="cell"><div class="k">Export</div><div class="v" id="sExp">—</div></div>
+        <div class="cell"><div class="k">Laden</div><div class="v" id="sChg">—</div></div>
+        <div class="cell"><div class="k">Entladen</div><div class="v" id="sDis">—</div></div>
+        <div class="cell"><div class="k">Ausgang</div><div class="v" id="sOut">—</div></div>
+        <div class="cell"><div class="k">→ Haus</div><div class="v" id="sHome">—</div></div>
+        <div class="cell"><div class="k">Mikro-WR</div><div class="v" id="sMicro">—</div></div>
+        <div class="cell"><div class="k">Akku Wh</div><div class="v" id="sWh">—</div></div>
+        <div class="cell"><div class="k">Überschuss</div><div class="v" id="sSur">—</div></div>
+        <div class="cell"><div class="k">Netz→Akku</div><div class="v" id="sG2b">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">PV-Strings</div>
+        <div class="pvbars">
+          <div class="pvrow"><span>PV1</span><div class="pvtrack"><i id="sPv1b"></i></div><b id="sPv1">—</b></div>
+          <div class="pvrow"><span>PV2</span><div class="pvtrack"><i id="sPv2b"></i></div><b id="sPv2">—</b></div>
+          <div class="pvrow"><span>PV3</span><div class="pvtrack"><i id="sPv3b"></i></div><b id="sPv3">—</b></div>
+          <div class="pvrow"><span>PV4</span><div class="pvtrack"><i id="sPv4b"></i></div><b id="sPv4">—</b></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="k">Solar-Miner (Nexus)</div>
+        <div class="nums">
+          <div><span class="k">Soll</span><b id="sRun">—</b></div>
+          <div><span class="k">Auto</span><b id="sEn">—</b></div>
+        </div>
+        <div class="track sol"><i id="sBar"></i></div>
+        <div class="meta"><span>An ≥10 % + PV≥300 W · Aus &lt;25 % ohne Sonne</span><span id="sLast">—</span></div>
+        <div class="reason" id="sReason">—</div>
+      </div>
+    </section>
+
+    <section class="view" id="viewPwr">
+      <div class="dual">
+        <div class="panel btc">
+          <div class="lab">Nexus S1</div>
+          <div class="big btc" id="pNH">—<small>TH/s</small></div>
+          <div class="mini" id="pNSub">—</div>
+        </div>
+        <div class="panel sol">
+          <div class="lab">Anker Solix</div>
+          <div class="big sol" id="pSSoc">—<small>%</small></div>
+          <div class="mini" id="pSSub">—</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="cell"><div class="k">S1 Power</div><div class="v" id="pNPw">—</div></div>
+        <div class="cell"><div class="k">S1 Temp</div><div class="v" id="pNTemp">—</div></div>
+        <div class="cell"><div class="k">PV</div><div class="v sol" id="pPv">—</div></div>
+        <div class="cell"><div class="k">Hauslast</div><div class="v" id="pLoad">—</div></div>
+        <div class="cell"><div class="k">Bezug</div><div class="v" id="pImp">—</div></div>
+        <div class="cell"><div class="k">Laden</div><div class="v" id="pChg">—</div></div>
+        <div class="cell"><div class="k">Überschuss</div><div class="v" id="pSur">—</div></div>
+        <div class="cell"><div class="k">Miner-Soll</div><div class="v" id="pRun">—</div></div>
+      </div>
+      <div class="box">
+        <div class="k">S1 An / Aus (Messung)</div>
+        <div class="nums">
+          <div><span class="k">Zuletzt AN</span><b id="pOnAt">—</b></div>
+          <div><span class="k">Zuletzt AUS</span><b id="pOffAt">—</b></div>
+        </div>
+        <div class="nums" style="margin-top:8px">
+          <div><span class="k">Jetzt</span><b id="pSince">—</b></div>
+          <div><span class="k">Schaltungen heute</span><b id="pCycles">—</b></div>
+        </div>
+        <div class="reason" id="pHist" style="margin-top:8px">Noch keine Schaltungen erfasst</div>
+        <div class="sub" id="pPowerHint" style="margin-top:6px">Tracking startet mit dem Dashboard · MESZ</div>
+      </div>
+      <div class="box">
+        <div class="k">Solar-Steuerung</div>
+        <div class="reason" id="pReason">—</div>
+        <div class="sub" id="pHint" style="margin-top:8px">Nexus nur bei Sonne / genug Akku (ioBroker)</div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot" id="foot" style="display:none">
+    <div class="actions" id="xActions">
+      <button class="act go-xmr" id="xBtn" type="button">…</button>
+    </div>
+    <div class="actions two" id="nActions" style="display:none">
+      <button class="act go-btc" id="nOn" type="button">Neustart</button>
+      <button class="act stop-btc" id="nOff" type="button">Shutdown</button>
+    </div>
+    <div class="actions" id="bActions" style="display:none">
+      <div class="tick" style="margin:0;padding:6px 0">Node · ckpool · 0 % Fee Solo</div>
+    </div>
+    <div class="actions" id="sActions" style="display:none">
+      <div class="tick" style="margin:0;padding:6px 0">Steuerung über ioBroker-Skript</div>
+    </div>
+    <div class="actions two" id="pActions" style="display:none">
+      <button class="act go-btc" id="pOn" type="button">S1 Neustart</button>
+      <button class="act stop-btc" id="pOff" type="button">S1 Shutdown</button>
+    </div>
+    <div id="err"></div>
+    <div class="tick" id="tick">—</div>
+  </footer>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const W="47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm";
+const BTC_ADDR="bc1qdjd4rtw6c6at7mmjyq4a9m4lh4s0z5yxf89qnl";
+let view="home", miningOn=null, busy=false, nBusy=false, nexusOff=true;
+const titles={home:"<b>MINER</b> · Home",xmr:"<b>XMRig</b> · Monero",btc:"<b>Nexus S1</b> · Bitcoin",node:"<b>Solo Node</b> · Bitcoin",sol:"<b>Solix</b> · Solar",pwr:"<b>S1 · Anker</b> · Power"};
+
+const fh=n=>{if(n==null||isNaN(n))return"—";if(n>=1000)return(n/1000).toFixed(2)+"k";return String(Math.round(n))};
+const fx=n=>{if(n==null||isNaN(n))return"—";if(!n)return"0";return n<0.01?n.toFixed(8):n.toFixed(4)};
+const fe=d=>{if(d==null||isNaN(d))return"—";if(d<1)return Math.round(d*24)+" Std";if(d<60)return Math.round(d)+" Tage";if(d<365)return(d/30).toFixed(1)+" Mon";return(d/365).toFixed(1)+" J"};
+const fu=s=>{if(s==null)return"—";const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?h+"h "+m+"m":m+"m"};
+const fn=n=>n==null?"—":Number(n).toLocaleString("de-DE");
+const fth=n=>{
+  if(n==null||isNaN(n))return"—";
+  let th=Number(n);
+  // Nexus API: H/s | GH/s | TH/s automatisch erkennen
+  if(th>=1e9) th=th/1e12;
+  else if(th>=100) th=th/1e3;
+  if(th>=10)return th.toFixed(1);
+  if(th>=1)return th.toFixed(2);
+  return th.toFixed(3);
+};
+const fw=n=>{if(n==null||isNaN(n))return"—";return Math.round(Number(n))+" W"};
+const fwh=n=>{if(n==null||isNaN(n))return"—";const x=Number(n);if(x>=1000)return(x/1000).toFixed(2)+" kWh";return Math.round(x)+" Wh"};
+const fdiff=n=>{
+  if(n==null||isNaN(n))return"—";
+  const x=Number(n);
+  if(x>=1e15)return(x/1e15).toFixed(2)+" P";
+  if(x>=1e12)return(x/1e12).toFixed(2)+" T";
+  if(x>=1e9)return(x/1e9).toFixed(2)+" G";
+  if(x>=1e6)return(x/1e6).toFixed(2)+" M";
+  if(x>=1e3)return(x/1e3).toFixed(2)+" K";
+  return String(Math.round(x));
+};
+
+function openView(name){
+  view=name;
+  $("viewHome").classList.toggle("show", name==="home");
+  $("viewXmr").classList.toggle("show", name==="xmr");
+  $("viewBtc").classList.toggle("show", name==="btc");
+  $("viewNode").classList.toggle("show", name==="node");
+  $("viewSol").classList.toggle("show", name==="sol");
+  $("viewPwr").classList.toggle("show", name==="pwr");
+  $("backBtn").style.display=name==="home"?"none":"inline-block";
+  $("foot").style.display=name==="home"?"none":"";
+  $("brandTitle").innerHTML=titles[name]||titles.home;
+  $("xActions").style.display=name==="xmr"?"":"none";
+  $("nActions").style.display=name==="btc"?"grid":"none";
+  $("bActions").style.display=name==="node"?"":"none";
+  $("sActions").style.display=name==="sol"?"":"none";
+  $("pActions").style.display=name==="pwr"?"grid":"none";
+}
+$("tileXmr").onclick=()=>openView("xmr");
+$("tileBtc").onclick=()=>openView("btc");
+$("tileNode").onclick=()=>openView("node");
+$("tileSol").onclick=()=>openView("sol");
+$("tilePwr").onclick=()=>openView("pwr");
+$("backBtn").onclick=()=>openView("home");
+
+function setSw(on,boot){
+  miningOn=on;
+  const pill=$("xPill");
+  const tPill=$("tXPill");
+  if(boot){pill.textContent="Startet";pill.className="pill on";tPill.textContent="Startet";tPill.className="pill on"}
+  else if(on){pill.textContent="Läuft";pill.className="pill on";tPill.textContent="Läuft";tPill.className="pill on"}
+  else{pill.textContent="Aus";pill.className="pill off";tPill.textContent="Aus";tPill.className="pill off"}
+  const b=$("xBtn");
+  b.textContent=on||boot?"XMR stoppen":"XMR starten";
+  b.className="act "+(on||boot?"stop-xmr":"go-xmr");
+}
+
+function setS1Power(p){
+  if(!p) return;
+  const st=p.state==="on"?"AN":(p.state==="off"?"AUS":"?");
+  if($("pOnAt")) $("pOnAt").textContent=p.last_on_txt||"—";
+  if($("pOffAt")) $("pOffAt").textContent=p.last_off_txt||"—";
+  if($("pSince")){
+    const since=p.since_txt?(st+" seit "+p.since_human):"—";
+    $("pSince").textContent=since;
+    $("pSince").style.color=p.state==="on"?"var(--xmr)":(p.state==="off"?"var(--stop)":"var(--mute)");
+  }
+  if($("pCycles")) $("pCycles").textContent=p.cycles_today!=null?String(p.cycles_today):"—";
+  if($("pHist")){
+    const rows=(p.history||[]).slice(0,6).map(h=>{
+      const ev=h.event==="on"?"AN":"AUS";
+      const why=h.reason||"";
+      const ctx=[];
+      if(h.pv!=null) ctx.push("PV "+Math.round(Number(h.pv))+"W");
+      if(h.soc!=null) ctx.push("SOC "+Math.round(Number(h.soc))+"%");
+      if(h.import_w!=null) ctx.push("Bezug "+Math.round(Number(h.import_w))+"W");
+      return (h.when||"?")+" · "+ev+" · "+why+(ctx.length?" · "+ctx.join(" · "):"");
+    });
+    $("pHist").textContent=rows.length?rows.join("\n"):"Noch keine Schaltungen erfasst";
+    $("pHist").style.whiteSpace="pre-line";
+  }
+  if($("pPowerHint")){
+    const onR=p.last_on_reason?("AN: "+p.last_on_reason):"";
+    const offR=p.last_off_reason?("AUS: "+p.last_off_reason):"";
+    const log=p.log_file?("Log: "+p.log_file):"Log: /opt/xmrig-dashboard/s1_power.log";
+    $("pPowerHint").textContent=([onR,offR].filter(Boolean).join(" · ")||"Tracking · MESZ")+" · "+log;
+  }
+  if($("tPSub") && p.last_off_txt){
+    // keep solix text; append short cycle hint on home via tPMain area only if setSolix already ran — handled there
+  }
+  if($("nHm") && p.since_human && (p.state==="on"||p.state==="off")){
+    // leave nHm to setNexus; show on power page only
+  }
+}
+
+function setNexus(d){
+  if(d&&d.s1_power) setS1Power(d.s1_power);
+  if(!d||d.error){
+    nexusOff=true;
+    $("nPill").textContent="Offline"; $("nPill").className="pill off";
+    $("tNPill").textContent="Offline"; $("tNPill").className="pill off";
+    $("nH").innerHTML='—<small>TH/s</small>';
+    $("tNH").innerHTML='—<small>TH/s</small>';
+    $("nHm").textContent=d&&d.error?String(d.error):"Nicht erreichbar";
+    $("tNSub").textContent="Nicht erreichbar";
+    $("nOn").disabled=true; $("nOff").disabled=true;
+    if($("pNH")){
+      $("pNH").innerHTML='—<small>TH/s</small>';
+      $("pNSub").textContent="S1 offline";
+      $("pNPw").textContent="—";
+      $("pNTemp").textContent="—";
+      if($("pOn")) $("pOn").disabled=true;
+      if($("pOff")) $("pOff").disabled=true;
+    }
+    return;
+  }
+  nexusOff=!!d.shutdown;
+  const hr=d.hashRate!=null?d.hashRate:(d.hashrate!=null?d.hashrate:0);
+  const pillTxt=nexusOff?"Shutdown":"Mining";
+  const pillCls=nexusOff?"pill off":"pill btc";
+  $("nPill").textContent=pillTxt; $("nPill").className=pillCls;
+  $("tNPill").textContent=pillTxt; $("tNPill").className=pillCls;
+  $("nH").innerHTML=fth(hr)+'<small>TH/s</small>';
+  $("tNH").innerHTML=fth(hr)+'<small>TH/s</small>';
+  const pnum=d.power!=null?Number(d.power):null;
+  const pw=pnum!=null?pnum.toFixed(pnum<1?2:0)+" W":"—";
+  $("nHm").textContent=pw+" · "+(d.hostname||"nexus");
+  $("tNSub").textContent=pw+" · "+(d.hostip||"192.168.178.116");
+  $("nSub").textContent=(d.hostip||"192.168.178.116");
+  $("npw").textContent=pw;
+  $("nt").textContent=d.temp!=null?Number(d.temp).toFixed(0)+"°":"—";
+  const rpm=d.fanrpm2||d.fanrpm||0;
+  $("nf").textContent=rpm?rpm+" rpm":"0";
+  const pools=d.stratum&&d.stratum.pools||[];
+  const conn=pools.some(p=>p.connected);
+  $("npool").textContent=nexusOff?"—":(conn?"OK":"Down");
+  $("npool").className="v "+(nexusOff?"":conn?"ok":"bad");
+  $("nacc").textContent=fn(d.sharesAccepted);
+  $("nfw").textContent=(d.version||"—").replace(/^nexus\./,"");
+  $("npoolurl").textContent=(d.stratumURL||"—")+":"+(d.stratumPort||"");
+  $("nuser").textContent=d.stratumUser||"—";
+  $("nbest").textContent=fdiff(d.bestSessionDiff!=null?d.bestSessionDiff:d.bestDiff);
+  const found=d.totalFoundBlocks!=null?d.totalFoundBlocks:(d.foundBlocks!=null?d.foundBlocks:0);
+  $("nblocks").textContent=fn(found);
+  const local=String(d.stratumURL||"").includes("192.168.178.111");
+  if(local) $("tNSub").textContent=pw+" · Solo Node";
+  $("nOn").disabled=nBusy||!nexusOff;
+  $("nOff").disabled=nBusy||nexusOff;
+  if($("pNH")){
+    $("pNH").innerHTML=fth(hr)+'<small>TH/s</small>';
+    $("pNSub").textContent=pillTxt+" · "+pw;
+    $("pNPw").textContent=pw;
+    $("pNTemp").textContent=d.temp!=null?Number(d.temp).toFixed(0)+"°":"—";
+    if($("pOn")) $("pOn").disabled=nBusy||!nexusOff;
+    if($("pOff")) $("pOff").disabled=nBusy||nexusOff;
+  }
+}
+
+function setBitcoin(d){
+  if(!d||d.error||d.ok===false){
+    $("bPill").textContent="Offline"; $("bPill").className="pill off";
+    $("tBPill").textContent="Offline"; $("tBPill").className="pill off";
+    $("bSync").innerHTML='—<small>%</small>';
+    $("tBSync").innerHTML='—<small>%</small>';
+    const err=d&&d.error?String(d.error):"RPC nicht erreichbar";
+    $("bHm").textContent=err;
+    $("tBSub").textContent=err.length>42?err.slice(0,40)+"…":err;
+    $("bReason").textContent="bitcoin.rpc auf CT 107 prüfen (url/user/password)";
+    return;
+  }
+  const pct=d.progress!=null?Number(d.progress):0;
+  const synced=!!d.synced;
+  const stale=!!d.stale;
+  const pillTxt=stale?"Busy":(synced?"LIVE":(d.ibd?"Sync":"Node"));
+  const pillCls=stale?"pill warn":(synced?"pill node":"pill warn");
+  $("bPill").textContent=pillTxt; $("bPill").className=pillCls;
+  $("tBPill").textContent=pillTxt; $("tBPill").className=pillCls;
+  const pctTxt=(pct>=10?pct.toFixed(1):pct.toFixed(2));
+  $("bSync").innerHTML=pctTxt+'<small>%</small>';
+  $("tBSync").innerHTML=pctTxt+'<small>%</small>';
+  $("bHm").textContent=stale
+    ?("RPC busy · letzter Stand · "+fn(d.blocks))
+    :(synced?"Solo bereit · 0 % Fee":("Sync · "+fn(d.blocks)+" / "+fn(d.headers)));
+  $("tBSub").textContent=stale
+    ?("Busy · "+fn(d.blocks)+" Blöcke")
+    :(synced
+      ?("LIVE · Blöcke "+(d.nexus&&d.nexus.totalFoundBlocks!=null?d.nexus.totalFoundBlocks:(d.nexus&&d.nexus.foundBlocks)||0))
+      :("Sync "+pctTxt+"% · "+fn(d.blocks)));
+  $("bSub").textContent=(d.rpc||"192.168.178.111").replace(/^https?:\/\//,"");
+  $("bBlocks").textContent=fn(d.blocks);
+  $("bHeaders").textContent=fn(d.headers);
+  $("bPeers").textContent=fn(d.connections);
+  $("bDiff").textContent=fdiff(d.difficulty);
+  const nx=d.nexus||{};
+  $("bBest").textContent=fdiff(nx.bestSessionDiff!=null?nx.bestSessionDiff:nx.bestDiff);
+  $("bFound").textContent=fn(nx.totalFoundBlocks!=null?nx.totalFoundBlocks:nx.foundBlocks)||"0";
+  $("bFound").className="v "+((nx.totalFoundBlocks||nx.foundBlocks)>0?"ok":"");
+  $("bBar").style.width=Math.max(0,Math.min(100,pct))+"%";
+  $("bProg").textContent=pctTxt+"% · "+(synced?"synced":"IBD");
+  $("bChain").textContent=d.chain||"main";
+  $("bCk").textContent=d.ckpool&&d.ckpool.ok?"OK":"Stratum";
+  $("bCk").style.color=d.ckpool&&d.ckpool.ok?"var(--node)":"var(--mute)";
+  const local=!!nx.solo_local;
+  const minerOn=nx.hashRate!=null&&Number(nx.hashRate)>0;
+  $("bMiner").textContent=local?(minerOn?"Solo AN":"verbunden"):(nx.stratumURL?"extern":"—");
+  $("bMiner").style.color=local&&minerOn?"var(--btc)":"var(--mute)";
+  if(stale) $("bReason").textContent="Node busy (Sync) · RPC Timeout — Werte vom letzten Abruf";
+  else if(synced&&local&&minerOn) $("bReason").textContent="SOLO MINING LIVE · Rewards → Coinbase";
+  else if(synced&&!local) $("bReason").textContent="Node synced · Miner zeigt noch auf externen Pool";
+  else if(synced) $("bReason").textContent="Node synced · warte auf Nexus → 192.168.178.111:3333";
+  else $("bReason").textContent="ckpool wartet auf Sync ≥ 99 % · ETA je nach Peers";
+  const addr=d.coinbase||BTC_ADDR;
+  $("bAddr").textContent=addr.slice(0,8)+"…"+addr.slice(-6);
+}
+
+function setSolix(d){
+  const setPvBar=(id,bid,val,maxv)=>{
+    const n=val!=null&&!isNaN(val)?Number(val):null;
+    $(id).textContent=fw(n);
+    const pct=n!=null&&maxv>0?Math.max(0,Math.min(100,(n/maxv)*100)):0;
+    $(bid).style.width=pct+"%";
+  };
+  if(!d||d.error){
+    $("sPill").textContent="Offline"; $("sPill").className="pill off";
+    $("tSPill").textContent="Offline"; $("tSPill").className="pill off";
+    $("sSoc").innerHTML='—<small>%</small>';
+    $("tSSoc").innerHTML='—<small>%</small>';
+    $("sHm").textContent=d&&d.error?String(d.error):"ioBroker nicht erreichbar";
+    $("tSSub").textContent="ioBroker nicht erreichbar";
+    if($("tPPill")){ $("tPPill").textContent="Solix?"; $("tPPill").className="pill warn"; }
+    if($("tPMain")) $("tPMain").textContent="—";
+    if($("tPSub")) $("tPSub").textContent="Anker offline";
+    return;
+  }
+  const soc=d.soc!=null?Number(d.soc):null;
+  const run=!!d.miners_running;
+  const en=d.miners_enabled!==false;
+  const pillTxt=run?"Miner AN":"Miner AUS";
+  const pillCls=run?"pill on":"pill off";
+  $("sPill").textContent=pillTxt; $("sPill").className=pillCls;
+  $("tSPill").textContent=pillTxt; $("tSPill").className=pillCls;
+  const socTxt=soc!=null?Math.round(soc):"—";
+  $("sSoc").innerHTML=socTxt+'<small>%</small>';
+  $("tSSoc").innerHTML=socTxt+'<small>%</small>';
+  const dev=d.device_name?String(d.device_name):"Solarbank 2";
+  if($("sDev")) $("sDev").textContent="Kraftwerk · "+dev;
+  $("sHm").textContent="Akku · "+fwh(d.battery_wh)+" · "+(en?"Auto an":"Auto aus");
+  $("tSSub").textContent="PV "+fw(d.pv)+" · Bezug "+fw(d.import_w);
+  $("sPv").textContent=fw(d.pv);
+  $("sLoad").textContent=fw(d.load_w);
+  $("sImp").textContent=fw(d.import_w);
+  $("sImp").className="v "+(d.import_w>=50?"bad":"ok");
+  $("sExp").textContent=fw(d.export_w);
+  $("sChg").textContent=fw(d.charge_w!=null?d.charge_w:d.bat_charge_w);
+  $("sDis").textContent=fw(d.discharge_w);
+  $("sOut").textContent=fw(d.output_w);
+  $("sHome").textContent=fw(d.to_home_w);
+  $("sMicro").textContent=fw(d.micro_w);
+  $("sWh").textContent=fwh(d.battery_wh);
+  $("sSur").textContent=fw(d.surplus_w);
+  $("sSur").className="v "+(d.surplus_w!=null&&d.surplus_w>0?"ok":"");
+  $("sG2b").textContent=fw(d.grid_to_bat_w);
+  const pvMax=Math.max(400, Number(d.pv)||0, Number(d.pv1)||0, Number(d.pv2)||0, Number(d.pv3)||0, Number(d.pv4)||0);
+  setPvBar("sPv1","sPv1b",d.pv1,pvMax);
+  setPvBar("sPv2","sPv2b",d.pv2,pvMax);
+  setPvBar("sPv3","sPv3b",d.pv3,pvMax);
+  setPvBar("sPv4","sPv4b",d.pv4,pvMax);
+  $("sRun").textContent=run?"ON":"OFF";
+  $("sRun").style.color=run?"var(--xmr)":"var(--stop)";
+  $("sEn").textContent=en?"Ja":"Nein";
+  const pct=soc!=null?Math.max(0,Math.min(100,soc)):0;
+  $("sBar").style.width=pct+"%";
+  $("sLast").textContent=d.miners_last||"—";
+  $("sReason").textContent=d.miners_reason||"Keine letzte Aktion";
+  // Combo page + home tile
+  if($("pSSoc")){
+    $("pSSoc").innerHTML=socTxt+'<small>%</small>';
+    $("pSSub").textContent="PV "+fw(d.pv)+" · "+pillTxt;
+    $("pPv").textContent=fw(d.pv);
+    $("pLoad").textContent=fw(d.load_w);
+    $("pImp").textContent=fw(d.import_w);
+    $("pImp").className="v "+(d.import_w>=50?"bad":"ok");
+    $("pChg").textContent=fw(d.charge_w!=null?d.charge_w:d.bat_charge_w);
+    $("pSur").textContent=fw(d.surplus_w);
+    $("pRun").textContent=run?"ON":"OFF";
+    $("pRun").style.color=run?"var(--xmr)":"var(--stop)";
+    $("pReason").textContent=d.miners_reason||"Keine letzte Aktion";
+  }
+  if($("tPMain")){
+    const hrTxt=$("tNH")?$("tNH").textContent.replace(/\s+/g," ").trim():"—";
+    $("tPMain").textContent=hrTxt+" · "+socTxt+"%";
+    const p=d.s1_power||{};
+    const sw=p.state==="on"
+      ?("AN "+(p.since_human||""))
+      :(p.state==="off"?("AUS "+(p.since_human||"")):pillTxt);
+    $("tPSub").textContent="PV "+fw(d.pv)+" · Bezug "+fw(d.import_w)+" · "+sw.trim();
+    $("tPPill").textContent=run?"Solar AN":"Solar AUS";
+    $("tPPill").className=run?"pill on":"pill off";
+  }
+  if(d.s1_power) setS1Power(d.s1_power);
+}
+
+$("xBtn").onclick=async()=>{
+  if(busy)return; busy=true; $("xBtn").disabled=true; $("err").textContent="";
+  const action=miningOn?"stop":"start";
+  try{
+    const res=await fetch("/api/mining",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action})});
+    const j=await res.json();
+    if(!res.ok||!j.ok)throw new Error(j.error||j.message||"Fehler");
+    setSw(action==="start");
+    setTimeout(r,800);
+  }catch(e){$("err").textContent=e.message}
+  finally{busy=false;$("xBtn").disabled=false}
+};
+
+async function nexusAct(action){
+  if(nBusy)return; nBusy=true;
+  ["nOn","nOff","pOn","pOff"].forEach(id=>{if($(id)) $(id).disabled=true;});
+  $("err").textContent="";
+  try{
+    const res=await fetch("/api/nexus",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action})});
+    const j=await res.json();
+    if(!res.ok||!j.ok)throw new Error(j.error||j.message||"Nexus-Fehler");
+    setTimeout(r,1200);
+  }catch(e){$("err").textContent=e.message}
+  finally{nBusy=false}
+}
+$("nOn").onclick=()=>nexusAct("restart");
+$("nOff").onclick=()=>nexusAct("shutdown");
+if($("pOn")) $("pOn").onclick=()=>nexusAct("restart");
+if($("pOff")) $("pOff").onclick=()=>nexusAct("shutdown");
+
+$("copyBtn").onclick=async()=>{
+  try{await navigator.clipboard.writeText(W);$("copyBtn").textContent="OK";setTimeout(()=>$("copyBtn").textContent="Copy",900)}
+  catch(e){$("err").textContent="Copy fehlgeschlagen"}
+};
+$("copyBtcBtn").onclick=async()=>{
+  try{await navigator.clipboard.writeText(BTC_ADDR);$("copyBtcBtn").textContent="OK";setTimeout(()=>$("copyBtcBtn").textContent="Copy",900)}
+  catch(e){$("err").textContent="Copy fehlgeschlagen"}
+};
+
+async function jget(url, ms){
+  const wait=ms!=null?ms:(url.indexOf("/api/bitcoin")>=0?30000:6000);
+  const ctrl=typeof AbortController!=="undefined"?new AbortController():null;
+  const t=ctrl?setTimeout(()=>ctrl.abort(),wait):null;
+  try{
+    const res=await fetch(url,{cache:"no-store",signal:ctrl?ctrl.signal:undefined});
+    let body=null;
+    try{ body=await res.json(); }catch(_){ body=null; }
+    if(!res.ok){
+      const err=(body&&body.error)!=null?String(body.error):("HTTP "+res.status);
+      return {ok:false, error:err, data:body||{}};
+    }
+    return {ok:true, data:body};
+  }catch(e){
+    return {ok:false, error:e.name==="AbortError"?"Timeout":(e.message||"Netzwerk"), data:{}};
+  }finally{ if(t) clearTimeout(t); }
+}
+
+function stamp(){
+  const t=new Date().toLocaleTimeString("de-DE");
+  if($("tick")) $("tick").textContent=t;
+  if($("homeTick")) $("homeTick").textContent="Stand "+t;
+}
+
+async function r(){
+  const errs=[];
+  try{
+    const [mining, temp, pool, nexus, bitcoin, solix, summary]=await Promise.all([
+      jget("/api/mining"),
+      jget("/api/temp"),
+      jget("/api/pool"),
+      jget("/api/nexus"),
+      jget("/api/bitcoin"),
+      jget("/api/solix"),
+      jget("/api/summary"),
+    ]);
+
+    try{
+      const nd=nexus.ok?nexus.data:Object.assign({error:nexus.error||"offline"}, nexus.data||{});
+      setNexus(nd);
+    }
+    catch(e){ errs.push("S1:"+e.message); }
+
+    try{ setBitcoin(bitcoin.ok?bitcoin.data:{error:bitcoin.error||"offline"}); }
+    catch(e){ errs.push("Node:"+e.message); }
+
+    try{ setSolix(solix.ok?solix.data:{error:solix.error||"offline"}); }
+    catch(e){ errs.push("Solix:"+e.message); }
+
+    const tj=temp.ok?temp.data:{};
+    if(tj.celsius!=null){
+      $("temp").textContent=Number(tj.celsius).toFixed(1)+"°";
+      $("temp").className="v "+(tj.celsius>=85?"bad":tj.celsius>=75?"warn":"ok");
+    }else{$("temp").textContent="n/a";$("temp").className="v"}
+
+    if(pool.ok&&pool.data&&!pool.data.error){
+      const pj=pool.data;
+      $("pend").textContent=fx(pj.pending_xmr);
+      $("paid").textContent=fx(pj.paid_xmr);
+      $("eta").textContent=fe(pj.eta_days);
+      const pct=Math.max(0,Math.min(100,pj.progress_pct||0));
+      $("bar").style.width=(pct>0?Math.max(pct,.8):0)+"%";
+      $("prog").textContent=pct.toFixed(2)+"% · "+fx(pj.pending_xmr)+" / 0,1";
+    }
+
+    const mj=mining.ok?mining.data:{};
+    if(!mj.active){
+      setSw(false);
+      $("xH").innerHTML='0<small>H/s</small>';
+      $("tXH").innerHTML='0<small>H/s</small>';
+      $("xHm").textContent=mining.ok?"Mining aus":("Status: "+(mining.error||"?"));
+      $("tXSub").textContent=mining.ok?"Mining aus · CT 107":("Fehler · "+(mining.error||"?"));
+      $("acc").textContent="—"; $("rej").textContent="—";
+      $("hashes").textContent="—"; $("up").textContent="—"; $("ping").textContent="—";
+    }else if(!summary.ok){
+      setSw(true,true);
+      $("xH").innerHTML='…<small>H/s</small>';
+      $("tXH").innerHTML='…<small>H/s</small>';
+      $("xHm").textContent="XMRig: "+(summary.error||"warte…");
+      $("tXSub").textContent="Startet / API";
+    }else{
+      const d=summary.data||{};
+      const tot=(d.hashrate&&d.hashrate.total)||[];
+      const t=tot[0]!=null?Number(tot[0]):0;
+      setSw(true, t<=0);
+      const hi=d.hashrate&&d.hashrate.highest;
+      const conn=d.connection||{};
+      const a=conn.accepted!=null?conn.accepted:0, rj=conn.rejected!=null?conn.rejected:0;
+      const main=t>=1000?(t/1000).toFixed(2)+"k":String(Math.round(t));
+      $("xH").innerHTML=main+'<small>H/s</small>';
+      $("tXH").innerHTML=main+'<small>H/s</small>';
+      $("xHm").textContent="Max "+fh(hi)+" · "+(d.algo||"rx").toUpperCase();
+      $("tXSub").textContent=(tj.celsius!=null?Number(tj.celsius).toFixed(1)+"° · ":"")+(d.algo||"rx").toUpperCase();
+      $("acc").textContent=fn(a);
+      $("rej").textContent=fn(rj);
+      $("hashes").textContent=fn(d.results&&d.results.hashes_total);
+      $("up").textContent=fu(d.uptime);
+      $("ping").textContent=conn.ping!=null?conn.ping+" ms":"—";
+      $("xSub").textContent="CT 107 · "+(d.algo||"rx").toUpperCase();
+    }
+
+    if(!nexus.ok) errs.push("S1:"+(nexus.error||"?"));
+    if(!bitcoin.ok) errs.push("Node:"+(bitcoin.error||"?"));
+    if(!solix.ok) errs.push("Solix:"+(solix.error||"?"));
+    if(!mining.ok) errs.push("XMR:"+(mining.error||"?"));
+    const msg=errs.join(" · ");
+    if($("err")) $("err").textContent=msg;
+    if($("homeErr")) $("homeErr").textContent=msg;
+    stamp();
+  }catch(e){
+    if($("err")) $("err").textContent=e.message;
+    if($("homeErr")) $("homeErr").textContent=e.message;
+    stamp();
+  }
+}
+r(); setInterval(r,3000);
+</script>
+</body>
+</html>
+"""
+
+
+class H(BaseHTTPRequestHandler):
+    def j(self, code, obj):
+        b = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(b)
+
+    def do_GET(self):
+        if self.path.startswith("/api/summary"):
+            try:
+                with urlopen(XMRIG, timeout=3) as r:
+                    b = r.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(b)
+            except URLError as ex:
+                self.j(502, {"error": str(ex.reason)})
+            return
+        if self.path.startswith("/api/temp"):
+            self.j(200, temp() or {"celsius": None})
+            return
+        if self.path.startswith("/api/pool"):
+            try:
+                self.j(200, pool())
+            except (URLError, HTTPError, TimeoutError, json.JSONDecodeError, ValueError) as ex:
+                self.j(502, {"error": str(ex)})
+            return
+        if self.path.startswith("/api/mining"):
+            self.j(200, mining_status())
+            return
+        if self.path.startswith("/api/nexus"):
+            try:
+                data = nexus_info()
+                data["s1_power"] = s1_from_nexus(data)
+                self.j(200, data)
+            except (URLError, HTTPError, TimeoutError, json.JSONDecodeError, ValueError) as ex:
+                err = getattr(ex, "reason", None) or str(ex)
+                self.j(502, {"error": str(err), "s1_power": s1_from_nexus({"error": str(err)})})
+            return
+        if self.path.startswith("/api/s1-power/log"):
+            n = 80
+            try:
+                q = self.path.split("?", 1)
+                if len(q) > 1:
+                    for part in q[1].split("&"):
+                        if part.startswith("n="):
+                            n = max(1, min(500, int(part.split("=", 1)[1])))
+            except ValueError:
+                n = 80
+            lines = []
+            try:
+                if S1_POWER_LOG.exists():
+                    lines = S1_POWER_LOG.read_text(encoding="utf-8").splitlines()[-n:]
+            except OSError as ex:
+                self.j(500, {"error": str(ex), "log_file": str(S1_POWER_LOG)})
+                return
+            self.j(200, {
+                "log_file": str(S1_POWER_LOG),
+                "jsonl_file": str(S1_POWER_JSONL),
+                "lines": lines,
+                "count": len(lines),
+            })
+            return
+        if self.path.startswith("/api/s1-power"):
+            self.j(200, s1_public())
+            return
+        if self.path.startswith("/api/bitcoin"):
+            try:
+                self.j(200, bitcoin_node_info())
+            except Exception as ex:
+                self.j(502, {"ok": False, "error": str(ex)})
+            return
+        if self.path.startswith("/api/solix"):
+            try:
+                self.j(200, solix_info())
+            except Exception as ex:
+                self.j(502, {"error": str(ex)})
+            return
+        b = HTML.encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers()
+        self.wfile.write(b)
+
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(n) if n else b"{}"
+        try:
+            data = json.loads(body.decode() or "{}")
+        except json.JSONDecodeError:
+            self.j(400, {"ok": False, "error": "invalid json"})
+            return
+        if self.path.startswith("/api/mining"):
+            ok, msg = mining_control(data.get("action", ""))
+            self.j(200 if ok else 500, {"ok": ok, "message": msg, **mining_status()})
+            return
+        if self.path.startswith("/api/nexus"):
+            ok, msg = nexus_control(data.get("action", ""))
+            payload = {"ok": ok, "message": msg}
+            action = data.get("action", "")
+            if ok and action == "shutdown":
+                payload["s1_power"] = s1_observe("off", "cmd:shutdown", force=True)
+            elif ok and action == "restart":
+                payload["s1_power"] = s1_observe("on", "cmd:restart", force=True)
+            try:
+                info = nexus_info()
+                payload.update(info)
+                if "s1_power" not in payload:
+                    payload["s1_power"] = s1_from_nexus(info)
+            except Exception as ex:
+                if "s1_power" not in payload:
+                    payload["s1_power"] = s1_from_nexus({"error": str(ex)})
+            self.j(200 if ok else 500, payload)
+            return
+        self.j(404, {"error": "not found"})
+
+    def log_message(self, *a):
+        pass
+
+
+if __name__ == "__main__":
+    s1_ensure_log(boot=True)
+    s1_start_watch()
+    rpc = bitcoin_rpc_cfg()
+    print(
+        "http://0.0.0.0:%s/ iobroker=%s bitcoin_rpc=%s user=%s s1_log=%s exists=%s"
+        % (
+            PORT,
+            iobroker_base(),
+            rpc.get("url"),
+            "yes" if rpc.get("user") else "no",
+            S1_POWER_LOG,
+            S1_POWER_LOG.exists(),
+        ),
+        flush=True,
+    )
+    ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()
