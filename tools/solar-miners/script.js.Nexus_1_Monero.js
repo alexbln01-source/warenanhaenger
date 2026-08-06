@@ -1,16 +1,7 @@
 // Solar-Miner: Nexus S1 — Steckdose
-// AN früh: sobald Akku aus Solar geladen wird und SOC ≥ 7 %
-// AUS: Netzbezug / Abend-Reserve
-//
-// AUS:
-//   - Bezug > 100 W für 2 Minuten
-//   - ab 18:00 und SOC < 25 %
-//
-// AN:
-//   - Bezug ≤ 100 W für 1 Minute
-//   - Laden (Solar→Akku) ≥ 50 W
-//   - SOC ≥ 7 %
-//   → kein Warten auf PV ≥ 400 / Morgen-Phase bis 10 Uhr
+// AN: Solar lädt Akku (≥ 50 W) und SOC ≥ 7 %
+// AUS: nur abends SOC < 25 %
+// Kein AUS/Warten wegen Netzbezug — bei Hausverbrauch weiterlaufen lassen
 
 const ID_PLUG     = "fritzdect.0.DECT_087610373499.state";
 const ID_PLUG_PWR = "fritzdect.0.DECT_087610373499.power";
@@ -27,15 +18,10 @@ const ID_LAST= "0_userdata.0.solar_miners.last_action";
 const ID_REAS= "0_userdata.0.solar_miners.reason";
 
 const SOC_MIN_ON     = 7;    // mindestens noch 7 % Akku
-const CHARGE_ON      = 50;   // Solar lädt Akku (Rauschen ausfiltern)
+const CHARGE_ON      = 50;   // Solar lädt Akku
 const SOC_EVENING    = 25;   // abends Reserve — darunter AUS
 const EVENING_HOUR   = 18;
-const IMPORT_LIMIT   = 100;
-const IMPORT_HOLD    = 2 * 60 * 1000;
-const IMPORT_CLEAR   = 1 * 60 * 1000;
 
-let importHighSince = null;
-let importLowSince  = null;
 let busy = false;
 let lastLogReason = "";
 
@@ -131,10 +117,9 @@ async function tick() {
         const imp    = num(ID_IMPORT);
         const charge = num(ID_CHARGE);
 
-        if (soc === null || pv === null || imp === null || charge === null) {
+        if (soc === null || pv === null || charge === null) {
             logStatus(
-                "⚠️ Solix-Werte fehlen SOC=" + soc + " PV=" + pv +
-                " Imp=" + imp + " Laden=" + charge
+                "⚠️ Solix-Werte fehlen SOC=" + soc + " PV=" + pv + " Laden=" + charge
             );
             return;
         }
@@ -148,82 +133,45 @@ async function tick() {
             log("solar_miners: Meta running=false synchronisiert (Steckdose war aus)");
         }
 
-        const now = Date.now();
         const evening = isEvening();
         const plugW = num(ID_PLUG_PWR);
+        const impTxt = imp !== null ? Math.round(imp) + "W" : "?";
 
         log(
             "solar_miners: tick on=" + on +
             " plug=" + bool(ID_PLUG) + " plugW=" + (plugW !== null ? Math.round(plugW) : "?") +
             " PV=" + Math.round(pv) + "W Laden=" + Math.round(charge) + "W" +
-            " SOC=" + Math.round(soc) + "% Bezug=" + Math.round(imp) + "W" +
+            " SOC=" + Math.round(soc) + "% Bezug=" + impTxt +
             (evening ? " [abend]" : "")
         );
 
-        if (imp > IMPORT_LIMIT) {
-            importLowSince = null;
-            if (!importHighSince) {
-                importHighSince = now;
-                log("solar_miners: Bezug > " + IMPORT_LIMIT + " W — AUS-Timer (2 min)");
+        // AUS nur abends bei niedriger Reserve — kein AUS wegen Bezug/Hausverbrauch
+        if (evening && soc < SOC_EVENING && on) {
+            if (plug(false)) {
+                setMeta(false, "Abend: SOC < " + SOC_EVENING + "% (" + Math.round(soc) + "%)");
             }
-        } else {
-            importHighSince = null;
-            if (!importLowSince) {
-                importLowSince = now;
-                log("solar_miners: Bezug ≤ " + IMPORT_LIMIT + " W — AN-Timer (1 min)");
-            }
-        }
-
-        let wantOff = false;
-        let offReason = "";
-
-        if (evening && soc < SOC_EVENING) {
-            wantOff = true;
-            offReason = "Abend: SOC < " + SOC_EVENING + "% (" + Math.round(soc) + "%)";
-        } else if (importHighSince && (now - importHighSince >= IMPORT_HOLD)) {
-            wantOff = true;
-            offReason = "Netzbezug > " + IMPORT_LIMIT + " W über 2 Min (" + Math.round(imp) + "W)";
-        } else if (imp > IMPORT_LIMIT && on) {
-            const left = Math.ceil((IMPORT_HOLD - (now - importHighSince)) / 1000);
-            logStatus("⚠️ Bezug " + Math.round(imp) + "W — AUS in ~" + left + "s");
-        }
-
-        if (wantOff && on) {
-            if (plug(false)) setMeta(false, offReason);
             return;
         }
 
         if (!on) {
-            const bezugKlar = importLowSince && (now - importLowSince >= IMPORT_CLEAR);
-            const okEnergie = energieOk(charge, soc);
-
-            if (bezugKlar && okEnergie) {
+            if (energieOk(charge, soc)) {
                 const reason =
                     "AN: Laden " + Math.round(charge) + "W, SOC " + Math.round(soc) +
-                    "%, PV " + Math.round(pv) + "W, Bezug " + Math.round(imp) + "W";
+                    "%, PV " + Math.round(pv) + "W, Bezug " + impTxt;
                 if (plug(true)) setMeta(true, reason);
             } else {
                 let why = "⏳ Warte —";
-                if (!bezugKlar) {
-                    if (imp > IMPORT_LIMIT) {
-                        why += " Bezug noch " + Math.round(imp) + "W";
-                    } else {
-                        const left = importLowSince
-                            ? Math.ceil((IMPORT_CLEAR - (now - importLowSince)) / 1000)
-                            : 60;
-                        why += " Bezug ok, noch ~" + left + "s";
-                    }
-                } else if (charge < CHARGE_ON) {
+                if (charge < CHARGE_ON) {
                     why += " kein Solar-Laden (Laden " + Math.round(charge) + "W < " + CHARGE_ON + "W)";
                 } else {
                     why += " SOC " + Math.round(soc) + "% < " + SOC_MIN_ON + "%";
                 }
                 logStatus(why);
             }
-        } else if (!wantOff) {
+        } else {
             logStatus(
                 "✓ Läuft: Laden " + Math.round(charge) + "W, PV " + Math.round(pv) +
-                "W, SOC " + Math.round(soc) + "%, Bezug " + Math.round(imp) + "W"
+                "W, SOC " + Math.round(soc) + "%, Bezug " + impTxt
             );
         }
     } catch (e) {
@@ -240,8 +188,8 @@ try {
     createState(ID_LAST, "",    { name: "solar_miners.last_action", type: "string" }, () => {});
     createState(ID_REAS, "",    { name: "solar_miners.reason", type: "string" }, () => {});
 
-    log("solar_miners: ✅ Gestartet — AN bei Solar-Laden ≥ " + CHARGE_ON + "W und SOC ≥ " + SOC_MIN_ON + "%");
-    log("  AUS: Bezug > " + IMPORT_LIMIT + "W / 2 Min, abends SOC < " + SOC_EVENING + "%");
+    log("solar_miners: ✅ Gestartet — AN bei Laden ≥ " + CHARGE_ON + "W und SOC ≥ " + SOC_MIN_ON + "%");
+    log("  AUS nur abends SOC < " + SOC_EVENING + "% — kein AUS wegen Netzbezug");
 
     on({ id: [ID_SOC, ID_PV, ID_IMPORT, ID_CHARGE], change: "ne" }, tick);
     schedule("*/1 * * * *", tick);
