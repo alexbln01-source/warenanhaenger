@@ -1209,7 +1209,7 @@ button.stop-btc{background:var(--stop);color:#190606}
         <div class="cell"><div class="k">Header</div><div class="v" id="bHeaders">—</div></div>
         <div class="cell"><div class="k">Peers</div><div class="v" id="bPeers">—</div></div>
         <div class="cell"><div class="k">Netz-Diff</div><div class="v" id="bDiff">—</div></div>
-        <div class="cell"><div class="k">Live Share</div><div class="v" id="bLive">—</div></div>
+        <div class="cell"><div class="k">Session</div><div class="v" id="bLive">—</div></div>
         <div class="cell"><div class="k">Best Share</div><div class="v" id="bBest">—</div></div>
       </div>
       <div class="box">
@@ -1547,10 +1547,10 @@ function setBitcoin(d){
   $("bPeers").textContent=fn(d.connections);
   $("bDiff").textContent=fdiff(d.difficulty);
   const nx=d.nexus||{};
-  // Live = beste Share dieser Session; Best = All-Time (Nexus)
-  const live=nx.bestSessionDiff!=null?nx.bestSessionDiff:nx.bestDiff;
-  const best=nx.bestDiff!=null?nx.bestDiff:nx.bestSessionDiff;
-  $("bLive").textContent=fdiff(live);
+  // Session = seit Connect/Restart; Best Share = All-Time (Nexus), nicht die Session
+  const sess=nx.bestSessionDiff!=null?nx.bestSessionDiff:null;
+  const best=nx.bestDiff!=null?nx.bestDiff:(sess!=null?sess:null);
+  $("bLive").textContent=fdiff(sess);
   $("bBest").textContent=fdiff(best);
   $("bFound").textContent=fn(nx.totalFoundBlocks!=null?nx.totalFoundBlocks:nx.foundBlocks)||"0";
   $("bFound").className=((nx.totalFoundBlocks||nx.foundBlocks)>0?"ok":"");

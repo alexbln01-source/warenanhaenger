@@ -136,10 +136,9 @@ EOF
   [ -z "$S1_HR" ] && S1_HR=$(jget "$NEXUS" "hashrate")
   S1_STATE=$(jget "$SOLIX" "s1_power.state")
   [ -z "$S1_STATE" ] && S1_STATE=$(jget "$NEXUS" "s1_power.state")
-  # Live Share = Session-Best; Best Share = All-Time (Nexus)
+  # Session = seit Connect; Best = All-Time (Nexus) — oft viel höher als Session
   LIVE_SHARE=$(jget "$NEXUS" "bestSessionDiff")
   BEST_SHARE=$(jget "$NEXUS" "bestDiff")
-  [ -z "$LIVE_SHARE" ] && LIVE_SHARE="$BEST_SHARE"
   [ -z "$BEST_SHARE" ] && BEST_SHARE="$LIVE_SHARE"
   LIVE_TXT=$(fmt_diff "$LIVE_SHARE")
   BEST_TXT=$(fmt_diff "$BEST_SHARE")
@@ -150,7 +149,7 @@ EOF
   fi
 
   {
-    echo -n "$TIMESTAMP | Diff: ${DIFF:-?} | Hash: ${HASH:-?} | Live: ${LIVE_TXT:-?} | Best: ${BEST_TXT:-?} | Shares/min: ${SHARES:-?} | Acc: ${ACCEPTED:-?} | Rej: ${REJECTED:-?}"
+    echo -n "$TIMESTAMP | Diff: ${DIFF:-?} | Hash: ${HASH:-?} | Session: ${LIVE_TXT:-?} | Best: ${BEST_TXT:-?} | Shares/min: ${SHARES:-?} | Acc: ${ACCEPTED:-?} | Rej: ${REJECTED:-?}"
     echo -n " | S1: ${S1_STATE:-?} ${S1_HR_TXT:-?} ${S1_W:-?}W ${S1_T:-?}°C Soll:$SOLL_TXT"
     echo -n " | PV: $(fmt_w "$PV") | SOC: $(fmt_pct "$SOC") | Haus: $(fmt_w "$HAUS")"
     echo -n " | Bezug: $(fmt_w "$BEZUG") | Laden: $(fmt_w "$LADEN") | Über: $(fmt_w "$UEBER")"
