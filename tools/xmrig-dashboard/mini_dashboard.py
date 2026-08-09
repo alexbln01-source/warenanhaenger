@@ -336,9 +336,14 @@ def s1_observe(want, reason, force=False):
 
 
 def s1_from_nexus(data):
-    """Beobachteter Zustand (Hintergrund + API) — ohne Nexus-Betriebszeit."""
+    """Beobachteter Zustand — Nexus-Betriebszeit ignorieren; Solar-Soll hat Vorrang."""
     s1_ensure_log()
+    with _s1_lock:
+        solar_on = _s1_ctx.get("_solar_running")
     if not data or data.get("error"):
+        # Während Solar „AN“ will: kurzes Offline beim Boot nicht als AUS zählen
+        if solar_on is True:
+            return s1_public()
         return s1_observe("off", "offline")
     if data.get("shutdown"):
         return s1_observe("off", "shutdown")
@@ -351,6 +356,8 @@ def s1_from_nexus(data):
         hr = 0.0
     if hr > 0:
         return s1_observe("on", "hashing")
+    if solar_on is True:
+        return s1_public()
     return s1_observe("off", "idle_0hs")
 
 
@@ -379,12 +386,10 @@ def s1_watch_loop():
                 data = {"error": str(getattr(ex, "reason", None) or ex)}
             s1_from_nexus(data)
             n += 1
-            # Solix / Solar-Schaltungen alle ~40s (unser Skript = Wahrheit für AN/AUS-Zeit)
+            # Solix / Solar-Schaltungen alle ~40s (ioBroker-Skript = Schaltzeit)
             if n % 2 == 0:
                 try:
-                    sx = solix_info()
-                    s1_update_context(sx)
-                    s1_from_solar_intent(sx)
+                    solix_info()
                 except Exception:
                     pass
         except Exception as ex:
@@ -1064,6 +1069,7 @@ body{
 .v.ok{color:var(--xmr)}.v.warn{color:var(--warn)}.v.bad{color:var(--stop)}.v.sol{color:var(--sol)}
 .box{background:var(--bg2);border:1px solid var(--line);padding:12px;margin-bottom:12px}
 .nums{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.nums.three{grid-template-columns:1fr 1fr 1fr}
 .nums b{display:block;font:700 1.05rem/1.15 JetBrains Mono,monospace;margin-top:4px}
 .track{height:10px;background:#152019;border:1px solid var(--line);overflow:hidden;margin-top:10px}
 .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1fa861,var(--xmr));transition:width .35s}
@@ -1203,16 +1209,17 @@ button.stop-btc{background:var(--stop);color:#190606}
         <div class="cell"><div class="k">Header</div><div class="v" id="bHeaders">—</div></div>
         <div class="cell"><div class="k">Peers</div><div class="v" id="bPeers">—</div></div>
         <div class="cell"><div class="k">Netz-Diff</div><div class="v" id="bDiff">—</div></div>
+        <div class="cell"><div class="k">Live Share</div><div class="v" id="bLive">—</div></div>
         <div class="cell"><div class="k">Best Share</div><div class="v" id="bBest">—</div></div>
-        <div class="cell"><div class="k">Gefunden</div><div class="v" id="bFound">—</div></div>
       </div>
       <div class="box">
         <div class="k">Solo Fortschritt</div>
         <div class="track node"><i id="bBar"></i></div>
         <div class="meta"><span id="bProg">—</span><span id="bChain">—</span></div>
-        <div class="nums">
+        <div class="nums three">
           <div><span class="k">ckpool</span><b id="bCk">—</b></div>
           <div><span class="k">Miner</span><b id="bMiner">—</b></div>
+          <div><span class="k">Gefunden</span><b id="bFound">—</b></div>
         </div>
         <div class="reason" id="bReason">Warte auf Sync ≥ 99 %</div>
       </div>
@@ -1540,9 +1547,13 @@ function setBitcoin(d){
   $("bPeers").textContent=fn(d.connections);
   $("bDiff").textContent=fdiff(d.difficulty);
   const nx=d.nexus||{};
-  $("bBest").textContent=fdiff(nx.bestSessionDiff!=null?nx.bestSessionDiff:nx.bestDiff);
+  // Live = beste Share dieser Session; Best = All-Time (Nexus)
+  const live=nx.bestSessionDiff!=null?nx.bestSessionDiff:nx.bestDiff;
+  const best=nx.bestDiff!=null?nx.bestDiff:nx.bestSessionDiff;
+  $("bLive").textContent=fdiff(live);
+  $("bBest").textContent=fdiff(best);
   $("bFound").textContent=fn(nx.totalFoundBlocks!=null?nx.totalFoundBlocks:nx.foundBlocks)||"0";
-  $("bFound").className="v "+((nx.totalFoundBlocks||nx.foundBlocks)>0?"ok":"");
+  $("bFound").className=((nx.totalFoundBlocks||nx.foundBlocks)>0?"ok":"");
   $("bBar").style.width=Math.max(0,Math.min(100,pct))+"%";
   $("bProg").textContent=pctTxt+"% · "+(synced?"synced":"IBD");
   $("bChain").textContent=d.chain||"main";

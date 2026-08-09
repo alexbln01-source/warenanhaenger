@@ -63,6 +63,22 @@ fmt_pct() {
   fi
 }
 
+fmt_diff() {
+  python3 -c '
+import sys
+try:
+    n=float(sys.argv[1])
+except Exception:
+    print("?"); raise SystemExit
+u=["","K","M","G","T","P"]
+i=0
+while abs(n)>=1000 and i<len(u)-1:
+    n/=1000.0; i+=1
+s=("%.2f" % n).rstrip("0").rstrip(".")
+print(s + u[i])
+' "${1:-}" 2>/dev/null || echo "?"
+}
+
 touch "$LOG" 2>/dev/null || true
 
 while true; do
@@ -72,18 +88,30 @@ while true; do
   SOLIX=$(curl -sS --max-time 10 "$SOLIX_API" 2>/dev/null || echo "{}")
   NEXUS=$(curl -sS --max-time 8 "$NEXUS_API" 2>/dev/null || echo "{}")
 
-  # --- WarpPool Worker (erstes Element / Top-Level) ---
-  DIFF=$(jget "$WORKERS" "0.current_diff")
-  [ -z "$DIFF" ] && DIFF=$(jget "$WORKERS" "current_diff")
-  HASH_RAW=$(jget "$WORKERS" "0.current_hashrate_hps")
-  [ -z "$HASH_RAW" ] && HASH_RAW=$(jget "$WORKERS" "current_hashrate_hps")
+  # --- WarpPool Worker (Array / workers[] / Top-Level) ---
+  read -r DIFF HASH_RAW SHARES ACCEPTED REJECTED <<EOF
+$(python3 -c '
+import json,sys
+raw=sys.argv[1] or "{}"
+try: d=json.loads(raw)
+except Exception: d={}
+w=None
+if isinstance(d, list) and d: w=d[0]
+elif isinstance(d, dict):
+    for k in ("workers","items","data"):
+        v=d.get(k)
+        if isinstance(v, list) and v: w=v[0]; break
+    if w is None: w=d
+def g(o,*ks):
+    for k in ks:
+        if isinstance(o,dict) and o.get(k) is not None: return o.get(k)
+    return ""
+print(g(w,"current_diff","diff"), g(w,"current_hashrate_hps","hashrate_hps","hashrate"),
+      g(w,"current_shares_per_min","shares_per_min"), g(w,"shares_accepted","accepted"),
+      g(w,"shares_rejected","rejected"))
+' "$WORKERS" 2>/dev/null)
+EOF
   HASH=$(fmt_th "$HASH_RAW")
-  SHARES=$(jget "$WORKERS" "0.current_shares_per_min")
-  [ -z "$SHARES" ] && SHARES=$(jget "$WORKERS" "current_shares_per_min")
-  ACCEPTED=$(jget "$WORKERS" "0.shares_accepted")
-  [ -z "$ACCEPTED" ] && ACCEPTED=$(jget "$WORKERS" "shares_accepted")
-  REJECTED=$(jget "$WORKERS" "0.shares_rejected")
-  [ -z "$REJECTED" ] && REJECTED=$(jget "$WORKERS" "shares_rejected")
 
   # --- Anker Solix (Dashboard) ---
   PV=$(jget "$SOLIX" "pv")
@@ -108,6 +136,13 @@ while true; do
   [ -z "$S1_HR" ] && S1_HR=$(jget "$NEXUS" "hashrate")
   S1_STATE=$(jget "$SOLIX" "s1_power.state")
   [ -z "$S1_STATE" ] && S1_STATE=$(jget "$NEXUS" "s1_power.state")
+  # Live Share = Session-Best; Best Share = All-Time (Nexus)
+  LIVE_SHARE=$(jget "$NEXUS" "bestSessionDiff")
+  BEST_SHARE=$(jget "$NEXUS" "bestDiff")
+  [ -z "$LIVE_SHARE" ] && LIVE_SHARE="$BEST_SHARE"
+  [ -z "$BEST_SHARE" ] && BEST_SHARE="$LIVE_SHARE"
+  LIVE_TXT=$(fmt_diff "$LIVE_SHARE")
+  BEST_TXT=$(fmt_diff "$BEST_SHARE")
   if [ -n "$S1_HR" ]; then
     S1_HR_TXT=$(python3 -c 'print("%.1fTH" % (float("'"$S1_HR"'")/1e12))' 2>/dev/null || echo "")
   else
@@ -115,7 +150,7 @@ while true; do
   fi
 
   {
-    echo -n "$TIMESTAMP | Diff: ${DIFF:-?} | Hash: ${HASH:-?} | Shares/min: ${SHARES:-?} | Acc: ${ACCEPTED:-?} | Rej: ${REJECTED:-?}"
+    echo -n "$TIMESTAMP | Diff: ${DIFF:-?} | Hash: ${HASH:-?} | Live: ${LIVE_TXT:-?} | Best: ${BEST_TXT:-?} | Shares/min: ${SHARES:-?} | Acc: ${ACCEPTED:-?} | Rej: ${REJECTED:-?}"
     echo -n " | S1: ${S1_STATE:-?} ${S1_HR_TXT:-?} ${S1_W:-?}W ${S1_T:-?}°C Soll:$SOLL_TXT"
     echo -n " | PV: $(fmt_w "$PV") | SOC: $(fmt_pct "$SOC") | Haus: $(fmt_w "$HAUS")"
     echo -n " | Bezug: $(fmt_w "$BEZUG") | Laden: $(fmt_w "$LADEN") | Über: $(fmt_w "$UEBER")"
