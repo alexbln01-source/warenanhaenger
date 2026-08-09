@@ -25,6 +25,8 @@ BTC_RPC_FILE = STATE_DIR / "bitcoin.rpc"
 S1_POWER_FILE = STATE_DIR / "s1_power.json"
 S1_POWER_LOG = STATE_DIR / "s1_power.log"
 S1_POWER_JSONL = STATE_DIR / "s1_power.jsonl"
+BEST_SHARE_FILE = STATE_DIR / "best_share.json"
+WARPPOOL_API = os.environ.get("WARPPOOL_API", "http://192.168.178.111:18334").rstrip("/")
 CKPOOL_STATUS = os.environ.get("CKPOOL_STATUS", "http://192.168.178.111")
 SITE = "ankersolix2.0.a278fac0-df28-4f92-846d-76e77de23b26"
 W = "47A5TsFqALUKVpJDJzsA277ZgqxkQhra9NVmh3H1Y5zUJcvJPDki45gCX7pb26XxBzKggKZGTknaQS33rdYp3byj48EZbTm"
@@ -561,6 +563,91 @@ def ckpool_probe():
     return {"ok": False}
 
 
+def _as_float(v):
+    try:
+        if v is None or v == "":
+            return None
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def best_share_load():
+    try:
+        if BEST_SHARE_FILE.exists():
+            d = json.loads(BEST_SHARE_FILE.read_text(encoding="utf-8"))
+            return _as_float(d.get("best")) or 0.0
+    except (OSError, json.JSONDecodeError, TypeError, ValueError):
+        pass
+    return 0.0
+
+
+def best_share_save(val, source=""):
+    try:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        BEST_SHARE_FILE.write_text(
+            json.dumps({"best": val, "source": source, "ts": time.time()}, indent=2),
+            encoding="utf-8",
+        )
+    except OSError as ex:
+        print("best_share_save failed:", ex, flush=True)
+
+
+def warppool_best_share():
+    """WarpPool Best-Share — überlebt Miner-/Session-Neustarts oft besser als Nexus-Session."""
+    headers = {"User-Agent": "xmrig-dash/solix"}
+    for path in ("/api/overview", "/api/stats", "/api/pool", "/api/dashboard", "/api/best-shares"):
+        try:
+            req = Request(WARPPOOL_API + path, headers=headers)
+            with urlopen(req, timeout=4) as r:
+                d = json.loads(r.read().decode())
+        except Exception:
+            continue
+        if not isinstance(d, (dict, list)):
+            continue
+        cands = []
+        if isinstance(d, dict):
+            for k in ("best_share_difficulty", "best_share", "bestShare", "best_diff", "bestDifficulty"):
+                cands.append(_as_float(d.get(k)))
+            for nest in ("pool", "stats", "overview", "data"):
+                n = d.get(nest)
+                if isinstance(n, dict):
+                    for k in ("best_share_difficulty", "best_share", "bestShare", "difficulty"):
+                        cands.append(_as_float(n.get(k)))
+            shares = d.get("best_shares") or d.get("bestShares")
+            if isinstance(shares, list):
+                for s in shares[:20]:
+                    if isinstance(s, dict):
+                        cands.append(_as_float(s.get("difficulty") or s.get("diff")))
+        elif isinstance(d, list):
+            for s in d[:20]:
+                if isinstance(s, dict):
+                    cands.append(_as_float(s.get("difficulty") or s.get("diff")))
+        vals = [x for x in cands if x and x > 0]
+        if vals:
+            return max(vals)
+    return None
+
+
+def share_peaks(nexus_pool):
+    """All-Time-Peak: nie unter Session-Reset fallen."""
+    sess = _as_float((nexus_pool or {}).get("bestSessionDiff"))
+    nexus_best = _as_float((nexus_pool or {}).get("bestDiff"))
+    pool_best = warppool_best_share()
+    stored = best_share_load()
+    peak = max(x for x in (stored, nexus_best or 0, pool_best or 0, sess or 0) if x is not None)
+    src = "stored"
+    if nexus_best and nexus_best >= peak - 1e-9:
+        src = "nexus"
+    if pool_best and pool_best >= peak - 1e-9:
+        src = "warppool"
+    if sess and sess >= peak - 1e-9:
+        src = "session"
+    if peak > stored + 1e-9:
+        best_share_save(peak, src)
+    return {"session": sess, "best": peak if peak > 0 else None, "pool": pool_best, "source": src}
+
+
 def bitcoin_node_info():
     now = time.time()
     if btc_cache["d"] and now - btc_cache["t"] < 15:
@@ -612,6 +699,12 @@ def bitcoin_node_info():
         nexus_pool["solo_local"] = "192.168.178.111" in url or url.startswith("192.168.")
     except Exception:
         pass
+    peaks = share_peaks(nexus_pool)
+    if nexus_pool:
+        nexus_pool["bestSessionDiff"] = peaks.get("session")
+        nexus_pool["bestDiff"] = peaks.get("best")  # Peak inkl. vor Session-Reset
+        nexus_pool["bestDiffSource"] = peaks.get("source")
+        nexus_pool["warppoolBest"] = peaks.get("pool")
     out = {
         "ok": True,
         "stale": False,
@@ -631,6 +724,7 @@ def bitcoin_node_info():
         "ckpool": ck,
         "stratum": "stratum+tcp://192.168.178.111:3333",
         "nexus": nexus_pool,
+        "share_peaks": peaks,
         "rpc": bitcoin_rpc_cfg()["url"],
     }
     btc_cache["t"], btc_cache["d"] = now, out
@@ -1210,7 +1304,7 @@ button.stop-btc{background:var(--stop);color:#190606}
         <div class="cell"><div class="k">Peers</div><div class="v" id="bPeers">—</div></div>
         <div class="cell"><div class="k">Netz-Diff</div><div class="v" id="bDiff">—</div></div>
         <div class="cell"><div class="k">Session</div><div class="v" id="bLive">—</div></div>
-        <div class="cell"><div class="k">Best Share</div><div class="v" id="bBest">—</div></div>
+        <div class="cell"><div class="k">Best Share</div><div class="v ok" id="bBest">—</div></div>
       </div>
       <div class="box">
         <div class="k">Solo Fortschritt</div>
@@ -1547,9 +1641,10 @@ function setBitcoin(d){
   $("bPeers").textContent=fn(d.connections);
   $("bDiff").textContent=fdiff(d.difficulty);
   const nx=d.nexus||{};
-  // Session = seit Connect/Restart; Best Share = All-Time (Nexus), nicht die Session
-  const sess=nx.bestSessionDiff!=null?nx.bestSessionDiff:null;
-  const best=nx.bestDiff!=null?nx.bestDiff:(sess!=null?sess:null);
+  // Session = nur seit Connect; Best = Peak (Datei+Nexus+WarpPool), überlebt Restarts
+  const peaks=d.share_peaks||{};
+  const sess=peaks.session!=null?peaks.session:nx.bestSessionDiff;
+  const best=peaks.best!=null?peaks.best:(nx.bestDiff!=null?nx.bestDiff:sess);
   $("bLive").textContent=fdiff(sess);
   $("bBest").textContent=fdiff(best);
   $("bFound").textContent=fn(nx.totalFoundBlocks!=null?nx.totalFoundBlocks:nx.foundBlocks)||"0";
