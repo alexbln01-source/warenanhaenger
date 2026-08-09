@@ -1,0 +1,20 @@
+# Offizielle WarpPool VarDiff-Defaults (ab ~v1.0.18 Doku)
+# target 15s, window 8, retarget 4, hysteresis 0.2
+#
+# Auf dem Host anwenden (Backup + sed) — siehe apply-vardiff-official.sh
+
+[vardiff]
+enabled = true
+target_seconds_per_share = 15.0
+window = 8
+min_diff = 64.0
+max_diff = 131072.0
+initial_diff = 1024.0
+gate_confidence = 0.9
+hysteresis = 0.2
+idle_decay_enabled = true
+idle_grace_factor = 20.0
+idle_step_factor = 8.0
+max_step = 3.0
+retarget_after_n_shares = 4
+significance_gate = true
