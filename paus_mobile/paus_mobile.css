@@ -39,6 +39,28 @@ html, body {
     text-align: center;
 }
 
+/* Zebra: Android-Nav-Leiste unten freilassen */
+body.zebra-device {
+    align-items: flex-start;
+}
+
+body.zebra-device .page {
+    min-height: 100svh;
+    box-sizing: border-box;
+    padding: 12px 12px calc(56px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+}
+
+body.zebra-device .bottom-row {
+    margin-top: auto;
+    padding-bottom: 2px;
+}
+
+body.zebra-device .build-info {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+}
+
 /* ===== TITLE ===== */
 .title {
     font-size: 26px;

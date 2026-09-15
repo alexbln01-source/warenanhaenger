@@ -37,21 +37,54 @@ html, body {
 @media (max-width:600px){
     html,body{
         height:100vh;
+        height:100dvh;
         display:flex;
         justify-content:center;
         align-items:center;
         overflow:hidden;
+        padding-bottom:calc(52px + env(safe-area-inset-bottom, 0px));
+        box-sizing:border-box;
     }
     #main{
         width:100%;
         max-width:380px;
         transform:scale(0.95);
+        padding-bottom:8px;
     }
     button{
         width:260px;
         height:85px;
         font-size:24px;
     }
+    footer{
+        margin-top:24px;
+        margin-bottom:4px;
+        font-size:14px;
+    }
+}
+
+/* Zebra TC22 / Android-Nav: untere Buttons voll sichtbar */
+body.zebra-device{
+    align-items:flex-start !important;
+    padding-top:12px;
+    padding-bottom:calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow:auto !important;
+}
+body.zebra-device #main{
+    transform:none;
+    max-width:100%;
+    padding:0 12px 8px;
+}
+body.zebra-device button{
+    width:100%;
+    max-width:320px;
+    height:72px;
+    font-size:22px;
+    margin:12px auto;
+}
+body.zebra-device footer{
+    margin-top:18px;
+    margin-bottom:8px;
 }
 
 @media (min-width:601px){
@@ -127,8 +160,36 @@ footer{
 /* =====================
    NAVIGATION
 ===================== */
+(function detectZebra(){
+    var ua = navigator.userAgent.toLowerCase();
+    var sw = window.screen.width;
+    var sh = window.screen.height;
+    var dpr = window.devicePixelRatio || 1;
+    var isTC22 = ua.indexOf("android") !== -1 && sw === 360 && sh === 720 && dpr === 3;
+    var isTC21 = ua.indexOf("android") !== -1 && sw === 360 && sh === 640;
+    var isZebra = isTC22 || isTC21 || ua.indexOf("zebra") !== -1;
+    function apply(){
+        var root = document.documentElement;
+        var body = document.body;
+        if (isZebra) {
+            root.classList.add("zebra-device");
+            if (body) body.classList.add("zebra-device");
+        }
+        if (isTC22) {
+            root.classList.add("zebra-tc22");
+            if (body) body.classList.add("zebra-tc22");
+        }
+        if (isTC21) {
+            root.classList.add("zebra-tc21");
+            if (body) body.classList.add("zebra-tc21");
+        }
+    }
+    apply();
+    if (!document.body) document.addEventListener("DOMContentLoaded", apply);
+})();
+
 function openBeschichtung(){
-    location.href="beschichtung_mobile/beschichtung.html?besc32=" + Date.now();
+    location.href="beschichtung_mobile/beschichtung.html?besc33=" + Date.now();
 }
 function openKanten(){
     location.href="kanten_mobile/bearbeitung.html?v=" + Date.now();

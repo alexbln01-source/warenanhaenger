@@ -777,7 +777,7 @@ body.zebra-device #card {
     max-width: 100%;
     height: 100svh;
     max-height: 100svh;
-    padding: calc(18px + env(safe-area-inset-top, 0px)) 10px calc(6px + env(safe-area-inset-bottom, 0px));
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 10px calc(56px + env(safe-area-inset-bottom, 0px));
     overflow: hidden;
 }
 
@@ -853,6 +853,7 @@ body.zebra-device .kunde-btn {
 
 body.zebra-device #actionButtons {
     gap: 6px;
+    padding-bottom: 2px;
 }
 
 body.zebra-device #backBtn,
@@ -860,6 +861,10 @@ body.zebra-device #druckenBtn {
     min-height: 40px;
     font-size: 14px;
     border-radius: 10px;
+}
+
+body.zebra-device .build-inline {
+    margin-bottom: 4px;
 }
 
 body.zebra-tc22 .kunde-btn {

@@ -53,6 +53,21 @@ body.pc-device {
     overflow: hidden;
 }
 
+/* Zebra: Android-Nav-Leiste unten freilassen */
+body.zebra-device #card {
+    height: 100svh;
+    max-height: 100svh;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+body.zebra-device .build-info {
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+}
+
+body.zebra-device #actionButtons {
+    margin-bottom: 2px;
+}
+
 .page-sub {
     margin: 4px 0 12px;
     text-align: center;
