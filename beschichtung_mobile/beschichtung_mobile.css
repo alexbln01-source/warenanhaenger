@@ -182,9 +182,10 @@ body.phone-layout:not(.pc-device):not(.zebra-device) #card {
 
 .input-field {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 6px;
-    font-size: 15px;
+    min-height: 46px;
+    padding: 12px;
+    margin-bottom: 8px;
+    font-size: 16px;
     font-weight: 600;
     border: var(--tile-border);
     border-radius: 12px;
@@ -194,7 +195,7 @@ body.phone-layout:not(.pc-device):not(.zebra-device) #card {
 }
 
 .input-field:last-of-type {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .input-field:focus {
@@ -208,12 +209,12 @@ body.phone-layout:not(.pc-device):not(.zebra-device) #card {
 
 .eilt-toggle {
     width: 100%;
-    min-height: 40px;
+    min-height: 44px;
     border: var(--tile-border);
     border-radius: 12px;
     background: #d5dde5;
     color: var(--brand);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     touch-action: manipulation;
 }
@@ -808,29 +809,30 @@ body.zebra-device .content-row {
 }
 
 body.zebra-device .panel-box {
-    padding: 5px;
-    border-radius: 10px;
+    padding: 8px;
+    border-radius: 12px;
 }
 
 body.zebra-device .grid-panel {
-    padding: 5px;
+    padding: 6px;
 }
 
 body.zebra-device .input-field {
-    padding: 6px 8px;
-    margin-bottom: 3px;
-    font-size: 13px;
-    border-radius: 8px;
+    min-height: 44px;
+    padding: 11px 10px;
+    margin-bottom: 6px;
+    font-size: 16px;
+    border-radius: 10px;
 }
 
 body.zebra-device .input-field:last-of-type {
-    margin-bottom: 3px;
+    margin-bottom: 6px;
 }
 
 body.zebra-device .eilt-toggle {
-    min-height: 32px;
-    font-size: 12px;
-    border-radius: 8px;
+    min-height: 42px;
+    font-size: 14px;
+    border-radius: 10px;
 }
 
 body.zebra-device .beschichter-grid {

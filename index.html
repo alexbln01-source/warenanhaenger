@@ -64,17 +64,20 @@ html, body {
 }
 
 /* Zebra TC22 / Android-Nav: untere Buttons voll sichtbar */
+html.zebra-device body,
 body.zebra-device{
     align-items:flex-start !important;
     padding-top:12px;
     padding-bottom:calc(56px + env(safe-area-inset-bottom, 0px)) !important;
     overflow:auto !important;
 }
+html.zebra-device #main,
 body.zebra-device #main{
     transform:none;
     max-width:100%;
     padding:0 12px 8px;
 }
+html.zebra-device button,
 body.zebra-device button{
     width:100%;
     max-width:320px;
@@ -82,6 +85,7 @@ body.zebra-device button{
     font-size:22px;
     margin:12px auto;
 }
+html.zebra-device footer,
 body.zebra-device footer{
     margin-top:18px;
     margin-bottom:8px;
@@ -189,7 +193,7 @@ footer{
 })();
 
 function openBeschichtung(){
-    location.href="beschichtung_mobile/beschichtung.html?besc33=" + Date.now();
+    location.href="beschichtung_mobile/beschichtung.html?besc34=" + Date.now();
 }
 function openKanten(){
     location.href="kanten_mobile/bearbeitung.html?v=" + Date.now();
