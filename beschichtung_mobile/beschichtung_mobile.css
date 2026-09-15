@@ -36,6 +36,12 @@ body.pc-device {
     align-items: center;
 }
 
+body.phone-layout {
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
+}
+
 /* Handy: Karte mittig, volle Höhe */
 body.phone-layout:not(.pc-device) {
     width: 100%;
@@ -94,16 +100,16 @@ body.phone-layout:not(.pc-device):not(.zebra-device) #card {
 
     html.early-pc .beschichter-grid {
         grid-template-columns: repeat(2, 1fr) !important;
-        grid-template-rows: repeat(7, minmax(44px, 1fr)) !important;
+        grid-template-rows: repeat(7, minmax(0, 1fr)) !important;
         grid-auto-rows: unset !important;
     }
 
     html.early-pc .kunde-btn {
-        font-size: 12px !important;
+        font-size: 11px !important;
         font-weight: 800 !important;
-        min-height: 44px !important;
-        height: auto !important;
-        padding: 6px 8px !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        padding: 3px 4px !important;
     }
 }
 
@@ -754,18 +760,108 @@ body.pc-device #druckenBtn {
     font-size: 18px;
 }
 
-/* Mobil (iPhone etc.): 2×7-Grid – gilt nicht für PC */
-body.phone-layout:not(.zebra-device):not(.pc-device) .beschichter-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(7, minmax(44px, 1fr));
+/* Mobil (iPhone etc.): ein Screen, kein Scroll – Grid schrumpft */
+body.phone-layout:not(.zebra-device):not(.pc-device) {
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) #card {
+    width: 100%;
+    max-width: 420px;
+    height: 100svh;
+    max-height: 100svh;
+    margin: 0 auto;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .page-title {
+    font-size: 24px;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .page-sub {
+    margin: 2px 0 6px;
+    font-size: 12px;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .section-head {
+    margin: 0 0 4px;
+    font-size: 12px;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .content-row {
+    flex: 1;
+    min-height: 0;
     gap: 8px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .input-block {
+    flex: 0 0 auto;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .select-block {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .grid-panel {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .input-field {
+    min-height: 40px;
+    height: 40px;
+    padding: 0 10px;
+    margin-bottom: 6px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .eilt-toggle {
+    min-height: 38px;
+    height: 38px;
+    font-size: 14px;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .beschichter-grid {
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    overflow: hidden;
 }
 
 body.phone-layout:not(.zebra-device):not(.pc-device) .kunde-btn {
-    font-size: 12px;
+    font-size: 11px;
+    min-height: 0;
+    height: 100%;
+    padding: 3px 4px;
+    line-height: 1.15;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) #actionButtons {
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) #backBtn,
+body.phone-layout:not(.zebra-device):not(.pc-device) #druckenBtn {
     min-height: 44px;
-    padding: 6px 8px;
-    line-height: 1.2;
+    height: 44px;
+    font-size: 15px;
+}
+
+body.phone-layout:not(.zebra-device):not(.pc-device) .device-info,
+body.phone-layout:not(.zebra-device):not(.pc-device) .build-info,
+body.phone-layout:not(.zebra-device):not(.pc-device) .build-inline {
+    display: none;
 }
 
 /* Zebra: ein Screen, kein Scroll, Android-Nav frei, Eingabe tippbar */

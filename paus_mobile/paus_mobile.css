@@ -39,6 +39,62 @@ html, body {
     text-align: center;
 }
 
+body.phone-layout {
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
+    width: 100%;
+    align-items: stretch;
+}
+
+body.phone-layout:not(.zebra-device) .page {
+    width: 100%;
+    max-width: 420px;
+    height: 100svh;
+    max-height: 100svh;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device) .title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device) .input-field {
+    padding: 11px;
+    font-size: 16px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device) .color-row {
+    margin: 6px 0 10px;
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device) .vorgezogen-btn,
+body.phone-layout:not(.zebra-device) .keyboard-open-btn {
+    padding: 12px;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device) .bottom-row {
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device) .device-info,
+body.phone-layout:not(.zebra-device) .build-info {
+    display: none;
+}
+
 /* Zebra: Android-Nav-Leiste unten freilassen, kein Scroll */
 body.zebra-device {
     align-items: stretch;

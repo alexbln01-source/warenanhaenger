@@ -38,6 +38,64 @@ body.pc-device {
     align-items: center;
 }
 
+body.phone-layout {
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
+    width: 100%;
+    align-items: stretch;
+}
+
+body.phone-layout:not(.zebra-device) #card {
+    width: 100%;
+    max-width: 420px;
+    height: 100svh;
+    max-height: 100svh;
+    margin: 0 auto;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device) .device-info,
+body.phone-layout:not(.zebra-device) .build-info {
+    display: none;
+}
+
+body.phone-layout:not(.zebra-device) .page-title {
+    font-size: 26px;
+}
+
+body.phone-layout:not(.zebra-device) .page-sub {
+    margin: 2px 0 8px;
+}
+
+body.phone-layout:not(.zebra-device) .work-area {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device) .kunden-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device) .kunden-grid {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.phone-layout:not(.zebra-device) #actionButtons {
+    flex-shrink: 0;
+}
+
+body.phone-layout:not(.zebra-device) #btnBack,
+body.phone-layout:not(.zebra-device) #btnDrucken {
+    min-height: 44px;
+}
+
 .hidden {
     display: none !important;
 }
