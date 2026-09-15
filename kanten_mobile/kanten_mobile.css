@@ -53,19 +53,29 @@ body.pc-device {
     overflow: hidden;
 }
 
-/* Zebra: Android-Nav-Leiste unten freilassen */
+/* Zebra: Android-Nav-Leiste unten freilassen, kein Scroll */
 body.zebra-device #card {
     height: 100svh;
     max-height: 100svh;
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(50px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
 }
 
+body.zebra-device,
+body.zebra-device.phone-layout {
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
+}
+
+body.zebra-device .device-info,
 body.zebra-device .build-info {
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+    display: none;
 }
 
 body.zebra-device #actionButtons {
-    margin-bottom: 2px;
+    margin-bottom: 0;
+    flex-shrink: 0;
 }
 
 .page-sub {

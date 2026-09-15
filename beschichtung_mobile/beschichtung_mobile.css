@@ -768,9 +768,12 @@ body.phone-layout:not(.zebra-device):not(.pc-device) .kunde-btn {
     line-height: 1.2;
 }
 
-/* Zebra Hochformat: kompakt, nichts abgeschnitten */
+/* Zebra: ein Screen, kein Scroll, Android-Nav frei, Eingabe tippbar */
 body.zebra-device.phone-layout {
     align-items: stretch;
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
 }
 
 body.zebra-device #card {
@@ -778,13 +781,19 @@ body.zebra-device #card {
     max-width: 100%;
     height: 100svh;
     max-height: 100svh;
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 10px calc(56px + env(safe-area-inset-bottom, 0px));
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px calc(50px + env(safe-area-inset-bottom, 0px));
     overflow: hidden;
+}
+
+body.zebra-device .device-info,
+body.zebra-device .build-info {
+    display: none;
 }
 
 body.zebra-device .page-title {
     font-size: 20px;
     line-height: 1.1;
+    margin: 0;
 }
 
 body.zebra-device .page-title::after {
@@ -804,50 +813,75 @@ body.zebra-device .section-head {
 }
 
 body.zebra-device .content-row {
-    gap: 4px;
-    margin-bottom: 4px;
+    flex: 1;
+    min-height: 0;
+    gap: 6px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+
+body.zebra-device .input-block {
+    flex: 0 0 auto;
+}
+
+body.zebra-device .select-block {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
 }
 
 body.zebra-device .panel-box {
-    padding: 8px;
-    border-radius: 12px;
-}
-
-body.zebra-device .grid-panel {
     padding: 6px;
-}
-
-body.zebra-device .input-field {
-    min-height: 44px;
-    padding: 11px 10px;
-    margin-bottom: 6px;
-    font-size: 16px;
     border-radius: 10px;
 }
 
+body.zebra-device .grid-panel {
+    flex: 1;
+    min-height: 0;
+    padding: 6px;
+    overflow: hidden;
+}
+
+/* Eingabe: tippbar, aber kompakt genug für einen Screen */
+body.zebra-device .input-field {
+    min-height: 38px;
+    height: 38px;
+    padding: 0 10px;
+    margin-bottom: 5px;
+    font-size: 15px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
 body.zebra-device .input-field:last-of-type {
-    margin-bottom: 6px;
+    margin-bottom: 5px;
 }
 
 body.zebra-device .eilt-toggle {
-    min-height: 42px;
-    font-size: 14px;
+    min-height: 36px;
+    height: 36px;
+    font-size: 13px;
     border-radius: 10px;
 }
 
 body.zebra-device .beschichter-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: stretch;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, minmax(0, 1fr));
     gap: 4px;
+    overflow: hidden;
+    align-content: stretch;
 }
 
 body.zebra-device .kunde-btn {
-    flex: 1 1 calc((100% - 8px) / 3);
-    max-width: calc((100% - 8px) / 3);
-    font-size: 10px;
+    width: 100%;
+    max-width: none;
+    flex: none;
     min-height: 0;
+    height: 100%;
+    font-size: 10px;
     padding: 2px 3px;
     line-height: 1.1;
     border-radius: 8px;
@@ -855,18 +889,21 @@ body.zebra-device .kunde-btn {
 
 body.zebra-device #actionButtons {
     gap: 6px;
-    padding-bottom: 2px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
 }
 
 body.zebra-device #backBtn,
 body.zebra-device #druckenBtn {
     min-height: 40px;
+    height: 40px;
     font-size: 14px;
     border-radius: 10px;
 }
 
 body.zebra-device .build-inline {
-    margin-bottom: 4px;
+    display: none;
 }
 
 body.zebra-tc22 .kunde-btn {
@@ -875,6 +912,12 @@ body.zebra-tc22 .kunde-btn {
 
 body.zebra-tc21 .page-title {
     font-size: 18px;
+}
+
+body.zebra-tc21 .input-field {
+    min-height: 34px;
+    height: 34px;
+    font-size: 14px;
 }
 
 body.zebra-tc21 .kunde-btn {

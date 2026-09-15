@@ -39,26 +39,73 @@ html, body {
     text-align: center;
 }
 
-/* Zebra: Android-Nav-Leiste unten freilassen */
+/* Zebra: Android-Nav-Leiste unten freilassen, kein Scroll */
 body.zebra-device {
-    align-items: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+    height: 100svh;
+    max-height: 100svh;
 }
 
 body.zebra-device .page {
-    min-height: 100svh;
+    width: 100%;
+    max-width: 100%;
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 0;
     box-sizing: border-box;
-    padding: 12px 12px calc(56px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 12px calc(50px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+body.zebra-device .title {
+    font-size: 22px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+body.zebra-device .input-field {
+    padding: 10px;
+    font-size: 15px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+body.zebra-device .color-row {
+    margin: 6px 0 10px;
+    flex-shrink: 0;
+}
+
+body.zebra-device .color-btn {
+    padding: 10px 0;
+    font-size: 15px;
+}
+
+body.zebra-device .vorgezogen-btn {
+    padding: 10px;
+    font-size: 15px;
+    margin: 6px 0 10px;
+    flex-shrink: 0;
+}
+
+body.zebra-device .keyboard-open-btn {
+    padding: 10px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 body.zebra-device .bottom-row {
     margin-top: auto;
-    padding-bottom: 2px;
+    padding-bottom: 0;
+    flex-shrink: 0;
 }
 
+body.zebra-device .device-info,
 body.zebra-device .build-info {
-    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+    display: none;
 }
 
 /* ===== TITLE ===== */
