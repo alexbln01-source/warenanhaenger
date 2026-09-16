@@ -112,28 +112,114 @@ body.phone-layout:not(.zebra-device) #btnDrucken {
 }
 
 /* Zebra: Android-Nav-Leiste unten freilassen, kein Scroll */
-body.zebra-device #card {
-    height: 100svh;
-    max-height: 100svh;
-    padding-bottom: calc(50px + env(safe-area-inset-bottom, 0px));
-    overflow: hidden;
-}
-
 body.zebra-device,
 body.zebra-device.phone-layout {
-    overflow: hidden;
+    overflow: hidden !important;
+    height: 100svh !important;
+    max-height: 100svh !important;
+    width: 100%;
+    align-items: stretch;
+}
+
+html.zebra-device body.zebra-device #card,
+body.zebra-device #card {
+    width: 100%;
+    max-width: 100%;
     height: 100svh;
     max-height: 100svh;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+html.zebra-device #actionButtons,
+body.zebra-device #actionButtons {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 0 calc(64px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
 }
 
 body.zebra-device .device-info,
 body.zebra-device .build-info {
-    display: none;
+    display: none !important;
 }
 
+body.zebra-device .page-title {
+    font-size: 22px;
+    margin: 0;
+}
+
+body.zebra-device .page-sub {
+    margin: 2px 0 6px;
+    font-size: 11px;
+}
+
+body.zebra-device .section-head {
+    margin: 0 0 4px;
+    font-size: 12px;
+}
+
+body.zebra-device .work-area {
+    flex: 1;
+    min-height: 0;
+    gap: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+body.zebra-device .art-section {
+    flex: 0 0 auto;
+}
+
+body.zebra-device .art-grid {
+    height: 96px;
+    gap: 6px;
+}
+
+body.zebra-device .artBtn {
+    font-size: 14px;
+    border-radius: 12px;
+}
+
+body.zebra-device .kunden-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.zebra-device .kunden-grid,
+body.zebra-device .kunden-hint,
+body.zebra-device .kunden-ready {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.zebra-device .kunden-grid {
+    gap: 5px;
+    padding: 6px;
+}
+
+body.zebra-device .kundeBtn {
+    font-size: 10px;
+    border-radius: 10px;
+}
+
+/* Zurück/Drucken klar über der Android-Leiste */
 body.zebra-device #actionButtons {
-    margin-bottom: 0;
     flex-shrink: 0;
+    margin: 0;
+    padding: 0 0 calc(64px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+}
+
+body.zebra-device #btnBack,
+body.zebra-device #btnDrucken {
+    min-height: 44px;
+    height: 44px;
+    font-size: 15px;
+    border-radius: 12px;
 }
 
 .page-sub {

@@ -3,12 +3,12 @@
 // ============================================================
 
 const ua  = navigator.userAgent.toLowerCase();
-const sw  = window.screen.width;
-const sh  = window.screen.height;
+const sw  = Math.min(window.screen.width, window.screen.height);
+const sh  = Math.max(window.screen.width, window.screen.height);
 const dpr = window.devicePixelRatio;
 
-const isTC22  = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
-const isTC21  = ua.includes("android") && sw === 360 && sh === 640;
+const isTC22  = ua.includes("android") && (ua.includes("tc22") || (sw === 360 && sh === 720 && dpr === 3));
+const isTC21  = ua.includes("android") && (ua.includes("tc21") || (sw === 360 && sh === 640));
 const isZebra = isTC22 || isTC21 || ua.includes("zebra");
 const isMobile = /android|iphone|ipad|ipod/.test(ua);
 const isPC     = !isZebra && !isMobile;
