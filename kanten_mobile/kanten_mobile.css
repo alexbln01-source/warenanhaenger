@@ -111,32 +111,41 @@ body.phone-layout:not(.zebra-device) #btnDrucken {
     overflow: hidden;
 }
 
-/* Zebra: Android-Nav-Leiste unten freilassen, kein Scroll */
+/* Zebra / Android: Body-Padding für Nav, Buttons ohne große Leerstelle */
 body.zebra-device,
-body.zebra-device.phone-layout {
+body.zebra-device.phone-layout,
+body.phone-layout.android-nav,
+html.android-nav body.phone-layout {
     overflow: hidden !important;
     height: 100svh !important;
     max-height: 100svh !important;
     width: 100%;
     align-items: stretch;
+    padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px)) !important;
+    box-sizing: border-box !important;
 }
 
 html.zebra-device body.zebra-device #card,
-body.zebra-device #card {
+body.zebra-device #card,
+body.phone-layout.android-nav #card,
+html.android-nav body.phone-layout #card {
     width: 100%;
     max-width: 100%;
-    height: 100svh;
-    max-height: 100svh;
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 0;
+    height: 100%;
+    max-height: 100%;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
     overflow: hidden;
     box-sizing: border-box;
 }
 
+/* Kein Extra-Abstand unter den Buttons – nur kleiner Innenabstand */
 html.zebra-device #actionButtons,
-body.zebra-device #actionButtons {
+body.zebra-device #actionButtons,
+body.phone-layout.android-nav #actionButtons,
+html.android-nav body.phone-layout #actionButtons {
     flex-shrink: 0;
     margin: 0;
-    padding: 0 0 calc(64px + env(safe-area-inset-bottom, 0px));
+    padding: 0;
     gap: 8px;
 }
 
@@ -206,19 +215,10 @@ body.zebra-device .kundeBtn {
     border-radius: 10px;
 }
 
-/* Zurück/Drucken klar über der Android-Leiste */
-body.zebra-device #actionButtons,
-html.zebra-device #actionButtons,
-body.phone-layout.android-nav #actionButtons,
-html.android-nav body.phone-layout #actionButtons {
-    flex-shrink: 0;
-    margin: 0;
-    padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
-    gap: 8px;
-}
-
 body.zebra-device #btnBack,
-body.zebra-device #btnDrucken {
+body.zebra-device #btnDrucken,
+body.phone-layout.android-nav #btnBack,
+body.phone-layout.android-nav #btnDrucken {
     min-height: 44px;
     height: 44px;
     font-size: 15px;

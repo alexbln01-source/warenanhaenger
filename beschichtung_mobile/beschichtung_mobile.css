@@ -849,7 +849,7 @@ body.phone-layout:not(.zebra-device):not(.pc-device) .kunde-btn {
 
 body.phone-layout:not(.zebra-device):not(.pc-device) #actionButtons {
     flex-shrink: 0;
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0;
 }
 
 body.phone-layout:not(.zebra-device):not(.pc-device) #backBtn,
@@ -859,10 +859,31 @@ body.phone-layout:not(.zebra-device):not(.pc-device) #druckenBtn {
     font-size: 15px;
 }
 
-/* Android (auch ohne zebra-Klasse): Zurück/Drucken über System-Nav */
+/* Android-Nav: Abstand am Body, nicht als Leerstelle unter den Buttons */
+body.phone-layout.android-nav,
+html.android-nav body.phone-layout,
+body.zebra-device.phone-layout {
+    padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px)) !important;
+    box-sizing: border-box !important;
+    height: 100svh !important;
+    max-height: 100svh !important;
+}
+
+body.phone-layout.android-nav #card,
+html.android-nav body.phone-layout #card,
+body.zebra-device #card {
+    height: 100%;
+    max-height: 100%;
+    padding-bottom: 8px;
+}
+
 body.phone-layout.android-nav #actionButtons,
-html.android-nav body.phone-layout #actionButtons {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+html.android-nav body.phone-layout #actionButtons,
+body.zebra-device #actionButtons,
+html.zebra-device #actionButtons {
+    padding-bottom: 0 !important;
+    padding: 0 !important;
+    margin: 0;
 }
 
 body.phone-layout:not(.zebra-device):not(.pc-device) .device-info,
@@ -882,9 +903,9 @@ body.zebra-device.phone-layout {
 body.zebra-device #card {
     width: 100%;
     max-width: 100%;
-    height: 100svh;
-    max-height: 100svh;
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 0;
+    height: 100%;
+    max-height: 100%;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
     overflow: hidden;
 }
 
@@ -995,7 +1016,7 @@ html.zebra-device #actionButtons {
     gap: 6px;
     flex-shrink: 0;
     margin: 0;
-    padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
+    padding: 0 !important;
 }
 
 body.zebra-device #backBtn,
