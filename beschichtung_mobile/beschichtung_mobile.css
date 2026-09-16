@@ -849,6 +849,7 @@ body.phone-layout:not(.zebra-device):not(.pc-device) .kunde-btn {
 
 body.phone-layout:not(.zebra-device):not(.pc-device) #actionButtons {
     flex-shrink: 0;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
 }
 
 body.phone-layout:not(.zebra-device):not(.pc-device) #backBtn,
@@ -856,6 +857,12 @@ body.phone-layout:not(.zebra-device):not(.pc-device) #druckenBtn {
     min-height: 44px;
     height: 44px;
     font-size: 15px;
+}
+
+/* Android (auch ohne zebra-Klasse): Zurück/Drucken über System-Nav */
+body.phone-layout.android-nav #actionButtons,
+html.android-nav body.phone-layout #actionButtons {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
 }
 
 body.phone-layout:not(.zebra-device):not(.pc-device) .device-info,
@@ -983,11 +990,12 @@ body.zebra-device .kunde-btn {
     border-radius: 8px;
 }
 
-body.zebra-device #actionButtons {
+body.zebra-device #actionButtons,
+html.zebra-device #actionButtons {
     gap: 6px;
     flex-shrink: 0;
     margin: 0;
-    padding: 0 0 calc(64px + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
 }
 
 body.zebra-device #backBtn,

@@ -21,7 +21,7 @@ const kundenButtons = Array.from(document.querySelectorAll(".kunde-btn"));
 let activeInput = null;
 let keyboardMode = "num";
 
-const BUILD = "besc37";
+const BUILD = "besc38";
 
 const ua  = navigator.userAgent.toLowerCase();
 const sw  = Math.min(window.screen.width, window.screen.height);
@@ -211,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isZebraTC21) document.body.classList.add("zebra-tc21");
     if (isZebraTC22) document.body.classList.add("zebra-tc22");
     if (isZebra) document.body.classList.add("zebra-device");
+    if (ua.includes("android")) document.body.classList.add("android-nav");
 
     setCornerInfo();
     bindKeyboardHandlers();

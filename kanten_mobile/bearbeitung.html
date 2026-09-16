@@ -19,11 +19,13 @@
     var isTC22 = ua.indexOf("android") !== -1 && (ua.indexOf("tc22") !== -1 || (sw === 360 && sh === 720 && dpr === 3));
     var isTC21 = ua.indexOf("android") !== -1 && (ua.indexOf("tc21") !== -1 || (sw === 360 && sh === 640));
     var isZebra = isTC22 || isTC21 || ua.indexOf("zebra") !== -1;
+    if (ua.indexOf("android") !== -1) document.documentElement.classList.add("android-nav");
     if (isZebra) document.documentElement.classList.add("zebra-device");
     if (isTC22) document.documentElement.classList.add("zebra-tc22");
     if (isTC21) document.documentElement.classList.add("zebra-tc21");
     function applyBody() {
         if (!document.body) return;
+        if (ua.indexOf("android") !== -1) document.body.classList.add("android-nav", "phone-layout");
         if (isZebra) document.body.classList.add("zebra-device", "phone-layout");
         if (isTC22) document.body.classList.add("zebra-tc22");
         if (isTC21) document.body.classList.add("zebra-tc21");
@@ -32,7 +34,7 @@
     if (!document.body) document.addEventListener("DOMContentLoaded", applyBody);
 })();
 </script>
-<link rel="stylesheet" href="kanten_mobile.css?v=bearb12">
+<link rel="stylesheet" href="kanten_mobile.css?v=bearb13">
 <style>
 .page-title {
     margin: 0;
@@ -45,7 +47,7 @@
 html.zebra-device .page-title { font-size: 22px; }
 </style>
 </head>
-<body data-page="bearbeitung" data-ver="bearb12">
+<body data-page="bearbeitung" data-ver="bearb13">
 
 <div id="deviceInfo" class="device-info"></div>
 <p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
@@ -102,7 +104,7 @@ html.zebra-device .page-title { font-size: 22px; }
 
 </div>
 
-<script src="kanten_mobile.js?v=bearb12" defer></script>
+<script src="kanten_mobile.js?v=bearb13" defer></script>
 
 </body>
 </html>

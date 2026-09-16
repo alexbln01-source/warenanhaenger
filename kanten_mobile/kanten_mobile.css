@@ -207,10 +207,13 @@ body.zebra-device .kundeBtn {
 }
 
 /* Zurück/Drucken klar über der Android-Leiste */
-body.zebra-device #actionButtons {
+body.zebra-device #actionButtons,
+html.zebra-device #actionButtons,
+body.phone-layout.android-nav #actionButtons,
+html.android-nav body.phone-layout #actionButtons {
     flex-shrink: 0;
     margin: 0;
-    padding: 0 0 calc(64px + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 calc(72px + env(safe-area-inset-bottom, 0px));
     gap: 8px;
 }
 
