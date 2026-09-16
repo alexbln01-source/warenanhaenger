@@ -48,11 +48,7 @@ deviceInfo.textContent =
     isZebra ? "Gerät: Zebra" :
     isMobile ? "Gerät: Mobil" : "Gerät: PC";
 
-if (isMobile || isZebra) document.body.classList.add("phone-layout");
 if (isPC) document.body.classList.add("pc-device");
-if (isZebra) document.body.classList.add("zebra-device");
-if (isTC22) document.body.classList.add("zebra-tc22");
-if (isTC21) document.body.classList.add("zebra-tc21");
 
 // ============================================================
 //  START

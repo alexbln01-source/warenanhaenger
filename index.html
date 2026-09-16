@@ -36,110 +36,22 @@ html, body {
 
 @media (max-width:600px){
     html,body{
-        height:100svh;
-        max-height:100svh;
+        height:100vh;
         display:flex;
         justify-content:center;
-        align-items:stretch;
+        align-items:center;
         overflow:hidden;
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
     }
     #main{
         width:100%;
-        max-width:100%;
-        height:100%;
-        max-height:100%;
-        transform:none;
-        margin:0;
-        padding:10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-        box-sizing:border-box;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
-        overflow:hidden;
-    }
-    #logo{
-        width:55%;
-        max-width:180px;
-        margin:0 auto 10px;
-    }
-    h1{
-        margin:0 0 12px;
-        font-size:26px;
+        max-width:380px;
+        transform:scale(0.95);
     }
     button{
-        width:100%;
-        max-width:100%;
-        height:58px;
-        font-size:20px;
-        margin:8px auto;
-        flex-shrink:0;
+        width:260px;
+        height:85px;
+        font-size:24px;
     }
-    footer{
-        margin-top:12px;
-        margin-bottom:0;
-        font-size:13px;
-        flex-shrink:0;
-    }
-}
-
-/* Zebra TC22: alles auf einem Screen, kein Scroll, Android-Nav frei */
-html.zebra-device,
-html.zebra-device body,
-body.zebra-device{
-    height:100svh !important;
-    max-height:100svh !important;
-    margin:0 !important;
-    padding:0 !important;
-    overflow:hidden !important;
-    display:flex !important;
-    justify-content:center !important;
-    align-items:stretch !important;
-    box-sizing:border-box !important;
-}
-html.zebra-device #main,
-body.zebra-device #main{
-    width:100%;
-    max-width:100%;
-    height:100%;
-    max-height:100%;
-    transform:none;
-    margin:0;
-    padding:10px 14px calc(52px + env(safe-area-inset-bottom, 0px));
-    box-sizing:border-box;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    overflow:hidden;
-}
-html.zebra-device #logo,
-body.zebra-device #logo{
-    width:58%;
-    max-width:200px;
-    margin:0 auto 10px;
-}
-html.zebra-device h1,
-body.zebra-device h1{
-    margin:0 0 12px;
-    font-size:26px;
-}
-html.zebra-device button,
-body.zebra-device button{
-    width:100%;
-    max-width:100%;
-    height:58px;
-    font-size:20px;
-    margin:8px auto;
-    flex-shrink:0;
-}
-html.zebra-device footer,
-body.zebra-device footer{
-    margin-top:12px;
-    margin-bottom:0;
-    font-size:13px;
-    flex-shrink:0;
 }
 
 @media (min-width:601px){
@@ -215,36 +127,8 @@ footer{
 /* =====================
    NAVIGATION
 ===================== */
-(function detectZebra(){
-    var ua = navigator.userAgent.toLowerCase();
-    var sw = window.screen.width;
-    var sh = window.screen.height;
-    var dpr = window.devicePixelRatio || 1;
-    var isTC22 = ua.indexOf("android") !== -1 && sw === 360 && sh === 720 && dpr === 3;
-    var isTC21 = ua.indexOf("android") !== -1 && sw === 360 && sh === 640;
-    var isZebra = isTC22 || isTC21 || ua.indexOf("zebra") !== -1;
-    function apply(){
-        var root = document.documentElement;
-        var body = document.body;
-        if (isZebra) {
-            root.classList.add("zebra-device");
-            if (body) body.classList.add("zebra-device");
-        }
-        if (isTC22) {
-            root.classList.add("zebra-tc22");
-            if (body) body.classList.add("zebra-tc22");
-        }
-        if (isTC21) {
-            root.classList.add("zebra-tc21");
-            if (body) body.classList.add("zebra-tc21");
-        }
-    }
-    apply();
-    if (!document.body) document.addEventListener("DOMContentLoaded", apply);
-})();
-
 function openBeschichtung(){
-    location.href="beschichtung_mobile/beschichtung.html?besc37=" + Date.now();
+    location.href="beschichtung_mobile/beschichtung.html?besc32=" + Date.now();
 }
 function openKanten(){
     location.href="kanten_mobile/bearbeitung.html?v=" + Date.now();
