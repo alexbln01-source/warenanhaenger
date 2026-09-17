@@ -1,0 +1,5 @@
+# Auf CT 107 nach /opt/xmrig-dashboard/bitcoin.rpc kopieren
+# (nicht committen — enthält Secrets)
+url=http://192.168.178.111:8332
+user=bitcoinrpc
+password=CHANGE_ME
