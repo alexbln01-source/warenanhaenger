@@ -135,7 +135,7 @@ document.querySelectorAll(".kundeBtn").forEach(btn => {
 
 btnDrucken.onclick = () => {
   if (selectedArt === "eilt_sehr") {
-    location.href = "druck_kanten.html?kunde=EILT_SEHR";
+    location.href = "druck_kanten.html?kunde=EILT_SEHR&v=batch100";
     return;
   }
   if (!selectedArt) return alert("Bitte eine Tätigkeit auswählen.");
@@ -143,7 +143,8 @@ btnDrucken.onclick = () => {
 
   location.href =
     "druck_kanten.html?kunde=" + encodeURIComponent(selectedCustomer) +
-    "&art=" + encodeURIComponent(selectedArt);
+    "&art=" + encodeURIComponent(selectedArt) +
+    "&v=batch100";
 };
 
 btnBack.onclick = () => {

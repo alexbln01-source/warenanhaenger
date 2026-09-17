@@ -257,19 +257,19 @@ const kundeAliases = {
 };
 const layoutKunde = kundeAliases[kunde] || kunde;
 
-/* Kanten-Sonderdruck: Start bis Start+50 = 51 Etikette */
-const KANTEN_BATCH_OFFSET = 50;
+/* Kanten-Sonderdruck: Start bis Start+99 = 100 Etikette (z.B. 100–199) */
+const KANTEN_BATCH_OFFSET = 99;
 
 const kantenBatchConfigs = {
-    "Backhus":      { start: 400 },  // 400–450
-    "Bergmann M-H": { start: 700 },  // 700–750 (Meppen)
-    "Bücker":       { start: 300 },  // 300–350
-    "FVG":          { start: 1, end: 50, pad: 3 },  // 50 Etikette: 001–050
-    "Janzen":       { start: 900 },  // 900–950
-    "Krone Spelle": { start: 100 },  // 100–150
-    "L. Bergmann":  { start: 600 },  // 600–650 (Lathen)
-    "Sonstige":     { start: 1000 }, // 1000–1050
-    "Böckmann":     { start: 200 }   // 200–250
+    "Backhus":      { start: 400 },  // 400–499
+    "Bergmann M-H": { start: 700 },  // 700–799 (Meppen)
+    "Bücker":       { start: 300 },  // 300–399
+    "FVG":          { start: 1, end: 100, pad: 3 },  // 100 Etikette: 001–100
+    "Janzen":       { start: 900 },  // 900–999
+    "Krone Spelle": { start: 100 },  // 100–199
+    "L. Bergmann":  { start: 600 },  // 600–699 (Lathen)
+    "Sonstige":     { start: 1000 }, // 1000–1099
+    "Böckmann":     { start: 200 }   // 200–299
 };
 const kantenBatch = art === "kanten" ? kantenBatchConfigs[layoutKunde] : null;
 const isKantenBatch = !!kantenBatch;
@@ -513,7 +513,7 @@ const fallbackDelayMs = isKantenBatch
     ? (isZebra ? 30000 : (isMobileDevice || isEdge ? 20000 : 12000))
     : (isZebra || isMobileDevice || isEdge ? 8000 : 10000);
 
-function returnToBearbeitung() {
+function returnToHauptansicht() {
     if (goingHome) return;
     goingHome = true;
     didPrint = false;
@@ -523,13 +523,14 @@ function returnToBearbeitung() {
     returnFallback = null;
     goHomeTimer = null;
 
-    window.location.replace("bearbeitung.html?v=" + Date.now());
+    // Nach Druck immer zur Hauptansicht (Ausnahme Paus bleibt in paus_druck)
+    window.location.replace("../index.html?v=" + Date.now());
 }
 
-function scheduleReturnToBearbeitung() {
+function scheduleReturnToHauptansicht() {
     if (!didPrint || goingHome) return;
     clearTimeout(goHomeTimer);
-    goHomeTimer = setTimeout(returnToBearbeitung, 300);
+    goHomeTimer = setTimeout(returnToHauptansicht, 300);
 }
 
 function onPrintDialogClosed() {
@@ -538,7 +539,7 @@ function onPrintDialogClosed() {
 
     clearTimeout(returnFallback);
     returnFallback = null;
-    scheduleReturnToBearbeitung();
+    scheduleReturnToHauptansicht();
 }
 
 function armReturnFallback(ms) {

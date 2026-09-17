@@ -462,7 +462,7 @@ if (!isMobileDevice) {
         didPrint = false;
 
         setTimeout(() => {
-            window.location.replace("beschichtung.html?besc40=" + Date.now());
+            window.location.replace("../index.html?v=" + Date.now());
         }, 300);
     };
 
@@ -479,7 +479,7 @@ if (isMobileDevice) {
         didPrint = false;
 
         setTimeout(() => {
-            window.location.replace("beschichtung.html?besc40=" + Date.now());
+            window.location.replace("../index.html?v=" + Date.now());
         }, 300);
     });
 
@@ -490,7 +490,7 @@ backBtn.onclick = () => {
     window.location.replace("beschichtung.html?besc40=" + Date.now());
 };
 
-    }); 
+}); // window load
 </script>
 
 </body>
