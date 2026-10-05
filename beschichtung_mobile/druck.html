@@ -118,13 +118,19 @@ html, body {
     margin-bottom: 1mm;
 }
 
+.kunde-schmalriede {
+    font-size: 56pt;
+    margin-bottom: 1mm;
+}
+
 .sub-comte-zn8,
 .sub-comte-zni8,
 .sub-chemisch,
 .sub-blau,
 .sub-rcs,
 .sub-coatinc,
-.sub-ekodekor {
+.sub-ekodekor,
+.sub-schmalriede {
     font-size: 48pt;
 }
 
@@ -376,6 +382,11 @@ html += `<div class="kunde-comte-zn8">Comte</div>
 <div class="sub-comte-zn8">„Zn8“</div>`;
 break;
 
+case "SCHMALRIEDE":
+html += `<div class="kunde-schmalriede">Schmalriede-Zink</div>
+<div class="sub-schmalriede">„Zn8“</div>`;
+break;
+
 case "COMTEZNI8":
 html += `<div class="kunde-comte-zni8">Comte</div>
 <div class="sub-comte-zni8">„ZnI8“</div>`;
@@ -487,7 +498,7 @@ if (isMobileDevice) {
 
 /* >>> ZURÜCK BUTTON <<< */
 backBtn.onclick = () => {
-    window.location.replace("beschichtung.html?besc40=" + Date.now());
+    window.location.replace("beschichtung.html?besc41=" + Date.now());
 };
 
 }); // window load
