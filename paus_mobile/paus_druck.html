@@ -130,7 +130,6 @@ html, body {
 .line-kommission { font-size: 48pt; }
 .line-date { font-size: 48pt; }
 .line-vorgezogen { font-size: 40pt; }
-.line-schwer { font-size: 44pt; line-height: 1.15; }
 
 .date-past {
     border: 3px solid red;
@@ -257,7 +256,6 @@ window.onload = () => {
     const farbe = data.farbe;
     const vorgezogen = data.vorgezogen;
     const zusatztext = (data.zusatztext || "").trim();
-    const schwerePalette = !!data.schwerePalette;
 
     let isPast = false;
     let finalDate = dat;
@@ -287,23 +285,9 @@ window.onload = () => {
         finalDate = `${d.padStart(2, "0")}.${m.padStart(2, "0")}`;
     }
 
-    let html;
-    let zusatzHtml = "";
-
-    if (schwerePalette) {
-        // Nur Warn-Etikett – keine Kommission/Datum, kein Zusatztext unten
-        html = `
-        <div class="text-block" style="transform:translateY(10mm);">
-            <div class="line line-title">PAUS</div>
-            <div class="line line-schwer" style="color:${farbe};">⚠️</div>
-            <div class="line line-schwer" style="color:${farbe};">Schwere Palette</div>
-            <div class="line line-schwer" style="color:${farbe};">⚠️</div>
-        </div>
-        `;
-    } else {
-        // Wie Web: Zusatztext zählt nicht zur Mitte – steht unten neben Logo
-        const offsetMm = vorgezogen ? 4 : 7;
-        html = `
+    // Wie Web: Zusatztext zählt nicht zur Mitte – steht unten neben Logo
+    const offsetMm = vorgezogen ? 4 : 7;
+    const html = `
         <div class="text-block" style="transform:translateY(${offsetMm}mm);">
             <div class="line line-title">PAUS</div>
             <div class="line line-kommission" style="color:${farbe};">${esc(kom)}</div>
@@ -312,9 +296,8 @@ window.onload = () => {
             </div>
             ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
         </div>
-        `;
-        zusatzHtml = zusatztext ? `„${esc(zusatztext)}“` : "";
-    }
+    `;
+    const zusatzHtml = zusatztext ? `„${esc(zusatztext)}“` : "";
 
     previewInner.innerHTML = html;
     printInner.innerHTML   = html;

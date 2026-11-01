@@ -115,18 +115,10 @@ backBtn.onclick = () => {
             location.href = "paus_druck.html?data=" + encodeURIComponent(json) + "&v=" + Date.now();
     }
 
-    // SCHWERE PALETTE: Klick druckt sofort nur das Warn-Etikett
-    // (keine Kommission / kein Datum – wie gewünscht)
+    // SCHWERE PALETTE: eigene Seite wie Web (kein Formular nötig)
     if (btnSchwerePalette) {
         btnSchwerePalette.onclick = () => {
-            goPrint({
-                kommission: "",
-                lieferdatum: "",
-                zusatztext: "",
-                vorgezogen: false,
-                schwerePalette: true,
-                farbe: selectedFarbe()
-            });
+            location.href = "schwere_palette.html?v=" + Date.now();
         };
     }
 
@@ -140,7 +132,6 @@ backBtn.onclick = () => {
             lieferdatum: lieferdatum.value.trim(),
             zusatztext: zusatztext ? capFirst(zusatztext.value.trim()) : "",
             vorgezogen: vorgezogenAktiv,
-            schwerePalette: false,
             farbe: selectedFarbe()
         });
     };

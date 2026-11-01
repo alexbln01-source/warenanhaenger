@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Schwere Palette</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #dcdcdc;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    height: 100dvh;
+}
+
+/* =======================
+   VORSCHAU (wie PAUS Lieferung)
+======================= */
+.preview-wrapper {
+    width: 100%;
+    height: calc(100% - 180px);
+    height: calc(100dvh - 180px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-area {
+    width: 148mm;
+    height: 105mm;
+    background: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    transform-origin: center;
+    transform: scale(min(calc(92vw / 559.3701px), calc((100dvh - 180px) / 396.8504px)));
+}
+
+/* =======================
+   ETIKETT (QUERFORMAT, 148 x 105mm)
+======================= */
+.etikett {
+    width: 148mm;
+    height: 105mm;
+    padding: 8mm;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.etikett-center {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.warn-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 6px solid #c80000;
+    border-radius: 4px;
+    padding: 10px 18px;
+}
+
+.emoji {
+    width: 100px;
+    height: 100px;
+    display: block;
+}
+
+.headline {
+    font-size: 36px;
+    font-weight: 900;
+    color: #c80000;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.etikett-bottom {
+    position: absolute;
+    left: 5mm;
+    right: 5mm;
+    bottom: 4mm;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.logo {
+    width: 40mm;
+    filter: grayscale(100%);
+    flex-shrink: 0;
+}
+
+/* =======================
+   WARNBOX – DRUCKERHINWEIS
+======================= */
+.warnbox {
+    flex-shrink: 0;
+    margin: -90px auto 10px;
+    max-width: 280px;
+    background: #fff4f4;
+    border: 2px solid #c80000;
+    border-radius: 14px;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 900;
+    color: #c80000;
+    font-size: 16px;
+    box-shadow: 0 0 10px rgba(200,0,0,0.2);
+    animation: warnPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes warnPulse {
+    0%   { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+    50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
+    100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
+}
+
+@media print {
+    .warnbox { display: none !important; }
+}
+
+/* =======================
+   BUTTONS
+======================= */
+.bottom-bar {
+    margin-top: 20px;
+    height: 60px;
+    display: flex;
+    gap: 16px;
+    padding: 0 20px;
+}
+
+.btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+}
+
+.back-btn  { background: #444; }
+.print-btn { background: #00963d; }
+
+/* =======================
+   PRINT (A6 HOCH – INHALT GEDREHT)
+======================= */
+.print-only { display: none; }
+
+@media print {
+    html, body {
+        overflow: visible !important;
+        height: auto !important;
+        width: auto !important;
+        display: block !important;
+    }
+    body { background: white !important; }
+
+    .preview-wrapper, .bottom-bar, .warnbox {
+        display: none !important;
+    }
+    .print-only { display: block !important; }
+
+    @page {
+        size: A6 portrait;
+        margin: 0;
+    }
+
+    #printArea {
+        width: 105mm;
+        height: 148mm;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #printArea.etikett {
+        width: 148mm;
+        height: 105mm;
+        position: absolute;
+        top: 21.5mm;
+        left: -21.5mm;
+        transform: rotate(-90deg);
+        transform-origin: center;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="preview-wrapper">
+    <div class="preview-area">
+        <div class="etikett">
+            <div class="etikett-center">
+                <div class="warn-box">
+                    <svg class="emoji" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M50 6 L96 88 C98 92 95 96 90 96 L10 96 C5 96 2 92 4 88 Z" fill="#FFCC4D" stroke="#000000" stroke-width="5" stroke-linejoin="round"/>
+                        <rect x="45.5" y="36" width="9" height="30" rx="4" fill="#000000"/>
+                        <circle cx="50" cy="80" r="5.5" fill="#000000"/>
+                    </svg>
+                    <div class="headline">Schwere<br>Palette</div>
+                </div>
+            </div>
+            <div class="etikett-bottom">
+                <img src="langen.png" class="logo" alt="Langen CNC Logo">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="warnbox">
+    ⚠️ Achtung!<br>
+    <b>A6 Hochformat</b> einstellen
+</div>
+
+<div id="printArea" class="etikett print-only">
+    <div class="etikett-center">
+        <div class="warn-box">
+            <svg class="emoji" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M50 6 L96 88 C98 92 95 96 90 96 L10 96 C5 96 2 92 4 88 Z" fill="#FFCC4D" stroke="#000000" stroke-width="5" stroke-linejoin="round"/>
+                <rect x="45.5" y="36" width="9" height="30" rx="4" fill="#000000"/>
+                <circle cx="50" cy="80" r="5.5" fill="#000000"/>
+            </svg>
+            <div class="headline">Schwere<br>Palette</div>
+        </div>
+    </div>
+    <div class="etikett-bottom">
+        <img src="langen.png" class="logo" alt="Langen CNC Logo">
+    </div>
+</div>
+
+<div class="bottom-bar">
+    <button type="button" class="btn back-btn" id="backBtn">Zurück</button>
+    <button type="button" class="btn print-btn" id="printBtn">Drucken</button>
+</div>
+
+<script>
+window.addEventListener("load", () => {
+    const backBtn = document.getElementById("backBtn");
+    const printBtn = document.getElementById("printBtn");
+
+    function goBack() {
+        window.location.href = "paus_mobile.html?v=" + Date.now();
+    }
+    backBtn.onclick = goBack;
+
+    let didPrint = false;
+    const isMobileDevice = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    printBtn.onclick = () => {
+        didPrint = true;
+        const oldLabel = printBtn.textContent;
+        printBtn.textContent = "Drucke…";
+        window.print();
+        setTimeout(function () { printBtn.textContent = oldLabel; }, 1600);
+    };
+
+    if (!isMobileDevice) {
+        window.onafterprint = () => {
+            if (!didPrint) return;
+            didPrint = false;
+            setTimeout(goBack, 300);
+        };
+    }
+    if (isMobileDevice) {
+        window.addEventListener("focus", () => {
+            if (!didPrint) return;
+            didPrint = false;
+            setTimeout(goBack, 300);
+        });
+    }
+});
+</script>
+
+</body>
+</html>
