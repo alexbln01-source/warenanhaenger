@@ -2,8 +2,154 @@
 <html lang="de" style="background-color:#d8dee6">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#d8dee6">
 <style>html,body{margin:0;min-height:100%;background-color:#d8dee6;background-image:radial-gradient(circle at top,#f2f5f9 0%,#d8dee6 42%,#c3cad4 100%);}</style>
-<script>location.replace("paus_mobile.html?v=" + Date.now());</script>
+<link rel="stylesheet" href="../shared_page_bg.css">
+<script>
+(function () {
+    var BUILD = "paus9";
+    if (location.search.indexOf(BUILD) < 0) {
+        location.replace(location.pathname + "?" + BUILD + "=" + Date.now());
+    }
+})();
+</script>
+<script>
+(function () {
+    var ua = navigator.userAgent.toLowerCase();
+    var mobile = /android|iphone|ipad|ipod/i.test(ua);
+    var sw = Math.min(window.screen.width || 0, window.screen.height || 0);
+    var sh = Math.max(window.screen.width || 0, window.screen.height || 0);
+    var dpr = window.devicePixelRatio || 1;
+    var isTC22 = ua.indexOf("android") !== -1 && (ua.indexOf("tc22") !== -1 || (sw === 360 && sh === 720 && dpr === 3));
+    var isTC21 = ua.indexOf("android") !== -1 && (ua.indexOf("tc21") !== -1 || (sw === 360 && sh === 640));
+    var zebra = isTC22 || isTC21 || ua.indexOf("zebra") !== -1 || ua.indexOf("tc21") !== -1 || ua.indexOf("tc22") !== -1;
+    var wide = (window.innerWidth || document.documentElement.clientWidth || 0) >= 700;
+    if (!mobile && !zebra && wide && window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
+        document.documentElement.classList.add("early-pc");
+    } else {
+        document.documentElement.classList.remove("early-pc");
+    }
+    if (ua.indexOf("android") !== -1) {
+        document.documentElement.classList.add("android-nav");
+    }
+    if (zebra) {
+        document.documentElement.classList.add("zebra-device");
+        if (isTC22) document.documentElement.classList.add("zebra-tc22");
+        if (isTC21) document.documentElement.classList.add("zebra-tc21");
+    }
+    function applyBody() {
+        if (!document.body) return;
+        if (zebra || mobile) document.body.classList.add("phone-layout");
+        if (ua.indexOf("android") !== -1) document.body.classList.add("android-nav");
+        if (zebra) document.body.classList.add("zebra-device");
+        if (isTC22) document.body.classList.add("zebra-tc22");
+        if (isTC21) document.body.classList.add("zebra-tc21");
+    }
+    applyBody();
+    if (!document.body) document.addEventListener("DOMContentLoaded", applyBody);
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>PAUS Lieferung</title>
+<link rel="stylesheet" href="paus_mobile.css?v=paus9">
 </head>
-<body></body>
+<body class="module-paus" data-page="paus" data-ver="paus9">
+
+<div id="deviceInfo" class="device-info"></div>
+<p id="buildInfo" class="build-info" x-apple-data-detectors="false"></p>
+
+<div id="card">
+
+    <h1 class="page-title">PAUS Lieferung</h1>
+    <p class="page-sub">Warenanhänger · A6</p>
+
+    <div class="work-area">
+        <div class="panel-section panel-side">
+            <p class="section-head">Eingabe</p>
+            <div class="panel-box input-panel">
+                <input id="kommission" class="input-field" type="text" placeholder="Kommissionsnummer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+                <input id="lieferdatum" class="input-field" type="text" placeholder="TT.MM" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true">
+                <button type="button" id="openKeyboardBtn" class="keyboard-open-btn">Tastatur öffnen</button>
+            </div>
+        </div>
+
+        <div class="panel-section panel-main">
+            <p class="section-head">Farbe wählen</p>
+            <div class="panel-box options-panel">
+                <div class="color-row">
+                    <button type="button" class="color-btn tile-btn" data-color="red">Rot</button>
+                    <button type="button" class="color-btn tile-btn" data-color="blue">Blau</button>
+                    <button type="button" class="color-btn tile-btn" data-color="black">Schwarz</button>
+                </div>
+                <button type="button" id="btnVorgezogen" class="vorgezogen-btn">Auftrag vorgezogen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="actionButtons">
+        <button type="button" id="backBtn">◀ Zurück</button>
+        <button type="button" id="druckenBtn">Drucken</button>
+    </div>
+
+</div>
+
+<div id="keyboardPopup" class="keyboard-popup">
+    <div class="keyboard-content">
+        <div class="keyboard-header">
+            <h3 id="keyboardTitle">Eingabe</h3>
+            <button type="button" id="keyboardClose" class="keyboard-close-x" aria-label="Schließen">✕</button>
+        </div>
+
+        <input id="keyboardInput"
+               class="keyboard-input"
+               inputmode="none"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false"
+               data-lpignore="true"
+               data-form-type="other">
+
+        <div id="keyboardKeys" class="keyboard-keys-wrap">
+            <table class="keyboard-grid" role="presentation">
+                <tbody>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="1">1</button></td>
+                        <td><button type="button" class="kb-key" data-key="2">2</button></td>
+                        <td><button type="button" class="kb-key" data-key="3">3</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="4">4</button></td>
+                        <td><button type="button" class="kb-key" data-key="5">5</button></td>
+                        <td><button type="button" class="kb-key" data-key="6">6</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" class="kb-key" data-key="7">7</button></td>
+                        <td><button type="button" class="kb-key" data-key="8">8</button></td>
+                        <td><button type="button" class="kb-key" data-key="9">9</button></td>
+                    </tr>
+                    <tr>
+                        <td><button type="button" id="keyboardDelete" class="kb-key key-delete" aria-label="Letzte Ziffer löschen">⌫</button></td>
+                        <td><button type="button" class="kb-key" data-key="0">0</button></td>
+                        <td><button type="button" id="keyboardOK" class="kb-key key-ok" aria-label="OK">✓</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var s = document.createElement("script");
+    s.src = "paus_mobile.js?v=paus9";
+    s.defer = true;
+    document.head.appendChild(s);
+})();
+</script>
+
+</body>
 </html>

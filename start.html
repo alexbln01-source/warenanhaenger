@@ -21,13 +21,13 @@
         beschichtung: "beschichtung_mobile/beschichtung.html",
         kanten: "kanten_mobile/bearbeitung.html",
         schweissen: "baustelle.html",
-        paus: "paus_mobile/paus_mobile.html"
+        paus: "paus_mobile/paus_lieferung.html"
     };
 
     var ziel = routes[bereich];
     if (!ziel) return;
 
-    var qs = bereich === "beschichtung" ? "besc41=" : "v=";
+    var qs = bereich === "beschichtung" ? "besc41=" : (bereich === "paus" ? "paus9=" : "v=");
     location.replace(ziel + "?" + qs + Date.now());
 })();
 </script>
