@@ -258,6 +258,16 @@ const backBtn      = document.getElementById("backBtn");
     const dat = data.lieferdatum;
     const farbe = data.farbe;
     const vorgezogen = data.vorgezogen;
+    const zusatz = (data.zusatztext || "").trim();
+    const schwerePalette = !!data.schwerePalette;
+
+    function esc(s) {
+        return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
 
     let isPast = false;
     let finalDate = dat;
@@ -288,13 +298,15 @@ const backBtn      = document.getElementById("backBtn");
     }
 
     const html = `
-        <div class="text-block ${vorgezogen ? "offset-vorgezogen" : "offset-normal"}">
+        <div class="text-block ${vorgezogen || schwerePalette || zusatz ? "offset-vorgezogen" : "offset-normal"}">
             <div class="line line-title">PAUS</div>
-            <div class="line line-kommission" style="color:${farbe};">${kom}</div>
+            <div class="line line-kommission" style="color:${farbe};">${esc(kom)}</div>
             <div class="line line-date">
-                <span class="${isPast ? "date-past" : ""}">${finalDate}</span>
+                <span class="${isPast ? "date-past" : ""}">${esc(finalDate)}</span>
             </div>
+            ${zusatz ? `<div class="line line-zusatz" style="color:${farbe};">${esc(zusatz)}</div>` : ``}
             ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
+            ${schwerePalette ? `<div class="line line-schwer" style="color:${farbe};">⚠️ Schwere Palette</div>` : ``}
         </div>
     `;
 
