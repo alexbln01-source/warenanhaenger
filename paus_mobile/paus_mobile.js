@@ -3,7 +3,6 @@
 // ============================================================
 let activeInput = null;
 let vorgezogenAktiv = false;
-let schwerePaletteAktiv = false;
 
 // ============================================================
 //  DEVICE DETECTION
@@ -102,14 +101,6 @@ backBtn.onclick = () => {
         btnVorgezogen.classList.toggle("active");
     };
 
-    // SCHWERE PALETTE BUTTON – Toggle; Druck ohne Kommission (nur dieses Etikett)
-    if (btnSchwerePalette) {
-        btnSchwerePalette.onclick = () => {
-            schwerePaletteAktiv = !schwerePaletteAktiv;
-            btnSchwerePalette.classList.toggle("active");
-        };
-    }
-
     function selectedFarbe() {
         const colorBtn = document.querySelector(".color-btn.active");
         return colorBtn ? colorBtn.dataset.color : "black";
@@ -121,26 +112,26 @@ backBtn.onclick = () => {
         if (window.Android && typeof Android.printPaus === "function")
             Android.printPaus(json);
         else
-            location.href = "paus_druck.html?data=" + encodeURIComponent(json);
+            location.href = "paus_druck.html?data=" + encodeURIComponent(json) + "&v=" + Date.now();
     }
 
-    // DRUCKEN BUTTON
-    druckenBtn.onclick = () => {
-        const farbe = selectedFarbe();
-
-        // Schwere Palette: nur dieses Etikett, keine Kommission/Datum nötig
-        if (schwerePaletteAktiv) {
+    // SCHWERE PALETTE: Klick druckt sofort nur das Warn-Etikett
+    // (keine Kommission / kein Datum – wie gewünscht)
+    if (btnSchwerePalette) {
+        btnSchwerePalette.onclick = () => {
             goPrint({
                 kommission: "",
                 lieferdatum: "",
                 zusatztext: "",
                 vorgezogen: false,
                 schwerePalette: true,
-                farbe
+                farbe: selectedFarbe()
             });
-            return;
-        }
+        };
+    }
 
+    // DRUCKEN BUTTON (normales PAUS-Etikett)
+    druckenBtn.onclick = () => {
         if (!kommission.value.trim()) return alert("Bitte Kommissionsnummer eingeben!");
         if (!lieferdatum.value.trim()) return alert("Bitte Lieferdatum eingeben!");
 
@@ -150,7 +141,7 @@ backBtn.onclick = () => {
             zusatztext: zusatztext ? capFirst(zusatztext.value.trim()) : "",
             vorgezogen: vorgezogenAktiv,
             schwerePalette: false,
-            farbe
+            farbe: selectedFarbe()
         });
     };
 };
