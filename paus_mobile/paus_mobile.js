@@ -12,12 +12,8 @@ const sw  = window.screen.width;
 const sh  = window.screen.height;
 const dpr = window.devicePixelRatio;
 
-const isTC22  = ua.includes("android") && (
-    ua.includes("tc22") || (Math.min(sw, sh) === 360 && Math.max(sw, sh) === 720 && dpr === 3)
-);
-const isTC21  = ua.includes("android") && (
-    ua.includes("tc21") || (Math.min(sw, sh) === 360 && Math.max(sw, sh) === 640)
-);
+const isTC22  = ua.includes("android") && sw === 360 && sh === 720 && dpr === 3;
+const isTC21  = ua.includes("android") && sw === 360 && sh === 640;
 const isZebra = isTC22 || isTC21 || ua.includes("zebra");
 const isMobile = /android|iphone|ipad|ipod/.test(ua);
 const isPC     = !isZebra && !isMobile;
@@ -53,11 +49,6 @@ deviceInfo.textContent =
     isMobile ? "Gerät: Mobil" : "Gerät: PC";
 
 if (isPC) document.body.classList.add("pc-device");
-if (isMobile || isZebra) document.body.classList.add("phone-layout");
-if (ua.includes("android")) document.body.classList.add("android-nav");
-if (isZebra) document.body.classList.add("zebra-device");
-if (isTC22) document.body.classList.add("zebra-tc22");
-if (isTC21) document.body.classList.add("zebra-tc21");
 
 // ============================================================
 //  START
@@ -86,7 +77,7 @@ window.onload = () => {
 
 backBtn.onclick = () => {
     const base = location.pathname.split("/").slice(0, -2).join("/");
-    window.location.href = base + "/start.html?bereich=home";
+    window.location.href = base + "/index.html";
 };
 
     // VORGEZOGEN BUTTON

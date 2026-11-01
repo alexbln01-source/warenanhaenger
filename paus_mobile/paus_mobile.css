@@ -1,297 +1,137 @@
-/* PAUS Lieferung A6 – Kartenlayout wie Beschichtung/Bearbeitung */
-:root {
-    --brand: #003a73;
-    --brand-light: #e8f0fa;
-    --accent: #28a745;
-    --accent-dark: #1d7f31;
-    --danger: #e53935;
-    --danger-dark: #c62828;
-    --ok: #00963d;
-    --muted: #6b7c8f;
-    --tile-bg: #f0f4f9;
-    --tile-border: 2px solid rgba(0, 58, 115, 0.22);
-    --panel-bg: #f7f9fc;
-    --panel-border: 2px solid rgba(0, 58, 115, 0.16);
-}
-
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+/* ===== RESET ===== */
+* { box-sizing: border-box; }
 
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    overflow: hidden;
     background-color: #d8dee6;
     background-image: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
     background-attachment: fixed;
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-    color: var(--brand);
-}
-
-body.phone-layout,
-body.pc-device {
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-body.phone-layout {
-    overflow: hidden;
-    height: 100svh;
-    max-height: 100svh;
-    width: 100%;
-    align-items: stretch;
-}
-
-body.phone-layout:not(.zebra-device) #card {
-    width: 100%;
-    max-width: 420px;
-    height: 100svh;
-    max-height: 100svh;
-    margin: 0 auto;
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(12px + env(safe-area-inset-bottom, 0px));
-    overflow: hidden;
-}
-
-body.phone-layout:not(.zebra-device) .device-info,
-body.phone-layout:not(.zebra-device) .build-info {
-    display: none;
-}
-
-.hidden { display: none !important; }
-
-#card {
-    width: 100%;
-    max-width: 380px;
-    height: 100vh;
-    height: 100dvh;
-    padding: calc(18px + env(safe-area-inset-top, 0px)) 16px calc(10px + env(safe-area-inset-bottom, 0px));
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.page-title {
-    margin: 0;
-    font-size: 32px;
-    font-weight: 900;
-    color: var(--brand);
-    text-align: center;
-    letter-spacing: -0.5px;
-    flex-shrink: 0;
-}
-
-.page-sub {
-    margin: 4px 0 12px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    flex-shrink: 0;
-}
-
-.section-head {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--brand);
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.work-area {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.panel-section {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.panel-box {
-    border-radius: 14px;
-    background: #eef2f7;
-    border: var(--panel-border);
-    padding: 10px;
-    overflow: hidden;
-}
-
-.input-panel,
-.options-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.options-panel {
-    flex: 1;
-    min-height: 0;
-    justify-content: center;
-}
-
-.input-field {
-    width: 100%;
-    min-height: 46px;
-    padding: 12px;
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    border: var(--tile-border);
-    border-radius: 12px;
-    text-align: center;
-    background: var(--tile-bg);
-    color: var(--brand);
-}
-
-.input-field:focus {
-    outline: 3px solid #ff9800;
-    outline-offset: 2px;
-}
-
-.color-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-}
-
-.color-btn {
-    min-height: 52px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 800;
-    color: #fff !important;
-    touch-action: manipulation;
-}
-
-.color-btn[data-color="red"] {
-    background: linear-gradient(165deg, #e53935, #c62828) !important;
-}
-
-.color-btn[data-color="blue"] {
-    background: linear-gradient(165deg, #007bff, #0056b3) !important;
-}
-
-.color-btn[data-color="black"] {
-    background: linear-gradient(165deg, #444, #222) !important;
-}
-
-.color-btn.active {
-    outline: 3px solid var(--accent);
-    outline-offset: 2px;
-    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.35);
-}
-
-.vorgezogen-btn {
-    width: 100%;
-    min-height: 48px;
-    border: var(--tile-border);
-    border-radius: 12px;
-    background: #d5dde5;
-    color: var(--brand);
-    font-size: 15px;
-    font-weight: 800;
-    touch-action: manipulation;
-}
-
-.vorgezogen-btn.active {
-    border-color: var(--accent-dark);
-    background: linear-gradient(165deg, var(--accent), var(--accent-dark));
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.35);
-}
-
-.keyboard-open-btn {
-    width: 100%;
-    min-height: 44px;
-    border: var(--tile-border);
-    border-radius: 12px;
-    background: var(--tile-bg);
-    color: var(--brand);
-    font-size: 15px;
-    font-weight: 800;
-    touch-action: manipulation;
-}
-
-body.pc-device .keyboard-open-btn {
-    display: none !important;
-}
-
-body.phone-layout .panel-side {
-    flex-shrink: 0;
-}
-
-body.phone-layout .panel-main {
-    flex: 1;
-    min-height: 0;
-}
-
-#actionButtons {
-    flex-shrink: 0;
-    display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 10px;
-}
-
-#backBtn,
-#druckenBtn {
-    min-height: 50px;
-    border: 2px solid transparent;
-    border-radius: 16px;
-    font-size: 16px;
-    font-weight: 800;
-    color: #fff;
-    touch-action: manipulation;
-}
-
-#backBtn {
-    background: #4a5568;
-    border-color: #3d4650;
-}
-
-#druckenBtn {
-    background: linear-gradient(165deg, #00a844, var(--ok));
-    box-shadow: 0 4px 14px rgba(0, 150, 61, 0.35);
-}
-
+/* ===== DEVICE INFO + BUILD ===== */
 .device-info {
     position: fixed;
     top: 6px;
     left: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--brand);
-    z-index: 9;
+    font-size: 12px;
+    color: #003a73;
 }
 
 .build-info {
     position: fixed;
     bottom: 6px;
     right: 10px;
-    font-size: 10px;
-    color: var(--brand);
-    opacity: 0.75;
-    z-index: 9;
+    font-size: 12px;
+    color: #003a73;
 }
 
+/* ===== PAGE FRAME ===== */
+.page {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    text-align: center;
+}
+
+/* ===== TITLE ===== */
+.title {
+    font-size: 26px;
+    font-weight: 900;
+    color: #003a73;
+    margin-bottom: 12px;
+}
+
+/* ===== FARBBUTTONS ===== */
+.color-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 10px 0 16px 0;
+}
+
+.color-btn {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 18px;
+    border-radius: 14px;
+    border: none;
+    font-weight: bold;
+    color: white;
+    background: #555;
+}
+
+.color-btn[data-color="red"] { background: #c62828; }
+.color-btn[data-color="blue"] { background: #1565c0; }
+.color-btn[data-color="black"] { background: #333; }
+
+.color-btn.active {
+    outline: 3px solid #ff9800;
+    outline-offset: 2px;
+}
+
+/* ===== VORGEZOGEN BUTTON ===== */
+.vorgezogen-btn {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0 20px 0;
+    background: #777;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
+}
+
+.vorgezogen-btn.active {
+    outline: 3px solid #ff9800;
+    background: #00963d;
+    outline-offset: 2px;
+}
+
+/* ===== INPUTS ===== */
+.input-field {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    margin-bottom: 12px;
+    border: 1px solid #777;
+    border-radius: 14px;
+    text-align: center;
+    background: #f0f4f9;
+}
+
+/* Cursor sichtbar */
 input[inputmode="none"] {
     caret-color: black !important;
+}
+
+/* ===== Tastatur öffnen ===== */
+.keyboard-open-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: none;
+    background: #777;
+    color: white;
+}
+
+body.pc-device .keyboard-open-btn {
+    display: none !important;
 }
 
 body.keyboard-open {
     overflow: hidden;
 }
 
-/* Popup-Tastatur */
+/* ===== POPUP TASTATUR (Vollbild, Zebra-tauglich) ===== */
 .keyboard-popup {
     display: none;
     position: fixed;
@@ -303,12 +143,15 @@ body.keyboard-open {
     background-attachment: fixed;
     z-index: 9999;
     flex-direction: column;
+    padding: 0;
 }
 
 .keyboard-content {
     flex: 1;
     width: 100%;
+    max-width: none;
     height: 100%;
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -318,7 +161,9 @@ body.keyboard-open {
         calc(16px + env(safe-area-inset-right, 0px))
         calc(12px + env(safe-area-inset-bottom, 0px))
         calc(16px + env(safe-area-inset-left, 0px));
+    border-radius: 0;
     text-align: center;
+    box-shadow: none;
     box-sizing: border-box;
 }
 
@@ -330,6 +175,7 @@ body.keyboard-open {
     max-width: 520px;
     min-height: 40px;
     margin-bottom: 12px;
+    padding: 0;
     flex-shrink: 0;
 }
 
@@ -337,7 +183,7 @@ body.keyboard-open {
     margin: 0;
     font-size: 22px;
     font-weight: 900;
-    color: var(--brand);
+    color: #003a73;
 }
 
 .keyboard-close-x {
@@ -357,6 +203,7 @@ body.keyboard-open {
     padding: 0;
     box-shadow: 0 3px 0 #8e0000;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .keyboard-close-x:active {
@@ -371,10 +218,10 @@ body.keyboard-open {
     margin-bottom: 16px;
     font-size: 32px;
     font-weight: bold;
-    border: 2px solid var(--brand);
+    border: 2px solid #003a73;
     border-radius: 14px;
     text-align: center;
-    background: var(--tile-bg);
+    background: #f0f4f9;
     flex-shrink: 0;
 }
 
@@ -413,6 +260,7 @@ body.keyboard-open {
     color: #1e3348;
     box-shadow: 0 3px 0 #c8ced6;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .kb-key:active {
@@ -421,16 +269,23 @@ body.keyboard-open {
     background: #e2e8ef;
 }
 
+.kb-key.key-delete,
+.kb-key.key-ok {
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: none;
+}
+
 .kb-key.key-delete {
     background: #c62828;
     color: white;
     font-size: 34px;
     line-height: 1;
-    box-shadow: none;
 }
 
 .kb-key.key-delete:active {
     background: #a31f1f;
+    box-shadow: none;
 }
 
 .kb-key.key-ok {
@@ -438,11 +293,11 @@ body.keyboard-open {
     color: white;
     font-size: 36px;
     line-height: 1;
-    box-shadow: none;
 }
 
 .kb-key.key-ok:active {
     background: #007a31;
+    box-shadow: none;
 }
 
 @media (orientation: landscape), (max-height: 500px) {
@@ -476,6 +331,14 @@ body.keyboard-open {
     .kb-key.key-ok {
         font-size: clamp(30px, 5vh, 36px);
     }
+
+    .keyboard-close-x {
+        width: 48px;
+        height: 48px;
+        font-size: 28px;
+        top: calc(14px + env(safe-area-inset-top, 0px));
+        right: calc(20px + env(safe-area-inset-right, 0px));
+    }
 }
 
 body.keyboard-open .device-info,
@@ -483,125 +346,7 @@ body.keyboard-open .build-info {
     display: none;
 }
 
-/* Zebra / Android Nav */
-body.zebra-device,
-body.zebra-device.phone-layout,
-body.phone-layout.android-nav,
-html.android-nav body.phone-layout {
-    overflow: hidden !important;
-    height: 100svh !important;
-    max-height: 100svh !important;
-    width: 100%;
-    align-items: stretch;
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
-    box-sizing: border-box !important;
-}
-
-html.zebra-device body.zebra-device #card,
-body.zebra-device #card,
-body.phone-layout.android-nav #card,
-html.android-nav body.phone-layout #card {
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    max-height: 100%;
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-body.zebra-device .device-info,
-body.zebra-device .build-info {
-    display: none !important;
-}
-
-body.zebra-device .page-title {
-    font-size: 22px;
-}
-
-body.zebra-device .page-sub {
-    margin: 2px 0 6px;
-    font-size: 11px;
-}
-
-body.zebra-device .section-head {
-    margin: 0 0 4px;
-    font-size: 12px;
-}
-
-body.zebra-device .work-area {
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-body.zebra-device .color-btn {
-    min-height: 44px;
-    font-size: 14px;
-}
-
-body.zebra-device #actionButtons {
-    flex-shrink: 0;
-    margin: 0;
-    padding: 0;
-    gap: 8px;
-}
-
-body.zebra-device #backBtn,
-body.zebra-device #druckenBtn {
-    min-height: 44px;
-}
-
-/* PC-Kartenlayout */
-body.pc-device {
-    background: radial-gradient(circle at top, #f2f5f9 0%, #d8dee6 42%, #c3cad4 100%);
-    padding: 24px;
-}
-
-body.pc-device #card {
-    width: min(700px, 96vw);
-    max-width: none;
-    height: min(760px, 94vh);
-    background: var(--panel-bg);
-    border: var(--panel-border);
-    border-radius: 24px;
-    box-shadow: 0 18px 50px rgba(0, 58, 115, 0.14);
-    padding: 28px 28px 22px;
-}
-
-body.pc-device .page-title { font-size: 36px; }
-body.pc-device .page-sub { font-size: 14px; margin-bottom: 16px; }
-body.pc-device .section-head { font-size: 15px; margin-bottom: 10px; }
-
-body.pc-device .work-area {
-    flex-direction: row;
-    align-items: stretch;
-    gap: 20px;
-    min-height: 0;
-    overflow: hidden;
-}
-
-body.pc-device .panel-side {
-    width: 240px;
-    flex-shrink: 0;
-}
-
-body.pc-device .panel-main {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-}
-
-body.pc-device .color-btn {
-    min-height: 72px;
-    font-size: 18px;
-}
-
-body.pc-device #backBtn,
-body.pc-device #druckenBtn {
-    min-height: 54px;
-    font-size: 17px;
-}
-
+/* PC: kompaktes Fenster (Tastatur dort meist aus) */
 body.pc-device .keyboard-popup {
     background: rgba(0, 0, 0, 0.45);
     justify-content: center;
@@ -619,7 +364,6 @@ body.pc-device .keyboard-content {
     padding: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
     position: relative;
-    background: #f7f8fa;
 }
 
 body.pc-device .keyboard-close-x {
@@ -636,4 +380,49 @@ body.pc-device .keyboard-input {
 body.pc-device .kb-key {
     height: 48px;
     font-size: 22px;
+}
+
+/* ===== BUTTONS ===== */
+.bottom-row {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.back-btn, .primary-btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 14px;
+    border: none;
+    color: white;
+}
+
+.back-btn { background: #333; }
+.primary-btn { background: #00963d; }
+
+/* =============================
+   PC – kompakteres Layout
+   (Zebra / Mobile bleiben unverändert)
+============================= */
+body.pc-device .page {
+    width: 80vw;
+    height: auto;
+    max-width: 1100px;
+    padding-top: 20px;
+}
+
+body.pc-device .kunden-grid {
+    grid-template-columns: repeat(3, 220px);
+    gap: 10px;
+}
+
+body.pc-device #eiltBtn {
+    margin-top: 12px;
+}
+
+body.pc-device .bottom-row {
+    margin-top: 40px;
 }
