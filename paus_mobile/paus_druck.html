@@ -11,7 +11,7 @@
    WARNBOX – DRUCKERHINWEIS (NUR SCREEN)
 ========================================================= */
 .warnbox {
-    margin: -10px auto 10px;
+    margin: -90px auto 10px;
     max-width: 280px;
     background: #fff4f4;
     border: 2px solid #c80000;
@@ -37,7 +37,6 @@
     50%  { box-shadow: 0 0 18px rgba(200,0,0,0.55); }
     100% { box-shadow: 0 0 6px rgba(200,0,0,0.25); }
 }
-/* Warnbox NICHT mitdrucken */
 @media print {
     .warnbox { display: none !important; }
 }
@@ -51,18 +50,7 @@ html, body {
     background: #dcdcdc;
     font-family: Arial, sans-serif;
     height: 100%;
-}
-
-/* =========================================================
-   DRUCKER-HINWEIS (NUR ÜBER VORSCHAU)
-========================================================= */
-.print-hint {
-    text-align: center;
-    font-weight: 900;
-    color: #c80000;
-    margin: 10px 0 6px;
-    font-size: 16px;
-    letter-spacing: 0.3px;
+    height: 100dvh;
 }
 
 /* =========================================================
@@ -71,6 +59,7 @@ html, body {
 .preview-wrapper {
     width: 100%;
     height: calc(100% - 180px);
+    height: calc(100dvh - 180px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -81,11 +70,9 @@ html, body {
     height: 105mm;
     background: white;
     box-shadow: 0 0 15px rgba(0,0,0,0.25);
+    transform-origin: center;
+    transform: scale(min(calc(92vw / 559.3701px), calc((100dvh - 180px) / 396.8504px)));
 }
-
-@media (max-width: 900px) { .preview-area { transform: scale(0.55); } }
-@media (min-width: 901px) and (max-width: 1300px) { .preview-area { transform: scale(0.7); } }
-@media (min-width: 1301px) { .preview-area { transform: scale(0.8); } }
 
 /* =========================================================
    ETIKETT (LOGIK VORSCHAU + DRUCK IDENTISCH)
@@ -98,45 +85,52 @@ html, body {
     position: relative;
 }
 
-/* Text-Zentrierfläche (Logo zählt NICHT) */
 .etikett-inner {
     width: 100%;
     height: calc(100% - 25mm);
     margin-bottom: 25mm;
-
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
 }
 
-/* ECHTER ZENTRIERBLOCK */
 .text-block {
     max-width: calc(148mm - 48mm);
     margin: 0 auto;
 }
 
-.offset-normal { transform: translateY(7mm); }
-.offset-vorgezogen { transform: translateY(4mm); }
-
-/* Logo */
-.logo {
+/* Logo + Zusatztext nebeneinander (wie Web) */
+.etikett-bottom {
     position: absolute;
     left: 5mm;
+    right: 5mm;
     bottom: 4mm;
-    width: 40mm;
-    filter: grayscale(100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6mm;
 }
 
-/* Text */
+.logo {
+    width: 40mm;
+    filter: grayscale(100%);
+    flex-shrink: 0;
+}
+
+.zusatztext-side {
+    font-size: 20pt;
+    font-weight: bold;
+    color: #000;
+    text-align: right;
+}
+
 .line { width: 100%; font-weight: bold; }
 .line-title { font-size: 40pt; }
 .line-kommission { font-size: 48pt; }
 .line-date { font-size: 48pt; }
 .line-vorgezogen { font-size: 40pt; }
-.line-zusatz { font-size: 40pt; margin-top: 2mm; }
-.line-schwer { font-size: 44pt; margin-top: 2mm; line-height: 1.15; }
-.offset-schwer { transform: translateY(10mm); }
+.line-schwer { font-size: 44pt; line-height: 1.15; }
 
 .date-past {
     border: 3px solid red;
@@ -145,11 +139,8 @@ html, body {
     display: inline-block;
 }
 
-/* =========================================================
-   BUTTONS
-========================================================= */
 .bottom-bar {
-    margin-top: 30px;
+    margin-top: 20px;
     height: 60px;
     display: flex;
     gap: 16px;
@@ -168,13 +159,9 @@ html, body {
 .back-btn { background: #444; }
 .print-btn { background: #00963d; }
 
-/* =========================================================
-   PRINT (A6 HOCH, KEINE SKALIERUNG)
-========================================================= */
 .print-only { display: none; }
 
- @media print {
-
+@media print {
     @page {
         size: A6 portrait;
         margin: 0;
@@ -218,39 +205,49 @@ html, body {
 
 <body>
 
-
 <!-- ================= VORSCHAU ================= -->
 <div class="preview-wrapper">
     <div class="preview-area">
         <div class="etikett">
             <div id="previewContent" class="etikett-inner"></div>
-            <img src="langen.png" class="logo">
+            <div class="etikett-bottom">
+                <img src="langen.png" class="logo" alt="">
+                <div id="previewZusatz" class="zusatztext-side"></div>
+            </div>
         </div>
     </div>
 </div>
-<!-- ================= WARNBOX ================= -->
+
 <div class="warnbox">
     ⚠️ Achtung!<br>
     (<b>A6 Hochformat</b><br>
 </div>
-<!-- ================= DRUCK ================= -->
+
 <div id="printArea" class="etikett print-only">
     <div id="printContent" class="etikett-inner"></div>
-    <img src="langen.png" class="logo">
+    <div class="etikett-bottom">
+        <img src="langen.png" class="logo" alt="">
+        <div id="printZusatz" class="zusatztext-side"></div>
+    </div>
 </div>
 
-<!-- ================= BUTTONS ================= -->
 <div class="bottom-bar">
-    <button class="btn back-btn" id="backBtn">◀ Zurück</button>
+    <button class="btn back-btn" id="backBtn">Zurück</button>
     <button class="btn print-btn" id="printBtn">Drucken</button>
 </div>
 
 <script>
 window.onload = () => {
-   const previewInner = document.getElementById("previewContent");
-const printInner   = document.getElementById("printContent");
-const printBtn     = document.getElementById("printBtn");
-const backBtn      = document.getElementById("backBtn");
+    const previewInner = document.getElementById("previewContent");
+    const printInner   = document.getElementById("printContent");
+    const previewZusatz = document.getElementById("previewZusatz");
+    const printZusatz   = document.getElementById("printZusatz");
+    const printBtn     = document.getElementById("printBtn");
+    const backBtn      = document.getElementById("backBtn");
+
+    const esc = (s) => String(s || "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
 
     const qs = new URLSearchParams(location.search);
     const data = JSON.parse(decodeURIComponent(qs.get("data")));
@@ -259,16 +256,8 @@ const backBtn      = document.getElementById("backBtn");
     const dat = data.lieferdatum;
     const farbe = data.farbe;
     const vorgezogen = data.vorgezogen;
-    const zusatz = (data.zusatztext || "").trim();
+    const zusatztext = (data.zusatztext || "").trim();
     const schwerePalette = !!data.schwerePalette;
-
-    function esc(s) {
-        return String(s)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;");
-    }
 
     let isPast = false;
     let finalDate = dat;
@@ -299,85 +288,70 @@ const backBtn      = document.getElementById("backBtn");
     }
 
     let html;
+    let zusatzHtml = "";
+
     if (schwerePalette) {
-        // Nur Schwere-Palette-Etikett (wie Web) – keine Kommission/Datum
+        // Nur Warn-Etikett – keine Kommission/Datum, kein Zusatztext unten
         html = `
-        <div class="text-block offset-schwer">
+        <div class="text-block" style="transform:translateY(10mm);">
             <div class="line line-title">PAUS</div>
             <div class="line line-schwer" style="color:${farbe};">⚠️</div>
             <div class="line line-schwer" style="color:${farbe};">Schwere Palette</div>
             <div class="line line-schwer" style="color:${farbe};">⚠️</div>
         </div>
-    `;
+        `;
     } else {
+        // Wie Web: Zusatztext zählt nicht zur Mitte – steht unten neben Logo
+        const offsetMm = vorgezogen ? 4 : 7;
         html = `
-        <div class="text-block ${vorgezogen || zusatz ? "offset-vorgezogen" : "offset-normal"}">
+        <div class="text-block" style="transform:translateY(${offsetMm}mm);">
             <div class="line line-title">PAUS</div>
             <div class="line line-kommission" style="color:${farbe};">${esc(kom)}</div>
             <div class="line line-date">
                 <span class="${isPast ? "date-past" : ""}">${esc(finalDate)}</span>
             </div>
-            ${zusatz ? `<div class="line line-zusatz" style="color:${farbe};">„${esc(zusatz)}“</div>` : ``}
             ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
         </div>
-    `;
+        `;
+        zusatzHtml = zusatztext ? `„${esc(zusatztext)}“` : "";
     }
 
-    /* >>> INHALT SETZEN <<< */
-previewInner.innerHTML = html;
-printInner.innerHTML   = html;
+    previewInner.innerHTML = html;
+    printInner.innerHTML   = html;
+    previewZusatz.innerHTML = zusatzHtml;
+    printZusatz.innerHTML   = zusatzHtml;
 
-/* ===== PRINT + RETURN ===== */
+    let didPrint = false;
+    const isMobileDevice = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 
-let didPrint = false;
-
-const isMobileDevice =
-    /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-
-/* >>> DRUCKEN <<< */
-printBtn.onclick = () => {
-    didPrint = true;
-    window.print();
-};
-
-/* =========================
-   DESKTOP (Windows / Mac)
-========================= */
-if (!isMobileDevice) {
-
-    window.onafterprint = () => {
-        if (!didPrint) return;
-
-        didPrint = false;
-
-        setTimeout(() => {
-            window.location.replace("paus_mobile.html?v=" + Date.now());
-        }, 300);
+    printBtn.onclick = () => {
+        didPrint = true;
+        window.print();
     };
 
-}
+    if (!isMobileDevice) {
+        window.onafterprint = () => {
+            if (!didPrint) return;
+            didPrint = false;
+            setTimeout(() => {
+                window.location.replace("paus_mobile.html?v=" + Date.now());
+            }, 300);
+        };
+    }
 
-/* =========================
-   MOBILE / ZEBRA
-========================= */
-if (isMobileDevice) {
+    if (isMobileDevice) {
+        window.addEventListener("focus", () => {
+            if (!didPrint) return;
+            didPrint = false;
+            setTimeout(() => {
+                window.location.replace("paus_mobile.html?v=" + Date.now());
+            }, 300);
+        });
+    }
 
-    window.addEventListener("focus", () => {
-        if (!didPrint) return;
-
-        didPrint = false;
-
-        setTimeout(() => {
-            window.location.replace("paus_mobile.html?v=" + Date.now());
-        }, 300);
-    });
-
-}
-
-/* >>> ZURÜCK BUTTON <<< */
-backBtn.onclick = () => {
-    window.location.replace("paus_mobile.html?v=" + Date.now());
-};
+    backBtn.onclick = () => {
+        window.location.replace("paus_mobile.html?v=" + Date.now());
+    };
 };
 </script>
 

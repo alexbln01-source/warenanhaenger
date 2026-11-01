@@ -64,7 +64,7 @@ window.onload = () => {
 
     buildNumber();
 
-    // Android Tastatur blockieren (Zusatztext: Systemtastatur für Freitext)
+    // Android/iOS: eigene Popup-Tastatur; Zusatztext: Systemtastatur (Freitext)
     if (!isPC) {
         [kommission, lieferdatum, keyboardInput].forEach(inp => {
             inp.setAttribute("inputmode", "none");
@@ -79,6 +79,12 @@ window.onload = () => {
             zusatztext.setAttribute("autocapitalize", "off");
             zusatztext.setAttribute("spellcheck", "false");
         }
+    }
+
+    if (zusatztext) {
+        zusatztext.addEventListener("blur", () => {
+            zusatztext.value = capFirst(zusatztext.value);
+        });
     }
 
     if (isZebra) kommission.focus();
@@ -141,13 +147,17 @@ backBtn.onclick = () => {
         goPrint({
             kommission: kommission.value.trim(),
             lieferdatum: lieferdatum.value.trim(),
-            zusatztext: zusatztext ? zusatztext.value.trim() : "",
+            zusatztext: zusatztext ? capFirst(zusatztext.value.trim()) : "",
             vorgezogen: vorgezogenAktiv,
             schwerePalette: false,
             farbe
         });
     };
 };
+
+function capFirst(s) {
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
 
 // ============================================================
 //  SCAN (QR-Code + Return / Zebra)
