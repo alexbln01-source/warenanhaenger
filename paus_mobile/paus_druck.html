@@ -134,8 +134,9 @@ html, body {
 .line-kommission { font-size: 48pt; }
 .line-date { font-size: 48pt; }
 .line-vorgezogen { font-size: 40pt; }
-.line-zusatz { font-size: 28pt; margin-top: 2mm; }
-.line-schwer { font-size: 32pt; margin-top: 2mm; }
+.line-zusatz { font-size: 40pt; margin-top: 2mm; }
+.line-schwer { font-size: 44pt; margin-top: 2mm; line-height: 1.15; }
+.offset-schwer { transform: translateY(10mm); }
 
 .date-past {
     border: 3px solid red;
@@ -297,18 +298,30 @@ const backBtn      = document.getElementById("backBtn");
         finalDate = `${d.padStart(2, "0")}.${m.padStart(2, "0")}`;
     }
 
-    const html = `
-        <div class="text-block ${vorgezogen || schwerePalette || zusatz ? "offset-vorgezogen" : "offset-normal"}">
+    let html;
+    if (schwerePalette) {
+        // Nur Schwere-Palette-Etikett (wie Web) – keine Kommission/Datum
+        html = `
+        <div class="text-block offset-schwer">
+            <div class="line line-title">PAUS</div>
+            <div class="line line-schwer" style="color:${farbe};">⚠️</div>
+            <div class="line line-schwer" style="color:${farbe};">Schwere Palette</div>
+            <div class="line line-schwer" style="color:${farbe};">⚠️</div>
+        </div>
+    `;
+    } else {
+        html = `
+        <div class="text-block ${vorgezogen || zusatz ? "offset-vorgezogen" : "offset-normal"}">
             <div class="line line-title">PAUS</div>
             <div class="line line-kommission" style="color:${farbe};">${esc(kom)}</div>
             <div class="line line-date">
                 <span class="${isPast ? "date-past" : ""}">${esc(finalDate)}</span>
             </div>
-            ${zusatz ? `<div class="line line-zusatz" style="color:${farbe};">${esc(zusatz)}</div>` : ``}
+            ${zusatz ? `<div class="line line-zusatz" style="color:${farbe};">„${esc(zusatz)}“</div>` : ``}
             ${vorgezogen ? `<div class="line line-vorgezogen" style="color:${farbe};">„Vorgezogen“</div>` : ``}
-            ${schwerePalette ? `<div class="line line-schwer" style="color:${farbe};">⚠️ Schwere Palette</div>` : ``}
         </div>
     `;
+    }
 
     /* >>> INHALT SETZEN <<< */
 previewInner.innerHTML = html;

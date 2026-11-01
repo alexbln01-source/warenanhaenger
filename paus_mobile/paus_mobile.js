@@ -96,7 +96,7 @@ backBtn.onclick = () => {
         btnVorgezogen.classList.toggle("active");
     };
 
-    // SCHWERE PALETTE BUTTON
+    // SCHWERE PALETTE BUTTON – Toggle; Druck ohne Kommission (nur dieses Etikett)
     if (btnSchwerePalette) {
         btnSchwerePalette.onclick = () => {
             schwerePaletteAktiv = !schwerePaletteAktiv;
@@ -104,31 +104,48 @@ backBtn.onclick = () => {
         };
     }
 
-    // DRUCKEN BUTTON
-    druckenBtn.onclick = () => {
-        sessionStorage.setItem("cameFrom", "paus");
-
-        if (!kommission.value.trim()) return alert("Bitte Kommissionsnummer eingeben!");
-        if (!lieferdatum.value.trim()) return alert("Bitte Lieferdatum eingeben!");
-
+    function selectedFarbe() {
         const colorBtn = document.querySelector(".color-btn.active");
-        const farbe    = colorBtn ? colorBtn.dataset.color : null;
+        return colorBtn ? colorBtn.dataset.color : "black";
+    }
 
-        const data = {
-            kommission : kommission.value.trim(),
-            lieferdatum: lieferdatum.value.trim(),
-            zusatztext : zusatztext ? zusatztext.value.trim() : "",
-            vorgezogen : vorgezogenAktiv,
-            schwerePalette: schwerePaletteAktiv,
-            farbe
-        };
-
+    function goPrint(data) {
+        sessionStorage.setItem("cameFrom", "paus");
         const json = JSON.stringify(data);
-
         if (window.Android && typeof Android.printPaus === "function")
             Android.printPaus(json);
         else
             location.href = "paus_druck.html?data=" + encodeURIComponent(json);
+    }
+
+    // DRUCKEN BUTTON
+    druckenBtn.onclick = () => {
+        const farbe = selectedFarbe();
+
+        // Schwere Palette: nur dieses Etikett, keine Kommission/Datum nötig
+        if (schwerePaletteAktiv) {
+            goPrint({
+                kommission: "",
+                lieferdatum: "",
+                zusatztext: "",
+                vorgezogen: false,
+                schwerePalette: true,
+                farbe
+            });
+            return;
+        }
+
+        if (!kommission.value.trim()) return alert("Bitte Kommissionsnummer eingeben!");
+        if (!lieferdatum.value.trim()) return alert("Bitte Lieferdatum eingeben!");
+
+        goPrint({
+            kommission: kommission.value.trim(),
+            lieferdatum: lieferdatum.value.trim(),
+            zusatztext: zusatztext ? zusatztext.value.trim() : "",
+            vorgezogen: vorgezogenAktiv,
+            schwerePalette: false,
+            farbe
+        });
     };
 };
 
