@@ -3,6 +3,7 @@
 // ============================================================
 let activeInput = null;
 let vorgezogenAktiv = false;
+let schwerePaletteAktiv = false;
 
 // ============================================================
 //  DEVICE DETECTION
@@ -23,6 +24,7 @@ const isPC     = !isZebra && !isMobile;
 // ============================================================
 const kommission     = document.getElementById("kommission");
 const lieferdatum    = document.getElementById("lieferdatum");
+const zusatztext     = document.getElementById("zusatztext");
 
 const openKeyboardBtn = document.getElementById("openKeyboardBtn");
 const keyboardPopup   = document.getElementById("keyboardPopup");
@@ -38,6 +40,7 @@ const deviceInfo = document.getElementById("deviceInfo");
 const buildInfo  = document.getElementById("buildInfo");
 
 const btnVorgezogen = document.getElementById("btnVorgezogen");
+const btnSchwerePalette = document.getElementById("btnSchwerePalette");
 
 // ============================================================
 //  DEVICE INFO
@@ -57,10 +60,11 @@ window.onload = () => {
 
     kommission.value  = "";
     lieferdatum.value = "";
+    if (zusatztext) zusatztext.value = "";
 
     buildNumber();
 
-    // Android Tastatur blockieren
+    // Android Tastatur blockieren (Zusatztext: Systemtastatur für Freitext)
     if (!isPC) {
         [kommission, lieferdatum, keyboardInput].forEach(inp => {
             inp.setAttribute("inputmode", "none");
@@ -69,6 +73,12 @@ window.onload = () => {
             inp.setAttribute("autocapitalize", "off");
             inp.setAttribute("spellcheck", "false");
         });
+        if (zusatztext) {
+            zusatztext.setAttribute("autocomplete", "off");
+            zusatztext.setAttribute("autocorrect", "off");
+            zusatztext.setAttribute("autocapitalize", "off");
+            zusatztext.setAttribute("spellcheck", "false");
+        }
     }
 
     if (isZebra) kommission.focus();
@@ -86,6 +96,14 @@ backBtn.onclick = () => {
         btnVorgezogen.classList.toggle("active");
     };
 
+    // SCHWERE PALETTE BUTTON
+    if (btnSchwerePalette) {
+        btnSchwerePalette.onclick = () => {
+            schwerePaletteAktiv = !schwerePaletteAktiv;
+            btnSchwerePalette.classList.toggle("active");
+        };
+    }
+
     // DRUCKEN BUTTON
     druckenBtn.onclick = () => {
         sessionStorage.setItem("cameFrom", "paus");
@@ -99,7 +117,9 @@ backBtn.onclick = () => {
         const data = {
             kommission : kommission.value.trim(),
             lieferdatum: lieferdatum.value.trim(),
+            zusatztext : zusatztext ? zusatztext.value.trim() : "",
             vorgezogen : vorgezogenAktiv,
+            schwerePalette: schwerePaletteAktiv,
             farbe
         };
 
